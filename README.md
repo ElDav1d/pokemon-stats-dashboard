@@ -2,36 +2,33 @@
 
 Este es un proyecto template para la prueba tecnica de Frontend
 
-## Librerias que usamos
-- Svelte 
+A continuacion se detallan los histos de la prueba, hay que tener en cuenta que la prueba real es versatil se pedira al cabo de {x} dias, que se explique el codigo y se hagan cambios en tiempo real, en funcion del nivel esperado.
+
+**Librerias preinstaladas que usamos:**
+
+- Svelte
 - Shadcn
 - Tailwind
 
 ## Prueba Tecnica
 
 ### Hitos
-- Visualizar los pokemons por tipos (20 primeros)
-- Visualizar un listado de pokemons de una tipo ordenados por tamanho (20 primeros) ou filtrar o listado principal por tipo
-- Visualizar ficha de un pokemon
-- Listados como tablas
-- Listados como graficos
+
+- [ ] Visualizar los pokemons por tipos (20 primeros)
+- [ ] Visualizar un listado de pokemons de una tipo ordenados por tamanho (20 primeros) ou filtrar o listado principal por tipo
+- [ ] Visualizar ficha de un pokemon
+- [ ] Listados como tablas
+- [ ] Listados como graficos
 
 ### Consideraciones
 
-Non fai falta facer todo esto e para evaluar o nivel, o importante e o nivel de comprension, do que se esta facendo
-
-Conceptos a aplicar que se teran mui en conta.
+Conceptos a aplicar que se tendran muy en cuenta a la hora de valorar.
 
 - Loading state fetching
-
 - State management
-
 - Bind states components
-
 - HTML semantico
-
 - Infinite scroll
-
-- Uso de bibliotecas que usamos en nuestro 
-
+- Uso de bibliotecas que usamos en nuestro stack
+- Presentacion UI/UX
 - Separar en componentes

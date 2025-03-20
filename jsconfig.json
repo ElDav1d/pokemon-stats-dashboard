@@ -1,0 +1,22 @@
+{
+	"compilerOptions": {
+		"moduleResolution": "bundler",
+		"target": "ESNext",
+		"module": "ESNext",
+		"verbatimModuleSyntax": true,
+		"isolatedModules": true,
+		"resolveJsonModule": true,
+		"sourceMap": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"checkJs": true,
+		"baseUrl": ".",
+		"paths": {
+			"$components": ["src/components"],
+			"$lib": ["src/lib"],
+			"$shacn": ["src/shacn"],
+			"$hooks": ["src/hooks"]
+		}
+	},
+	"include": ["src/**/*.d.ts", "src/**/*.js", "src/**/*.svelte"]
+}

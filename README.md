@@ -1,34 +1,37 @@
 # Test Frontend Developer
 
-Este es un proyecto template para la prueba tecnica de Frontend
+a proba técnica de Frontend
 
-A continuacion se detallan los histos de la prueba, hay que tener en cuenta que la prueba real es versatil se pedira al cabo de {x} dias, que se explique el codigo y se hagan cambios en tiempo real, en funcion del nivel esperado.
+A continuación detállanse os fitos da proba, hai que ter en conta que a proba real é versátil e pedirase ao cabo de {x} días, que se explique o código e se fagan cambios en tempo real, en función do nivel esperado.
 
-**Librerias preinstaladas que usamos:**
+A API que imos usar para a proba é: **https://pokeapi.co/**
+
+**Librarías preinstaladas que usamos:**
 
 - Svelte
 - Shadcn
 - Tailwind
+- D3.js
 
-## Prueba Tecnica
+## Proba Técnica
 
-### Hitos
+### Fitos
 
-- [ ] Visualizar los pokemons por tipos (20 primeros)
-- [ ] Visualizar un listado de pokemons de una tipo ordenados por tamanho (20 primeros) ou filtrar o listado principal por tipo
-- [ ] Visualizar ficha de un pokemon
-- [ ] Listados como tablas
-- [ ] Listados como graficos
+- [ ] Visualizar os pokemons por tipos (20 primeiros)
+- [ ] Visualizar un listado de pokemons dun tipo ordenados por tamaño (20 primeiros)
+- [ ] Visualizar ficha dun pokemon
+- [ ] Listados como táboas
+- [ ] Listados como gráficos
 
-### Consideraciones
+### Consideracións
 
-Conceptos a aplicar que se tendran muy en cuenta a la hora de valorar.
+Conceptos a aplicar que se terán moi en conta á hora de valorar.
 
 - Loading state fetching
 - State management
 - Bind states components
-- HTML semantico
+- HTML semántico
 - Infinite scroll
-- Uso de bibliotecas que usamos en nuestro stack
-- Presentacion UI/UX
-- Separar en componentes
+- Uso de bibliotecas que usamos no noso stack
+- Presentación UI/UX
+- Separar en compoñentes

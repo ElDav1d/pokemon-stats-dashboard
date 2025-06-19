@@ -8,8 +8,6 @@ const Home = () => {
 
   const selectedTypeParam = searchParams.get("type");
 
-  console.log("Selected Type:", selectedTypeParam);
-
   useEffect(() => {
     setSearchParams((prev) => {
       if (!prev.has("type")) {
@@ -46,11 +44,26 @@ const Home = () => {
       <section>
         <h2>Select a type to view details</h2>
         <ul className="flex gap-2 overflow-x-auto">
-          {types.map((type) => (
-            <li key={type.name}>
-              <button onClick={() => selectType(type.name)}>{type.name}</button>
-            </li>
-          ))}
+          <li key={"normal"}>
+            <button
+              onClick={() => selectType("normal")}
+              className={`${
+                selectedTypeParam === "normal" ? "button-default-type" : ""
+              }`}
+            >
+              normal
+            </button>
+          </li>
+          {types.map(
+            (type, index) =>
+              index > 0 && (
+                <li key={type.name}>
+                  <button onClick={() => selectType(type.name)}>
+                    {type.name}
+                  </button>
+                </li>
+              )
+          )}
         </ul>
       </section>
 

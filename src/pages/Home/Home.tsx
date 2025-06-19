@@ -27,8 +27,17 @@ const Home = () => {
     const fetchTypes = async () => {
       const response = await fetch(`${url.BASE}${url.TYPE}`);
 
+      if (!response.ok) {
+        throw new Error("Failed to fetch types");
+      }
+
       const data = await response.json();
-      setTypes(data.results);
+
+      try {
+        setTypes(data.results);
+      } catch (error) {
+        console.error("Error setting types:", error);
+      }
     };
     fetchTypes();
   }, []);

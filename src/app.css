@@ -64,9 +64,17 @@ button:hover {
 }
 
 button:focus,
-button:focus-visible,
-.button-default-type {
+button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+button.button-type-selected:focus,
+button.button-type-selected:focus-visible {
+  outline: 4px auto red;
+}
+
+.button-type-selected {
+  outline: 4px auto red;
 }
 
 @media (prefers-color-scheme: light) {

@@ -87,30 +87,23 @@ const Home = () => {
         <h2>Select a type to view details</h2>
         {types.length > 0 && (
           <ul className="flex gap-2 overflow-x-auto">
-            <li key={"normal"}>
-              <button
-                onClick={() => selectType("normal")}
-                className={`${
-                  selectedTypeParam === "normal" ? "button-default-type" : ""
-                }`}
-              >
-                normal
-              </button>
-            </li>
-            {types.map(
-              ({ name }, index) =>
-                index > 0 && (
-                  <li key={name}>
-                    <button onClick={() => selectType(name)}>{name}</button>
-                  </li>
-                )
-            )}
+            {types.map(({ name }) => (
+              <li key={name}>
+                <button
+                  onClick={() => selectType(name)}
+                  className={`${
+                    selectedTypeParam === name ? "button-type-selected" : ""
+                  }`}
+                >
+                  {name}
+                </button>
+              </li>
+            ))}
           </ul>
         )}
       </section>
 
       <section>
-        <h2>Selected Type: {selectedTypeParam}</h2>
         {pokemonList.length > 0 && (
           <ul>
             {pokemonList.map(({ pokemon }) => (

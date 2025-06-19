@@ -1,5 +1,8 @@
+import { useParams } from "react-router-dom";
+
 const Detail = () => {
-  return <h1>Pokemon Stats Detail</h1>;
+  const { name } = useParams();
+  return <h1>Pokemon Stats Detail for {name}</h1>;
 };
 
 export default Detail;

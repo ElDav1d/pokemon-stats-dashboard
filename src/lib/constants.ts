@@ -1,6 +1,6 @@
 const paths = {
   BASE: "/",
-  DETAIL: "detail",
+  DETAIL: ":name",
 };
 
 const url = {

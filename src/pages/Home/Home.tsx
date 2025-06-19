@@ -1,6 +1,6 @@
-import { useState, useEffect, use } from "react";
-import { useSearchParams } from "react-router-dom";
-import { url } from "../../lib/constants";
+import { useState, useEffect } from "react";
+import { useSearchParams, Link } from "react-router-dom";
+import { paths, url } from "../../lib/constants";
 
 export interface IPokemonListItem {
   pokemon: {
@@ -108,7 +108,9 @@ const Home = () => {
           <ul>
             {pokemonList.map(({ pokemon }) => (
               <li key={pokemon.name}>
-                <h3>{pokemon.name}</h3>
+                <Link to={`${paths.BASE}${pokemon.name}`}>
+                  <h3>{pokemon.name}</h3>
+                </Link>
               </li>
             ))}
           </ul>

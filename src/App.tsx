@@ -6,14 +6,14 @@ import { paths } from "./lib/constants";
 
 function App() {
   return (
-    <Layout>
-      <BrowserRouter>
+    <BrowserRouter>
+      <Layout>
         <Routes>
           <Route path={paths.BASE} element={<Home />} />
           <Route path={`${paths.BASE}${paths.DETAIL}`} element={<Detail />} />
         </Routes>
-      </BrowserRouter>
-    </Layout>
+      </Layout>
+    </BrowserRouter>
   );
 }
 

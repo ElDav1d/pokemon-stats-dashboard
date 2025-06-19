@@ -3,4 +3,9 @@ const paths = {
   DETAIL: "detail",
 };
 
-export { paths };
+const url = {
+  BASE: "https://pokeapi.co/api/v2/",
+  TYPE: "type/",
+};
+
+export { paths, url };

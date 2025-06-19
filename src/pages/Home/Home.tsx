@@ -1,11 +1,31 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { url } from "../../lib/constants";
 
 const Home = () => {
   const [types, setTypes] = useState([]);
-  const [selectedType, setSelectedType] = useState("normal");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const selectedTypeParam = searchParams.get("type");
+
+  console.log("Selected Type:", selectedTypeParam);
 
   useEffect(() => {
+    setSearchParams((prev) => {
+      if (!prev.has("type")) {
+        prev.set("type", "normal");
+      }
+      return prev;
+    });
+  }, [setSearchParams]);
+
+  useEffect(() => {
+    setSearchParams((prev) => {
+      if (!prev.has("type")) {
+        prev.set("type", "normal");
+      }
+      return prev;
+    });
     const fetchTypes = async () => {
       const response = await fetch(`${url.BASE}${url.TYPE}`);
 
@@ -16,7 +36,7 @@ const Home = () => {
   }, []);
 
   const selectType = (type: string) => {
-    setSelectedType(type);
+    setSearchParams({ type });
   };
 
   return (
@@ -35,7 +55,7 @@ const Home = () => {
       </section>
 
       <section>
-        <h2>Selected Type: {selectedType}</h2>
+        <h2>Selected Type: {selectedTypeParam}</h2>
       </section>
     </article>
   );

@@ -87,10 +87,12 @@ const PokemonList = () => {
 
   return (
     <section>
-      <h2>Pokemon List</h2>
-      <fieldset>
-        <legend>Order the pokemons:</legend>
+      <fieldset className="mb-6">
+        <legend className="text-lg l:text-xl xl:text-2xl">
+          Order the pokemons:
+        </legend>
         <input
+          className="mr-2"
           type="checkbox"
           id="height"
           name="height"

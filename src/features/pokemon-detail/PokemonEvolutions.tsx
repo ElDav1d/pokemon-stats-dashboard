@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { paths } from "../../lib/constants";
+import { IEvolutionChainLink } from "./entities";
 
 interface IPokemonEvolutionsProps {
   evolutionChainUrl: string | null;
@@ -16,7 +17,7 @@ const PokemonEvolutions = ({
   useEffect(() => {
     if (!evolutionChainUrl) return;
 
-    const getEvolutionNames = (chain): string[] =>
+    const getEvolutionNames = (chain: IEvolutionChainLink): string[] =>
       chain
         ? [chain.species.name, ...chain.evolves_to.flatMap(getEvolutionNames)]
         : [];

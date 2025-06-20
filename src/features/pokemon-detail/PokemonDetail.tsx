@@ -8,7 +8,9 @@ const PokemonDetail = ({ name }: { name: string }) => {
   const [pokemonDetails, setPokemonDetails] = useState<IPokemonDetail | null>(
     null
   );
-  const [evolutionChainUrl, setEvolutionChainUrl] = useState<string>(null);
+  const [evolutionChainUrl, setEvolutionChainUrl] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     if (!name) return;
@@ -57,6 +59,7 @@ const PokemonDetail = ({ name }: { name: string }) => {
     }
   }, [pokemonDetails]);
 
+  console.log(pokemonDetails);
   return (
     <>
       {pokemonDetails && (

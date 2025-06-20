@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { url } from "../../lib/constants";
-import { PokemonDetail } from "./entities";
+import { PokemonDetail } from "../../shared/entities";
 
 const Detail = () => {
   const { name } = useParams();

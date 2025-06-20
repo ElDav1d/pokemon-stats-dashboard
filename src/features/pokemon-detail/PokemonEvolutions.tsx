@@ -46,7 +46,7 @@ const PokemonEvolutions = ({
   return (
     <>
       <h2>Evolutions</h2>
-      <ul>
+      <ul aria-live="polite">
         {evolutionChain.map(
           (evolution) =>
             evolution !== currentName && (

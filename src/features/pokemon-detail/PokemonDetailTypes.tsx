@@ -31,7 +31,7 @@ const PokemonDetailTypes = ({ types }: PokemonTypesProps) => {
   return (
     <section>
       <h2>Types</h2>
-      <ul className="flex gap-2 overflow-x-auto">
+      <ul aria-live="polite" className="flex gap-2 overflow-x-auto">
         {types.map((type) => (
           <li key={type.type.name}>
             <button

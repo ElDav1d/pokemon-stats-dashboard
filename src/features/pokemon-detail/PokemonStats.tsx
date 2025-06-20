@@ -7,7 +7,7 @@ interface IPokemonStatsProps {
 const PokemonStats = ({ stats }: IPokemonStatsProps) => (
   <>
     <h2>Stats</h2>
-    <ul>
+    <ul aria-live="polite">
       {stats.map((stat) => (
         <li key={stat.stat.name}>
           {stat.stat.name}: {stat.base_stat}

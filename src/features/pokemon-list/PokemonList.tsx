@@ -84,6 +84,7 @@ const PokemonList = () => {
     () => (isSortedByHeight ? sortByHeight(pokemonList) : pokemonList),
     [isSortedByHeight, pokemonList]
   );
+  console.log("Sorted Pokemon List:", sortedPokemonList);
 
   return (
     <section>
@@ -101,12 +102,16 @@ const PokemonList = () => {
         <label htmlFor="height">By height</label>
       </fieldset>
       {sortedPokemonList.length > 0 && (
-        <ul>
+        <ul
+          aria-live="polite"
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"
+        >
           {sortedPokemonList.map(({ pokemon, details }) => (
             <PokemonListItem
               key={pokemon.name}
               pokemon={pokemon}
               height={details.height}
+              imageUrl={details.sprites.front_default}
             />
           ))}
         </ul>

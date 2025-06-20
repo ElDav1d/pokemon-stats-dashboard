@@ -1,4 +1,4 @@
-import { PokemonDetail } from "../../shared/entities";
+import { IPokemonDetail } from "../../shared/entities";
 
 export type PokemonItem = {
   name: string;
@@ -11,5 +11,5 @@ export interface IPokemonListItem {
 }
 
 export interface IPokemonListItemWithDetails extends IPokemonListItem {
-  details: PokemonDetail;
+  details: IPokemonDetail;
 }

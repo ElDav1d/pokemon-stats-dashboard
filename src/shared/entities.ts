@@ -1,4 +1,4 @@
-export interface PokemonDetail {
+export interface IPokemonDetail {
   abilities: Ability[];
   base_experience: number;
   cries: Cries;
@@ -195,11 +195,11 @@ export interface Type {
 
 // Converts JSON strings to/from your types
 export class Convert {
-  public static toPokemonDetail(json: string): PokemonDetail {
+  public static toPokemonDetail(json: string): IPokemonDetail {
     return JSON.parse(json);
   }
 
-  public static pokemonDetailToJson(value: PokemonDetail): string {
+  public static pokemonDetailToJson(value: IPokemonDetail): string {
     return JSON.stringify(value);
   }
 }

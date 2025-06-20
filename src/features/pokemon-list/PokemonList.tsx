@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { url } from "../../lib/constants";
 import { IPokemonListItem, IPokemonListItemWithDetails } from "./entities";
@@ -8,6 +8,7 @@ const PokemonList = () => {
   const [pokemonList, setPokemonList] = useState<IPokemonListItemWithDetails[]>(
     []
   );
+  const [isSortedByHeight, setIsSortedByHeight] = useState(false);
 
   const [searchParams] = useSearchParams();
   const selectedTypeParam = searchParams.get("type");
@@ -70,11 +71,36 @@ const PokemonList = () => {
     fetchList(selectedTypeParam);
   }, [selectedTypeParam]);
 
+  const orderByHeight = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const isChecked = event.target.checked;
+    setIsSortedByHeight(isChecked);
+  };
+
+  const sortByHeight = (pokemonList: IPokemonListItemWithDetails[]) => {
+    return [...pokemonList].sort((a, b) => a.details.height - b.details.height);
+  };
+
+  const sortedPokemonList = useMemo(
+    () => (isSortedByHeight ? sortByHeight(pokemonList) : pokemonList),
+    [isSortedByHeight, pokemonList]
+  );
+
   return (
     <section>
-      {pokemonList.length > 0 && (
+      <h2>Pokemon List</h2>
+      <fieldset>
+        <legend>Order the pokemons:</legend>
+        <input
+          type="checkbox"
+          id="height"
+          name="height"
+          onChange={orderByHeight}
+        />
+        <label htmlFor="height">By height</label>
+      </fieldset>
+      {sortedPokemonList.length > 0 && (
         <ul>
-          {pokemonList.map(({ pokemon, details }) => (
+          {sortedPokemonList.map(({ pokemon, details }) => (
             <PokemonListItem
               key={pokemon.name}
               pokemon={pokemon}

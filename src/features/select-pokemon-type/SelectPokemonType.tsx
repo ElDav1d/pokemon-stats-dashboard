@@ -1,0 +1,63 @@
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { url } from "../../lib/constants";
+
+const SelectPokemonType = () => {
+  const [types, setTypes] = useState([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedTypeParam = searchParams.get("type");
+
+  useEffect(() => {
+    setSearchParams((prev) => {
+      if (!prev.has("type")) {
+        prev.set("type", "normal");
+      }
+      return prev;
+    });
+
+    const fetchTypes = async () => {
+      const response = await fetch(`${url.BASE}${url.TYPE}`);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch types");
+      }
+
+      try {
+        const data = await response.json();
+        setTypes(data.results);
+      } catch (error) {
+        console.error("Error setting types:", error);
+      }
+    };
+
+    fetchTypes();
+  }, []);
+
+  const selectType = (type: string) => {
+    setSearchParams({ type });
+  };
+
+  return (
+    <section>
+      <h2>Select a Pokemon Type to get the list</h2>
+      {types.length > 0 && (
+        <ul className="flex gap-2 overflow-x-auto">
+          {types.map(({ name }) => (
+            <li key={name}>
+              <button
+                onClick={() => selectType(name)}
+                className={`${
+                  selectedTypeParam === name ? "button-type-selected" : ""
+                }`}
+              >
+                {name}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+};
+
+export default SelectPokemonType;

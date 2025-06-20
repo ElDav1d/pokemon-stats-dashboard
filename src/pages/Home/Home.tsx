@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { paths, url } from "../../lib/constants";
+import { SelectPokemonType } from "../../features/select-pokemon-type";
 
 export interface IPokemonListItem {
   pokemon: {
@@ -11,46 +12,10 @@ export interface IPokemonListItem {
 }
 
 const Home = () => {
-  const [types, setTypes] = useState([]);
   const [pokemonList, setPokemonList] = useState<IPokemonListItem[]>([]);
 
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const selectedTypeParam = searchParams.get("type");
-
-  useEffect(() => {
-    setSearchParams((prev) => {
-      if (!prev.has("type")) {
-        prev.set("type", "normal");
-      }
-      return prev;
-    });
-  }, [setSearchParams]);
-
-  useEffect(() => {
-    setSearchParams((prev) => {
-      if (!prev.has("type")) {
-        prev.set("type", "normal");
-      }
-      return prev;
-    });
-
-    const fetchTypes = async () => {
-      const response = await fetch(`${url.BASE}${url.TYPE}`);
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch types");
-      }
-
-      try {
-        const data = await response.json();
-        setTypes(data.results);
-      } catch (error) {
-        console.error("Error setting types:", error);
-      }
-    };
-
-    fetchTypes();
-  }, []);
 
   useEffect(() => {
     if (!selectedTypeParam) return;
@@ -75,33 +40,11 @@ const Home = () => {
     fetchList(selectedTypeParam);
   }, [selectedTypeParam]);
 
-  const selectType = (type: string) => {
-    setSearchParams({ type });
-  };
-
   return (
     <article>
       <h1>Pokemon Stats Dashboard</h1>
 
-      <section>
-        <h2>Select a type to view details</h2>
-        {types.length > 0 && (
-          <ul className="flex gap-2 overflow-x-auto">
-            {types.map(({ name }) => (
-              <li key={name}>
-                <button
-                  onClick={() => selectType(name)}
-                  className={`${
-                    selectedTypeParam === name ? "button-type-selected" : ""
-                  }`}
-                >
-                  {name}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <SelectPokemonType />
 
       <section>
         {pokemonList.length > 0 && (

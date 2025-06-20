@@ -9,11 +9,10 @@ interface PokemonTypesProps {
 
 const PokemonDetailTypes = ({ types }: PokemonTypesProps) => {
   const [pokemonList, setPokemonList] = useState<IPokemonListItem[]>([]);
-  const [loading, setLoading] = useState(false);
+
   const [selectedType, setSelectedType] = useState<string | null>(null);
 
   const fetchList = async (type: string) => {
-    setLoading(true);
     setSelectedType(type);
     try {
       const response = await fetch(`${url.BASE}${url.TYPE}${type}`);
@@ -23,15 +22,15 @@ const PokemonDetailTypes = ({ types }: PokemonTypesProps) => {
     } catch (error) {
       console.error("Error fetching pokemon list:", error);
       setPokemonList([]);
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
-    <section>
-      <h2>Types</h2>
-      <ul aria-live="polite" className="flex gap-2 overflow-x-auto">
+    <section className="bg-stone-600  rounded-lg p-4 mb-4">
+      <h2 className="mb-2 text-lg l:text-xl xl:text-2xl font-semibold">
+        Types:
+      </h2>
+      <ul aria-live="polite" className="flex flex-wrap gap-2 mb-2">
         {types.map((type) => (
           <li key={type.type.name}>
             <button
@@ -45,11 +44,13 @@ const PokemonDetailTypes = ({ types }: PokemonTypesProps) => {
           </li>
         ))}
       </ul>
-      {loading && <div>Loading...</div>}
+
       {pokemonList.length > 0 && (
-        <ul>
+        <ul className="flex flex-wrap gap-2 mb-2" aria-live="polite">
           {pokemonList.map(({ pokemon }) => (
-            <li key={pokemon.name}>{pokemon.name}</li>
+            <li className="capitalize" key={pokemon.name}>
+              {pokemon.name}
+            </li>
           ))}
         </ul>
       )}

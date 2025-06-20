@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+
 import { PokemonDetail } from "../../features/pokemon-detail";
 
 const Detail = () => {
@@ -7,10 +7,8 @@ const Detail = () => {
 
   return (
     <>
-      <header className="max-w-[1240px] mx-6 my-6 xl:mx-auto">
-        <h1 className="text-xl l:text-2xl xl:text-3xl">
-          Pokemon Detail for {name}
-        </h1>
+      <header className="w-fulL max-w-[1240px] mx-6 my-6 xl:mx-auto">
+        <h1 className="text-3xl xl:text-5xl capitalize">{name}</h1>
         <nav>
           <Link to="/" className="text-blue-500 hover:underline">
             Home

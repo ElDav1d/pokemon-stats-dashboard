@@ -64,23 +64,25 @@ const PokemonDetail = ({ name }: { name: string }) => {
     <>
       {pokemonDetails && (
         <>
-          <section>
+          <section className="flex flex-col gap-4 md:flex-row bg-stone-600  rounded-lg p-4 mb-4">
             <img
+              className="w-full md:w-80 xl:w-86 object-contain"
               src={pokemonDetails.sprites.front_default}
               alt={pokemonDetails.name}
             />
-
-            {evolutionChainUrl && (
-              <PokemonEvolutions
-                evolutionChainUrl={evolutionChainUrl}
-                currentName={pokemonDetails.name}
-              />
-            )}
-
-            {pokemonDetails.stats.length > 0 && (
-              <PokemonStats stats={pokemonDetails.stats} />
-            )}
+            <div className="w-full">
+              {evolutionChainUrl && (
+                <PokemonEvolutions
+                  evolutionChainUrl={evolutionChainUrl}
+                  currentName={pokemonDetails.name}
+                />
+              )}
+              {pokemonDetails.stats.length > 0 && (
+                <PokemonStats stats={pokemonDetails.stats} />
+              )}
+            </div>
           </section>
+
           {pokemonDetails?.types.length > 0 && (
             <PokemonDetailTypes types={pokemonDetails.types} />
           )}

@@ -45,13 +45,23 @@ const PokemonEvolutions = ({
 
   return (
     <>
-      <h2>Evolutions</h2>
-      <ul aria-live="polite">
+      <h2 className="mb-2 text-lg l:text-xl xl:text-2xl font-semibold">
+        Evolutions:{" "}
+      </h2>
+      <ul aria-live="polite" className="inline-flex gap-4 mb-4">
         {evolutionChain.map(
           (evolution) =>
             evolution !== currentName && (
-              <li key={evolution}>
-                <Link to={`${paths.BASE}${evolution}`}>{evolution}</Link>
+              <li
+                key={evolution}
+                className="capitalize bg-stone-200 rounded-lg p-2"
+              >
+                <Link
+                  className="text-blue-500 hover:underline"
+                  to={`${paths.BASE}${evolution}`}
+                >
+                  {evolution}
+                </Link>
               </li>
             )
         )}

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { url } from "../../lib/constants";
 import { IPokemonDetail } from "../../shared/entities";
 import PokemonEvolutions from "./PokemonEvolutions";
+import PokemonStats from "./PokemonStats";
 
 const PokemonDetail = ({ name }: { name: string }) => {
   const [pokemonDetails, setPokemonDetails] = useState<IPokemonDetail | null>(
@@ -72,14 +73,9 @@ const PokemonDetail = ({ name }: { name: string }) => {
             />
           )}
 
-          <h2>Stats</h2>
-          <ul>
-            {pokemonDetails.stats.map((stat) => (
-              <li key={stat.stat.name}>
-                {stat.stat.name}: {stat.base_stat}
-              </li>
-            ))}
-          </ul>
+          {pokemonDetails.stats.length > 0 && (
+            <PokemonStats stats={pokemonDetails.stats} />
+          )}
         </section>
       )}
     </>

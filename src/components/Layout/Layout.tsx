@@ -5,7 +5,9 @@ interface LayoutProps {
 }
 
 const Layout = ({ children }: LayoutProps) => {
-  return <main>{children}</main>;
+  return (
+    <main className="max-w-[1240px] mx-6 my-6 xl:mx-auto">{children}</main>
+  );
 };
 
 export default Layout;

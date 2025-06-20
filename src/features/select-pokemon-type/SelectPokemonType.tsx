@@ -41,7 +41,7 @@ const SelectPokemonType = () => {
     <section>
       <h2>Select a Pokemon Type to get the list</h2>
       {types.length > 0 && (
-        <ul className="flex gap-2 overflow-x-auto">
+        <ul className="flex flex-wrap gap-2">
           {types.map(({ name }) => (
             <li key={name}>
               <button

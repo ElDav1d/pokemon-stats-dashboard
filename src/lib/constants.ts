@@ -9,4 +9,13 @@ const url = {
   POKEMON: "pokemon/",
 };
 
-export { paths, url };
+const graphConfig = {
+  WIDTH: 500,
+  HEIGHT: 300,
+  MARGIN_TOP: 20,
+  MARGIN_RIGHT: 20,
+  MARGIN_BOTTOM: 30,
+  MARGIN_LEFT: 100,
+};
+
+export { paths, url, graphConfig };

@@ -84,7 +84,6 @@ const PokemonList = () => {
     () => (isSortedByHeight ? sortByHeight(pokemonList) : pokemonList),
     [isSortedByHeight, pokemonList]
   );
-  console.log("Sorted Pokemon List:", sortedPokemonList);
 
   return (
     <section>

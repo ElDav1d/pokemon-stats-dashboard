@@ -15,7 +15,7 @@ const graphConfig = {
   MARGIN_TOP: 20,
   MARGIN_RIGHT: 20,
   MARGIN_BOTTOM: 30,
-  MARGIN_LEFT: 100,
+  MARGIN_LEFT: 120,
 };
 
 export { paths, url, graphConfig };

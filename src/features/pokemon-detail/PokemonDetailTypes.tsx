@@ -2,6 +2,7 @@ import { useState } from "react";
 import { IPokemonListItem } from "../pokemon-list/entities";
 import { Type } from "../../shared/entities";
 import { url } from "../../lib/constants";
+import { SelectButton } from "../../components/select-button-list";
 
 interface PokemonTypesProps {
   types: Type[];
@@ -33,14 +34,12 @@ const PokemonDetailTypes = ({ types }: PokemonTypesProps) => {
       <ul aria-live="polite" className="flex flex-wrap gap-2 mb-2">
         {types.map((type) => (
           <li key={type.type.name}>
-            <button
+            <SelectButton
+              selected={selectedType === type.type.name}
               onClick={() => fetchList(type.type.name)}
-              className={
-                selectedType === type.type.name ? "button-type-selected" : ""
-              }
             >
               {type.type.name}
-            </button>
+            </SelectButton>
           </li>
         ))}
       </ul>

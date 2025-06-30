@@ -27,6 +27,7 @@ const PokemonList = () => {
 
       try {
         const data = await response.json();
+
         return data;
       } catch (error) {
         console.error("Error fetching pokemon details:", error);
@@ -46,8 +47,9 @@ const PokemonList = () => {
         const data = await response.json();
 
         const pokemonDetailsPromises = data.pokemon.map(
-          (pokemonItem: IPokemonListItem) =>
-            fetchItemDetails(pokemonItem.pokemon.name)
+          (pokemonItem: IPokemonListItem) => {
+            return fetchItemDetails(pokemonItem.pokemon.name);
+          }
         );
 
         const pokemonDetails = await Promise.all(pokemonDetailsPromises);
@@ -102,6 +104,7 @@ const PokemonList = () => {
       </fieldset>
       {sortedPokemonList.length > 0 && (
         <ul
+          aria-label="Pokemon List"
           aria-live="polite"
           className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"
         >

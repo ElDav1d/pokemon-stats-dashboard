@@ -39,11 +39,18 @@ const SelectPokemonType = () => {
 
   return (
     <>
-      <h2 className="text-lg l:text-xl xl:text-2xl mb-4">
+      <h2
+        className="text-lg l:text-xl xl:text-2xl mb-4"
+        id="pokemon-type-list-heading"
+      >
         Select a Pokemon Type to get the list
       </h2>
       {types.length > 0 && (
-        <ul aria-live="polite" className="flex flex-wrap gap-2 mb-6">
+        <ul
+          className="flex flex-wrap gap-2 mb-6"
+          aria-live="polite"
+          aria-labelledby="pokemon-type-list-heading"
+        >
           {types.map(({ name }) => (
             <li key={name}>
               <button

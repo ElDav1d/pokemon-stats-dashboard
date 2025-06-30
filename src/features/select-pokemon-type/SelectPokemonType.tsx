@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { url } from "../../lib/constants";
+import { usePokemonTypes } from "./usePokemonTypes";
 
 const SelectPokemonType = () => {
-  const [types, setTypes] = useState([]);
+  const { types, isLoading, isError } = usePokemonTypes();
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedTypeParam = searchParams.get("type");
 
@@ -14,24 +14,7 @@ const SelectPokemonType = () => {
       }
       return prev;
     });
-
-    const fetchTypes = async () => {
-      const response = await fetch(`${url.BASE}${url.TYPE}`);
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch types");
-      }
-
-      try {
-        const data = await response.json();
-        setTypes(data.results);
-      } catch (error) {
-        console.error("Error setting types:", error);
-      }
-    };
-
-    fetchTypes();
-  }, []);
+  }, [setSearchParams]);
 
   const selectType = (type: string) => {
     setSearchParams({ type });
@@ -45,7 +28,18 @@ const SelectPokemonType = () => {
       >
         Select a Pokemon Type to get the list
       </h2>
-      {types.length > 0 && (
+
+      {isLoading && (
+        <h3 className="text-center text-gray-500">Loading pokemon types...</h3>
+      )}
+
+      {isError && (
+        <h3 className="text-center text-red-500">
+          Error loading pokemon types
+        </h3>
+      )}
+
+      {!isLoading && !isError && types.length > 0 && (
         <ul
           className="flex flex-wrap gap-2 mb-6"
           aria-live="polite"

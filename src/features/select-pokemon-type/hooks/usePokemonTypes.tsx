@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { url } from "../../lib/constants";
+import { url } from "../../../lib/constants";
 
-export function usePokemonTypes() {
+const usePokemonTypes = () => {
   const [types, setTypes] = useState<{ name: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
@@ -40,4 +40,6 @@ export function usePokemonTypes() {
   }, []);
 
   return { types, isLoading, isError };
-}
+};
+
+export default usePokemonTypes;

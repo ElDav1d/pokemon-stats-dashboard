@@ -1,24 +1,8 @@
-import { useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
-import { usePokemonTypes } from "./usePokemonTypes";
+import { usePokemonTypes, useSelectPokemonType } from "./hooks";
 
 const SelectPokemonType = () => {
   const { types, isLoading, isError } = usePokemonTypes();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const selectedTypeParam = searchParams.get("type");
-
-  useEffect(() => {
-    setSearchParams((prev) => {
-      if (!prev.has("type")) {
-        prev.set("type", "normal");
-      }
-      return prev;
-    });
-  }, [setSearchParams]);
-
-  const selectType = (type: string) => {
-    setSearchParams({ type });
-  };
+  const { selectedTypeParam, selectType } = useSelectPokemonType();
 
   return (
     <>

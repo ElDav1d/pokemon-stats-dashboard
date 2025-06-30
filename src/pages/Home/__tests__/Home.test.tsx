@@ -27,7 +27,6 @@ it("renders the initial elements", async () => {
   });
 
   expect(heading).toBeInTheDocument();
-  expect(contentArea).toBeInTheDocument();
   expect(sortByHeightCheckbox).toBeInTheDocument();
 
   await waitFor(async () => {

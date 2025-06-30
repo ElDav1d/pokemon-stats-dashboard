@@ -1,3 +1,4 @@
+import { SelectButton } from "../../components/select-button-list";
 import { usePokemonTypes, useSelectPokemonType } from "./hooks";
 
 const SelectPokemonType = () => {
@@ -31,14 +32,12 @@ const SelectPokemonType = () => {
         >
           {types.map(({ name }) => (
             <li key={name}>
-              <button
+              <SelectButton
+                selected={selectedTypeParam === name}
                 onClick={() => selectType(name)}
-                className={`${
-                  selectedTypeParam === name ? "button-type-selected" : ""
-                }`}
               >
                 {name}
-              </button>
+              </SelectButton>
             </li>
           ))}
         </ul>

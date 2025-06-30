@@ -23,7 +23,7 @@ const SelectPokemonType = () => {
         </h3>
       )}
 
-      {!isLoading && !isError && types.length > 0 && (
+      {!isLoading && !isError && types?.length > 0 && (
         <ul
           className="flex flex-wrap gap-2 mb-6"
           aria-live="polite"

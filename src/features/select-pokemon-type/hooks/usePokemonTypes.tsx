@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { url } from "../../../lib/constants";
+import { services } from "../services";
 
 const usePokemonTypes = () => {
   const [types, setTypes] = useState<{ name: string }[]>([]);
@@ -11,15 +11,12 @@ const usePokemonTypes = () => {
     setIsLoading(true);
     setIsError(false);
 
-    const fetchTypes = async () => {
+    const getTypes = async () => {
       try {
-        const response = await fetch(`${url.BASE}${url.TYPE}`);
-
-        if (!response.ok) throw new Error("Failed to fetch types");
-        const data = await response.json();
+        const typesList = await services.fetchPokemonTypes();
 
         if (isMounted) {
-          setTypes(data.results);
+          setTypes(typesList);
           setIsLoading(false);
         }
       } catch (error) {
@@ -32,7 +29,7 @@ const usePokemonTypes = () => {
       }
     };
 
-    fetchTypes();
+    getTypes();
 
     return () => {
       isMounted = false;

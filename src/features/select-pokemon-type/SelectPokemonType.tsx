@@ -1,9 +1,14 @@
-import { SelectButton } from "../../components/select-button-list";
+import {
+  SelectButtonList,
+  SelectButton,
+} from "../../components/select-button-list";
 import { usePokemonTypes, useSelectPokemonType } from "./hooks";
 
 const SelectPokemonType = () => {
   const { types, isLoading, isError } = usePokemonTypes();
   const { selectedTypeParam, selectType } = useSelectPokemonType();
+
+  const getTypeName = (typeItem: { name: string }) => typeItem.name;
 
   return (
     <>
@@ -25,22 +30,21 @@ const SelectPokemonType = () => {
       )}
 
       {!isLoading && !isError && types?.length > 0 && (
-        <ul
-          className="flex flex-wrap gap-2 mb-6"
+        <SelectButtonList
           aria-live="polite"
           aria-labelledby="pokemon-type-list-heading"
+          items={types}
+          getKey={getTypeName}
         >
-          {types.map(({ name }) => (
-            <li key={name}>
-              <SelectButton
-                selected={selectedTypeParam === name}
-                onClick={() => selectType(name)}
-              >
-                {name}
-              </SelectButton>
-            </li>
-          ))}
-        </ul>
+          {(item: { name: string }) => (
+            <SelectButton
+              selected={selectedTypeParam === item.name}
+              onClick={() => selectType(item.name)}
+            >
+              {item.name}
+            </SelectButton>
+          )}
+        </SelectButtonList>
       )}
     </>
   );

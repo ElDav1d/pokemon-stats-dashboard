@@ -1,22 +1,23 @@
-import { HTMLAttributes, ReactNode } from "react";
+import { HTMLAttributes, ReactElement } from "react";
+import SelectButton, { ISelectButtonProps } from "./SelectButton";
 
-export interface ISelectButtonListProps<T>
+export interface ISelectButtonListProps
   extends Omit<HTMLAttributes<HTMLUListElement>, "children"> {
-  items: T[];
-  getKey: (item: T) => string;
-  children: (item: T) => ReactNode;
+  optionNames: string[];
+  children: (
+    optionName: string
+  ) => ReactElement<ISelectButtonProps, typeof SelectButton>;
 }
 
-const SelectButtonList = <T,>({
-  items,
-  getKey,
+const SelectButtonList = ({
+  optionNames,
   children,
   ...props
-}: ISelectButtonListProps<T>) => {
+}: ISelectButtonListProps) => {
   return (
     <ul className="flex flex-wrap gap-2" {...props}>
-      {items.map((item) => (
-        <li key={getKey(item)}>{children(item)}</li>
+      {optionNames.map((name) => (
+        <li key={name}>{children(name)}</li>
       ))}
     </ul>
   );

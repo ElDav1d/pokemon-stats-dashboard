@@ -5,10 +5,8 @@ import {
 import { usePokemonTypes, useSelectPokemonType } from "./hooks";
 
 const SelectPokemonType = () => {
-  const { types, isLoading, isError } = usePokemonTypes();
+  const { typeNames, isLoading, isError } = usePokemonTypes();
   const { selectedTypeParam, selectType } = useSelectPokemonType();
-
-  const getTypeName = (obj: { name: string }): string => obj.name;
 
   return (
     <>
@@ -29,19 +27,18 @@ const SelectPokemonType = () => {
         </h3>
       )}
 
-      {!isLoading && !isError && types?.length > 0 && (
+      {!isLoading && !isError && typeNames?.length > 0 && (
         <SelectButtonList
           aria-live="polite"
           aria-labelledby="pokemon-type-list-heading"
-          items={types}
-          getKey={(item) => getTypeName(item)}
+          optionNames={typeNames}
         >
-          {(item) => (
+          {(name) => (
             <SelectButton
-              selected={selectedTypeParam === item.name}
-              onClick={() => selectType(item.name)}
+              selected={selectedTypeParam === name}
+              onClick={() => selectType(name)}
             >
-              {item.name}
+              {name}
             </SelectButton>
           )}
         </SelectButtonList>

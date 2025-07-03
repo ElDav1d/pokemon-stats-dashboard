@@ -29,7 +29,9 @@ const PokemonDetailTypes = ({ types }: PokemonTypesProps) => {
     }
   };
 
-  const getTypeName = (obj: { name: string }): string => obj.name;
+  const getOptionNames = (types: Type[]) => {
+    return types.map((type) => type.type.name);
+  };
 
   return (
     <section className="bg-stone-600  rounded-lg p-4 mb-4">
@@ -42,15 +44,14 @@ const PokemonDetailTypes = ({ types }: PokemonTypesProps) => {
       <SelectButtonList
         aria-live="polite"
         aria-labelledby="pokemon-type-list-heading"
-        items={types}
-        getKey={(type) => getTypeName(type.type)}
+        optionNames={getOptionNames(types)}
       >
-        {(type) => (
+        {(name) => (
           <SelectButton
-            selected={selectedType === type.type.name}
-            onClick={() => fetchList(type.type.name)}
+            selected={selectedType === name}
+            onClick={() => fetchList(name)}
           >
-            {type.type.name}
+            {name}
           </SelectButton>
         )}
       </SelectButtonList>

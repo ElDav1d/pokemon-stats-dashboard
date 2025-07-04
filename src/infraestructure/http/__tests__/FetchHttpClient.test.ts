@@ -19,8 +19,6 @@ afterEach(() => {
 it("calls fetch with the correct URL and returns data", async () => {
   const data = await new FetchHttpClient(baseUrl).get("/pokemon/pikachu");
 
-  console.log("Data received:", data);
-
   expect(global.fetch).toHaveBeenCalledWith(`${baseUrl}/pokemon/pikachu`);
   expect(data).toEqual({ name: "pikachu" });
 });

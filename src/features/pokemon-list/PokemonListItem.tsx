@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { paths } from "../../lib/constants";
-import { PokemonItem } from "./entities";
+import { PokemonItem } from "./domain/entities/entities";
 
 export interface IPokemonListItemProps {
   pokemon: PokemonItem;

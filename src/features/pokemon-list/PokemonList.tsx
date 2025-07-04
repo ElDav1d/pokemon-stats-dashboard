@@ -1,7 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { url } from "../../lib/constants";
-import { IPokemonListItem, IPokemonListItemWithDetails } from "./entities";
+import {
+  IPokemonListItem,
+  IPokemonListItemWithDetails,
+} from "./domain/entities/entities";
 import PokemonListItem from "./PokemonListItem";
 
 const PokemonList = () => {

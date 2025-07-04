@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { IPokemonListItem } from "../pokemon-list/entities";
+import { IPokemonListItem } from "../pokemon-list/domain/entities/entities";
 import { Type } from "../../shared/entities";
 import { url } from "../../lib/constants";
 import {

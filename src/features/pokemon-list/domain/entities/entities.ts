@@ -1,4 +1,4 @@
-import { IPokemonDetail } from "../../shared/entities";
+import { IPokemonDetail } from "../../../../shared/entities";
 
 export type PokemonItem = {
   name: string;

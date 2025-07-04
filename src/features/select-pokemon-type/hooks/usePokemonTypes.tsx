@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { services } from "../services";
-import { IPokemonTypeItem } from "../../../shared/entities";
+import { services } from "../domain/services";
+import { IPokemonTypeItem } from "../domain/entities";
 import PokemonType from "../domain/PokemonType";
 
 interface IUsePokemonTypesReturn {

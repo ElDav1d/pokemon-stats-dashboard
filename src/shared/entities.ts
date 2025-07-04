@@ -193,11 +193,6 @@ export interface Type {
   type: Species;
 }
 
-export interface IPokemonTypeItem {
-  name: string;
-  url: string;
-}
-
 // Converts JSON strings to/from your types
 export class Convert {
   public static toPokemonDetail(json: string): IPokemonDetail {

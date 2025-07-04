@@ -1,5 +1,5 @@
-import { url } from "../../lib/constants";
-import { IPokemonTypeItem } from "../../shared/entities";
+import { url } from "../../../lib/constants";
+import { IPokemonTypeItem } from "./entities";
 
 const fetchPokemonTypes = async (): Promise<IPokemonTypeItem[]> => {
   const response = await fetch(`${url.BASE}${url.TYPE}`);

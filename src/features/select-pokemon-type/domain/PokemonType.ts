@@ -1,4 +1,4 @@
-import { IPokemonTypeItem } from "../../../shared/entities";
+import { IPokemonTypeItem } from "./entities";
 
 class PokemonType {
   private readonly pokemonTypeItem: IPokemonTypeItem;

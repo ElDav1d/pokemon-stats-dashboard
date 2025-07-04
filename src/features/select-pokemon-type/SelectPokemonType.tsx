@@ -2,11 +2,14 @@ import {
   SelectButton,
   SelectButtonList,
 } from "../../components/select-button-list";
+import PokemonType from "./domain/PokemonType";
 import { usePokemonTypes, useSelectPokemonType } from "./hooks";
 
 const SelectPokemonType = () => {
   const { typeNames, isLoading, isError } = usePokemonTypes();
-  const { selectedTypeParam, selectType } = useSelectPokemonType("normal");
+  const { selectedTypeParam, selectType } = useSelectPokemonType(
+    PokemonType.defaultType
+  );
 
   return (
     <>

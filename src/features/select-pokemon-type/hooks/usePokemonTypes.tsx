@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { services } from "../services";
 import { IPokemonTypeItem } from "../../../shared/entities";
+import PokemonType from "../domain/PokemonType";
 
 interface IUsePokemonTypesReturn {
   typeNames: string[];
@@ -14,7 +15,7 @@ const usePokemonTypes = (): IUsePokemonTypesReturn => {
   const [isError, setIsError] = useState(false);
 
   const getTypeNames = (types: IPokemonTypeItem[]) => {
-    return types.map((type) => type.name);
+    return types.map((type) => new PokemonType(type).name);
   };
 
   useEffect(() => {

@@ -1,7 +1,14 @@
 import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 
-const useSelectPokemonType = (defaultType = "normal") => {
+interface IUseSelectPokemonTypeReturn {
+  selectedTypeParam: string | null;
+  selectType: (type: string) => void;
+}
+
+const useSelectPokemonType = (
+  defaultType: string
+): IUseSelectPokemonTypeReturn => {
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedTypeParam = searchParams.get("type");
 

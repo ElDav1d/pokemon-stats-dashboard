@@ -6,7 +6,7 @@ import { usePokemonTypes, useSelectPokemonType } from "./hooks";
 
 const SelectPokemonType = () => {
   const { typeNames, isLoading, isError } = usePokemonTypes();
-  const { selectedTypeParam, selectType } = useSelectPokemonType();
+  const { selectedTypeParam, selectType } = useSelectPokemonType("normal");
 
   return (
     <>

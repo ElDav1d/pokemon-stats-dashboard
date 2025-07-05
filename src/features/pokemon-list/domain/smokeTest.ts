@@ -9,19 +9,19 @@ export class SmokeTestPokemonRepository implements PokemonRepository {
   private readonly pokemonList: Pokemon[] = [
     new Pokemon(
       "charmander",
-      `${url.BASE}${url.POKEMON}4`,
+      `${url.BASE}${url.POKEMON}4/`,
       6,
       "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png"
     ),
     new Pokemon(
       "squirtle",
-      `${url.BASE}${url.POKEMON}7`,
+      `${url.BASE}${url.POKEMON}7/`,
       5,
       "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png"
     ),
     new Pokemon(
       "bulbasaur",
-      `${url.BASE}${url.POKEMON}1`,
+      `${url.BASE}${url.POKEMON}1/`,
       7,
       "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png"
     ),

@@ -1,8 +1,8 @@
-import { GetPokemonListUseCase } from "../get-pokemon-list/GetPokemonListUseCase";
-import { PokemonRepository } from "../../domain/ports/PokemonRepository";
-import { PokemonType } from "../../domain/value-objects/PokemonType";
-import { Pokemon } from "../../domain/entities/Pokemon";
 import { it, expect, vi } from "vitest";
+import { GetPokemonListUseCase } from "../GetPokemonListUseCase";
+import { PokemonRepository } from "../../../domain/ports/PokemonRepository";
+import { PokemonType } from "../../../domain/value-objects/PokemonType";
+import { Pokemon } from "../../../domain/entities/Pokemon";
 
 it("calls repository.findByType with the correct type and returns the result", async () => {
   const fakeType = new PokemonType("fire");

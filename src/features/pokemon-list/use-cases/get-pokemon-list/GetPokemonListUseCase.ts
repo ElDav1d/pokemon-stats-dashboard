@@ -1,6 +1,6 @@
-import { PokemonRepository } from "../domain/ports/PokemonRepository";
-import { PokemonType } from "../domain/value-objects/PokemonType";
-import { Pokemon } from "../domain/entities/Pokemon";
+import { PokemonRepository } from "../../domain/ports/PokemonRepository";
+import { PokemonType } from "../../domain/value-objects/PokemonType";
+import { Pokemon } from "../../domain/entities/Pokemon";
 
 export class GetPokemonListUseCase {
   constructor(private readonly repository: PokemonRepository) {}

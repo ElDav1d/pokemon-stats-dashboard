@@ -34,6 +34,8 @@ it("should return Pokemon[] mapped from API response", async () => {
   // @ts-ignore
   global.fetch.mockResolvedValue({
     json: async () => mockApiResponse,
+    status: 200,
+    ok: true,
   });
 
   const [pokemon1, pokemon2] = await repo.findByType(type);
@@ -56,6 +58,8 @@ it("should call fetch with the correct URL", async () => {
   // @ts-ignore
   global.fetch.mockResolvedValue({
     json: async () => ({ pokemon: [] }),
+    status: 200,
+    ok: true,
   });
 
   await repo.findByType(type);

@@ -1,6 +1,5 @@
 import { HttpClient } from "./HttpClient";
 
-// TODO: who is using it?
 export class FetchHttpClient implements HttpClient {
   constructor(private readonly baseUrl: string) {}
 

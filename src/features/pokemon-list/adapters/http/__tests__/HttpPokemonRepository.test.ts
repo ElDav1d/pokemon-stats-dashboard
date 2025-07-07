@@ -4,6 +4,7 @@ import { HttpPokemonRepository } from "../HttpPokemonRepository";
 import { Pokemon } from "../../../domain/entities/Pokemon";
 import { PokemonType } from "../../../domain/value-objects/PokemonType";
 import { mockApiResponse } from "./mocks";
+import { FetchHttpClient } from "../../../../../infraestructure/http/FetchHttpClient";
 
 class HttpClientStub {
   public getMock = vi.fn();
@@ -21,7 +22,8 @@ let repo: HttpPokemonRepository;
 beforeEach(() => {
   httpClientStub = new HttpClientStub();
   // Patch the repository to use the stub instead of fetch
-  repo = new HttpPokemonRepository();
+  const httpClient = new FetchHttpClient(url.BASE);
+  repo = new HttpPokemonRepository(httpClient);
   // @ts-ignore
   repo.fetch = httpClientStub.get.bind(httpClientStub);
   // @ts-ignore

@@ -1,26 +1,38 @@
 import { url } from "../../../../lib/constants";
-import { Pokemon } from "../../domain/entities/Pokemon";
+import { PokemonByType } from "../../domain/value-objects/PokemonByType";
 import { PokemonRepository } from "../../domain/ports/PokemonRepository";
 import { PokemonType } from "../../domain/value-objects/PokemonType";
 import { HttpClient } from "../../../../infraestructure/http/HttpClient";
-import { RawPokemonTypeResponse } from "./dto/PokemonDTO";
+import {
+  RawPokemonByType,
+  RawPokemonTypeResponse,
+  RawPokemonDetailResponse,
+} from "./dto/PokemonDTO";
+import { PokemonByName } from "../../domain/value-objects/PokemonByName";
 
 export class HttpPokemonRepository implements PokemonRepository {
   constructor(private readonly http: HttpClient) {}
 
-  async findByType(type: PokemonType): Promise<Pokemon[]> {
+  async findAllByType(type: PokemonType): Promise<PokemonByType[]> {
     const data = await this.http.get<RawPokemonTypeResponse>(
       `${url.BASE}${url.TYPE}${type.value}`
     );
 
     return data.pokemon.map(
-      (pokemon: any) =>
-        new Pokemon(
-          pokemon.name,
-          pokemon.url,
-          pokemon.height,
-          pokemon.sprites.front_default
-        )
+      (rawItem: RawPokemonByType) =>
+        new PokemonByType(rawItem.pokemon.name, rawItem.pokemon.url)
     );
+  }
+
+  async findDetailsByName(name: string): Promise<PokemonByName | null> {
+    const data = await this.http.get<RawPokemonDetailResponse>(
+      `${url.BASE}${url.POKEMON}${name}`
+    );
+
+    if (data) {
+      return new PokemonByName(data.height, data.sprites.front_default);
+    }
+
+    return null;
   }
 }

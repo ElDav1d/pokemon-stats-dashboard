@@ -1,6 +1,7 @@
-import { Pokemon } from "../entities/Pokemon.ts";
-import { PokemonType } from "../value-objects/PokemonType.ts";
-
+import { PokemonByName } from "../value-objects/PokemonByName.ts";
+import { PokemonByType } from "../value-objects/PokemonByType.ts";
+import { PokemonType } from "../value-objects/PokemonType";
 export interface PokemonRepository {
-  findByType(type: PokemonType): Promise<Pokemon[]>;
+  findAllByType(type: PokemonType): Promise<PokemonByType[]>;
+  findDetailsByName(name: string): Promise<PokemonByName | null>;
 }

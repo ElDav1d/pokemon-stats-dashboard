@@ -1,3 +1,5 @@
+// TODO: clean up the code and remove any unused imports or variables
+
 import { IPokemonDetail } from "../../../../shared/entities";
 
 export type PokemonItem = {

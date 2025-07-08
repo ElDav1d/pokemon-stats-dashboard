@@ -64,6 +64,7 @@ it("should return the details of a pokemon by name", async () => {
   const pokemonDetails = await repo.findDetailsByName(pokemonName);
 
   expect(pokemonDetails).toBeInstanceOf(PokemonByName);
+  expect(pokemonDetails?.name).toBe("charmander");
   expect(pokemonDetails?.height).toBe(6);
   expect(pokemonDetails?.imageUrl).toBe("sprite-url");
 });

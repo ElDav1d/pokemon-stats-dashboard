@@ -20,14 +20,17 @@ class SmokeTestPokemonRepository implements PokemonRepository {
     // Fake details for each Pokémon
     const details: Record<string, PokemonByName> = {
       charmander: new PokemonByName(
+        "charmander",
         6,
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png"
       ),
       squirtle: new PokemonByName(
+        "squirtle",
         5,
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png"
       ),
       bulbasaur: new PokemonByName(
+        "bulbasaur",
         7,
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png"
       ),

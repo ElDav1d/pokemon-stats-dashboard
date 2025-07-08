@@ -1,18 +1,31 @@
-import { RawPokemonTypeResponse, RawPokemonDetail } from "./PokemonDTO";
-import { Pokemon } from "../../../domain/entities/Pokemon";
+import { PokemonListItem } from "../../../domain/entities/PokemonListItem";
+import { PokemonByName } from "../../../domain/value-objects/PokemonByName";
+import { PokemonByType } from "../../../domain/value-objects/PokemonByType";
+import { v4 as uuidv4 } from "uuid";
 
 export function mapToDomainList(
-  rawList: RawPokemonTypeResponse,
-  rawDetails: RawPokemonDetail[]
-): Pokemon[] {
-  return rawList.pokemon.map((item, index) => {
-    const detail = rawDetails[index];
+  list: PokemonByType[],
+  details: PokemonByName[]
+): PokemonListItem[] {
+  return list.map((item, index) => {
+    const detail = details[index];
 
-    return new Pokemon(
-      item.pokemon.name,
-      item.pokemon.url,
+    if (!detail) {
+      throw new Error(`Detail not found for item: ${item.name}`);
+    }
+
+    if (item.name !== detail.name) {
+      throw new Error(
+        `Name mismatch: item "${item.name}" does not match detail "${detail.name}"`
+      );
+    }
+
+    return new PokemonListItem(
+      uuidv4(),
+      item.name,
+      item.url,
       detail.height,
-      detail.sprites.front_default
+      detail.imageUrl
     );
   });
 }

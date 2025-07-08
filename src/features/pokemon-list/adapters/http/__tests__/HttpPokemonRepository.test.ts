@@ -43,8 +43,6 @@ it("should return a list of pokemons by type", async () => {
 
   const [pokemon1, pokemon2] = await repo.findAllByType(type);
 
-  console.log(pokemon1, pokemon2);
-
   expect(pokemon1).toBeInstanceOf(PokemonByType);
   expect(pokemon1.name).toBe("charmander");
   expect(pokemon1.url).toBe(`${url.BASE}${url.POKEMON}4/`);

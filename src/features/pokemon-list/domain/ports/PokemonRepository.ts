@@ -3,5 +3,5 @@ import { PokemonByType } from "../value-objects/PokemonByType.ts";
 import { PokemonType } from "../value-objects/PokemonType";
 export interface PokemonRepository {
   findAllByType(type: PokemonType): Promise<PokemonByType[]>;
-  findDetailsByName(name: string): Promise<PokemonByName | null>;
+  findDetailsByName(name: string): Promise<PokemonByName>;
 }

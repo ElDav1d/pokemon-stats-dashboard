@@ -16,7 +16,7 @@ class SmokeTestPokemonRepository implements PokemonRepository {
     return this.pokemonList;
   }
 
-  async findDetailsByName(name: string): Promise<PokemonByName | null> {
+  async findDetailsByName(name: string): Promise<PokemonByName> {
     // Fake details for each Pokémon
     const details: Record<string, PokemonByName> = {
       charmander: new PokemonByName(

@@ -24,15 +24,15 @@ export class HttpPokemonRepository implements PokemonRepository {
     );
   }
 
-  async findDetailsByName(name: string): Promise<PokemonByName | null> {
+  async findDetailsByName(name: string): Promise<PokemonByName> {
     const data = await this.http.get<RawPokemonDetailResponse>(
       `${url.BASE}${url.POKEMON}${name}`
     );
 
-    if (data) {
-      return new PokemonByName(data.height, data.sprites.front_default);
-    }
-
-    return null;
+    return new PokemonByName(
+      data.name,
+      data.height,
+      data.sprites.front_default
+    );
   }
 }

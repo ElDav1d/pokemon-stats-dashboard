@@ -1,3 +1,4 @@
+import { UuidGenerator } from "../../../../../lib/IdGenerator";
 import { mapToDomainList } from "../../../adapters/http/dto/mappers";
 import { PokemonListItem } from "../../../domain/entities/PokemonListItem";
 import { PokemonRepository } from "../../../domain/ports/PokemonRepository";
@@ -15,8 +16,9 @@ export class GetPokemonListUseCase {
 
     const details = await Promise.all(detailsPromises);
 
-    const pokemonListItems = mapToDomainList(pokemonsByType, details);
+    const idGenerator = new UuidGenerator();
+    const items = mapToDomainList(pokemonsByType, details, idGenerator);
 
-    return pokemonListItems;
+    return items;
   }
 }

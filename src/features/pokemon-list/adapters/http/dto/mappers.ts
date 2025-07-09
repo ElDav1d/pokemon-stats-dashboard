@@ -1,11 +1,12 @@
 import { PokemonListItem } from "../../../domain/entities/PokemonListItem";
 import { PokemonByName } from "../../../domain/value-objects/PokemonByName";
 import { PokemonByType } from "../../../domain/value-objects/PokemonByType";
-import { v4 as uuidv4 } from "uuid";
+import { IdGenerator } from "../../../../../lib/IdGenerator";
 
 export function mapToDomainList(
   list: PokemonByType[],
-  details: PokemonByName[]
+  details: PokemonByName[],
+  idGenerator: IdGenerator
 ): PokemonListItem[] {
   return list.map((item, index) => {
     const detail = details[index];
@@ -21,7 +22,7 @@ export function mapToDomainList(
     }
 
     return new PokemonListItem(
-      uuidv4(),
+      idGenerator.generate(),
       item.name,
       item.url,
       detail.height,

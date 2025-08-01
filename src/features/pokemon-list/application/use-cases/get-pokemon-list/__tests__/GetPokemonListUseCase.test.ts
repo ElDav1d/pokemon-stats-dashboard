@@ -6,7 +6,7 @@ import { PokemonByType } from "../../../../domain/value-objects/PokemonByType";
 import { PokemonByName } from "../../../../domain/value-objects/PokemonByName";
 import { PokemonListItem } from "../../../../domain/entities/PokemonListItem";
 
-it(" returns a list of Pokemon items with the required values", async () => {
+it("returns a list of Pokemon items with the required values", async () => {
   const fakeType = new PokemonType("fire");
 
   const fakePokemons = [

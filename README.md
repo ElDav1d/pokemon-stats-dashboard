@@ -12,7 +12,7 @@ El objetivo es que demuestres tu capacidad técnica, creatividad y atención al 
 
 Nosotros trabajamos con las siguientes librerías:
 
-- Svelte
+- React
 - Shadcn
 - Tailwind
 - D3.js

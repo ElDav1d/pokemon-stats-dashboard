@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { url } from "../../lib/constants";
 import { IPokemonListItem, IPokemonListItemWithDetails } from "./entities";

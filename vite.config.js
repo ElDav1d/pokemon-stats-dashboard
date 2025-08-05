@@ -13,7 +13,6 @@ export default defineConfig({
     alias: {
       $components: path.resolve("./src/components"),
       $lib: path.resolve("./src/lib"),
-      $shadcn: path.resolve("./src/shadcn"),
     },
   },
 });

@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { url } from "../../lib/constants";
 import { IPokemonListItem, IPokemonListItemWithDetails } from "./entities";
 import PokemonListItem from "./PokemonListItem";
+import { useVirtualList } from "./hooks/useVirtualList";
 
 const PokemonList = () => {
   const [pokemonList, setPokemonList] = useState<IPokemonListItemWithDetails[]>(
@@ -87,6 +88,13 @@ const PokemonList = () => {
     [isSortedByHeight, pokemonList]
   );
 
+  const { visibleItems, totalHeight, onScroll } = useVirtualList({
+    items: sortedPokemonList,
+    itemHeight: 200,
+    containerHeight: 600,
+    overscan: 5,
+  });
+
   return (
     <section>
       <fieldset className="mb-6">
@@ -107,14 +115,43 @@ const PokemonList = () => {
           aria-label="Pokemon List"
           aria-live="polite"
           className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"
+          style={{
+            height: "600px",
+            overflow: "auto",
+            position: "relative",
+          }}
+          onScroll={onScroll}
         >
-          {sortedPokemonList.map(({ pokemon, details }) => (
-            <PokemonListItem
-              key={pokemon.name}
-              pokemon={pokemon}
-              height={details.height}
-              imageUrl={details.sprites.front_default}
-            />
+          {/* Spacer to maintain total height */}
+          <div
+            style={{
+              height: totalHeight,
+              width: "100%",
+              position: "absolute",
+              top: 0,
+              left: 0,
+              pointerEvents: "none",
+              visibility: "hidden",
+            }}
+            aria-hidden="true"
+          />
+          {visibleItems.map(({ item, offsetY }) => (
+            <li
+              key={item.pokemon.name}
+              style={{
+                position: "absolute",
+                top: offsetY,
+                left: 0,
+                right: 0,
+                height: "200px",
+              }}
+            >
+              <PokemonListItem
+                pokemon={item.pokemon}
+                height={item.details.height}
+                imageUrl={item.details.sprites.front_default}
+              />
+            </li>
           ))}
         </ul>
       )}

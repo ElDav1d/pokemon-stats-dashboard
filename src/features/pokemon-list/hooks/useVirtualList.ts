@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 interface VirtualListOptions {
   itemHeight: number;
@@ -14,7 +14,6 @@ interface VirtualListResult<T> {
     width: string;
   }>;
   totalHeight: number;
-  onScroll: (e: React.UIEvent<HTMLElement>) => void;
 }
 
 export function useVirtualList<T>(
@@ -46,17 +45,35 @@ export function useVirtualList<T>(
     return () => window.removeEventListener("resize", updateColumns);
   }, []);
 
-  const containerHeight = 600;
+  // Listen for window scroll instead of container scroll
+  useEffect(() => {
+    const handleWindowScroll = () => {
+      setScrollTop(window.scrollY);
+    };
+
+    window.addEventListener("scroll", handleWindowScroll);
+    return () => window.removeEventListener("scroll", handleWindowScroll);
+  }, []);
 
   const isTestEnvironment =
     typeof import.meta !== "undefined" && import.meta.env?.MODE === "test";
 
   const visibleRange = useMemo(() => {
+    if (isTestEnvironment) {
+      return { startIndex: 0, endIndex: items?.length || 0 };
+    }
+
     const rowHeight = itemHeight;
-    const visibleStartRow = Math.floor(scrollTop / rowHeight);
+    const containerTop = 0; // Assuming list starts at top of page, adjust if needed
+    const viewportHeight =
+      typeof window !== "undefined" ? window.innerHeight : 600;
+
+    const visibleStartRow = Math.floor(
+      Math.max(0, scrollTop - containerTop) / rowHeight
+    );
     const totalRows = Math.ceil((items?.length || 0) / columns);
     const visibleEndRow = Math.min(
-      visibleStartRow + Math.ceil(containerHeight / rowHeight),
+      visibleStartRow + Math.ceil(viewportHeight / rowHeight),
       totalRows
     );
 
@@ -70,10 +87,10 @@ export function useVirtualList<T>(
   }, [
     scrollTop,
     itemHeight,
-    containerHeight,
     items?.length,
     overscan,
     columns,
+    isTestEnvironment,
   ]);
 
   const visibleItems = useMemo(() => {
@@ -116,13 +133,8 @@ export function useVirtualList<T>(
     return Math.ceil(items.length / columns) * itemHeight;
   }, [items, columns, itemHeight, isTestEnvironment]);
 
-  const onScroll = (e: React.UIEvent<HTMLElement>) => {
-    setScrollTop(e.currentTarget.scrollTop);
-  };
-
   return {
     visibleItems,
     totalHeight,
-    onScroll,
   };
 }

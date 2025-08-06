@@ -88,13 +88,10 @@ const PokemonList = () => {
     [isSortedByHeight, pokemonList]
   );
 
-  const { visibleItems, totalHeight, onScroll } = useVirtualList(
-    sortedPokemonList,
-    {
-      itemHeight: 200,
-      overscan: 5,
-    }
-  );
+  const { visibleItems, totalHeight } = useVirtualList(sortedPokemonList, {
+    itemHeight: 200,
+    overscan: 5,
+  });
 
   return (
     <section>
@@ -117,11 +114,9 @@ const PokemonList = () => {
           aria-live="polite"
           className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"
           style={{
-            height: "600px",
-            overflow: "auto",
+            minHeight: `${totalHeight}px`, // Set the total height to enable proper scrolling
             position: "relative",
           }}
-          onScroll={onScroll}
         >
           {/* Spacer to maintain total height */}
           <li

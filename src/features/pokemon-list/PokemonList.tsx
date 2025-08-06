@@ -112,7 +112,6 @@ const PokemonList = () => {
         <ul
           aria-label="Pokemon List"
           aria-live="polite"
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"
           style={{
             minHeight: `${totalHeight}px`, // Set the total height to enable proper scrolling
             position: "relative",
@@ -139,7 +138,6 @@ const PokemonList = () => {
                 top: offsetY,
                 left: offsetX,
                 width: width,
-                height: "200px",
               }}
             >
               <PokemonListItem

@@ -3,6 +3,7 @@ import { useState, useMemo, useEffect } from "react";
 interface VirtualListOptions {
   itemHeight: number;
   overscan?: number;
+  gap?: number;
 }
 
 interface VirtualListResult<T> {
@@ -16,11 +17,11 @@ interface VirtualListResult<T> {
   totalHeight: number;
 }
 
-export function useVirtualList<T>(
+export function useVirtualGridList<T>(
   items: T[],
   options: VirtualListOptions
 ): VirtualListResult<T> {
-  const { itemHeight, overscan = 5 } = options; // Extract with default
+  const { itemHeight, overscan = 5, gap = 0 } = options; // Extract with defaults
 
   // Move ALL hooks to the top - ALWAYS call them
   const [scrollTop, setScrollTop] = useState(0);
@@ -63,7 +64,7 @@ export function useVirtualList<T>(
       return { startIndex: 0, endIndex: items?.length || 0 };
     }
 
-    const rowHeight = itemHeight;
+    const rowHeight = itemHeight + gap;
     const containerTop = 0; // Assuming list starts at top of page, adjust if needed
     const viewportHeight =
       typeof window !== "undefined" ? window.innerHeight : 600;
@@ -87,6 +88,7 @@ export function useVirtualList<T>(
   }, [
     scrollTop,
     itemHeight,
+    gap,
     items?.length,
     overscan,
     columns,
@@ -120,18 +122,22 @@ export function useVirtualList<T>(
         return {
           item,
           index: actualIndex,
-          offsetY: row * itemHeight,
-          offsetX: `calc(${(col * 100) / columns}% + ${col * 16}px)`,
-          width: `calc(${100 / columns}% - ${((columns - 1) * 16) / columns}px)`,
+          offsetY: row * (itemHeight + gap),
+          offsetX: `calc(${(col * 100) / columns}% + ${col * gap}px)`,
+          width: `calc(${100 / columns}% - ${((columns - 1) * gap) / columns}px)`,
         };
       });
-  }, [items, visibleRange, itemHeight, columns, isTestEnvironment]);
+  }, [items, visibleRange, itemHeight, gap, columns, isTestEnvironment]);
 
   const totalHeight = useMemo(() => {
     if (!items || items.length === 0) return 0;
+
+    const totalRows = Math.ceil(items.length / columns);
+    const rowHeight = itemHeight + gap;
+
     if (isTestEnvironment) return items.length * itemHeight;
-    return Math.ceil(items.length / columns) * itemHeight;
-  }, [items, columns, itemHeight, isTestEnvironment]);
+    return totalRows * rowHeight - gap; // Subtract last gap since there's no gap after the last row
+  }, [items, columns, itemHeight, gap, isTestEnvironment]);
 
   return {
     visibleItems,

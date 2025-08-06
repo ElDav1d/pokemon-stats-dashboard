@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { url } from "../../lib/constants";
+import { url, pokemonListConfig } from "../../lib/constants";
 import { IPokemonListItem, IPokemonListItemWithDetails } from "./entities";
 import PokemonListItem from "./PokemonListItem";
-import { useVirtualList } from "./hooks/useVirtualList";
+import { useVirtualGridList } from "./hooks/useVirtualList";
 
 const PokemonList = () => {
   const [pokemonList, setPokemonList] = useState<IPokemonListItemWithDetails[]>(
@@ -88,9 +88,10 @@ const PokemonList = () => {
     [isSortedByHeight, pokemonList]
   );
 
-  const { visibleItems, totalHeight } = useVirtualList(sortedPokemonList, {
+  const { visibleItems, totalHeight } = useVirtualGridList(sortedPokemonList, {
     itemHeight: 200,
     overscan: 5,
+    gap: pokemonListConfig.GAP,
   });
 
   return (

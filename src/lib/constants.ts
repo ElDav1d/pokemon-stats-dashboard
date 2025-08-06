@@ -18,4 +18,8 @@ const graphConfig = {
   MARGIN_LEFT: 120,
 };
 
-export { paths, url, graphConfig };
+const pokemonListConfig = {
+  GAP: 16, // gap-4 in Tailwind (1rem = 16px)
+};
+
+export { paths, url, graphConfig, pokemonListConfig };

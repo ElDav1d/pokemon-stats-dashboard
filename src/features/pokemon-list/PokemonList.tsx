@@ -112,29 +112,24 @@ const PokemonList = () => {
         <ul
           aria-label="Pokemon List"
           aria-live="polite"
+          className="relative"
           style={{
             minHeight: `${totalHeight}px`, // Set the total height to enable proper scrolling
-            position: "relative",
           }}
         >
           {/* Spacer to maintain total height */}
           <li
+            className="absolute top-0 left-0 pointer-events-none invisible"
             style={{
               height: totalHeight,
-              width: "100%",
-              position: "absolute",
-              top: 0,
-              left: 0,
-              pointerEvents: "none",
-              visibility: "hidden",
             }}
             aria-hidden="true"
           />
           {visibleItems.map(({ item, offsetY, offsetX, width }) => (
             <li
               key={item.pokemon.name}
+              className="absolute"
               style={{
-                position: "absolute",
                 top: offsetY,
                 left: offsetX,
                 width: width,

@@ -88,12 +88,13 @@ const PokemonList = () => {
     [isSortedByHeight, pokemonList]
   );
 
-  const { visibleItems, totalHeight, onScroll } = useVirtualList({
-    items: sortedPokemonList,
-    itemHeight: 200,
-    containerHeight: 600,
-    overscan: 5,
-  });
+  const { visibleItems, totalHeight, onScroll } = useVirtualList(
+    sortedPokemonList,
+    {
+      itemHeight: 200,
+      overscan: 5,
+    }
+  );
 
   return (
     <section>
@@ -123,7 +124,7 @@ const PokemonList = () => {
           onScroll={onScroll}
         >
           {/* Spacer to maintain total height */}
-          <div
+          <li
             style={{
               height: totalHeight,
               width: "100%",
@@ -135,14 +136,14 @@ const PokemonList = () => {
             }}
             aria-hidden="true"
           />
-          {visibleItems.map(({ item, offsetY }) => (
+          {visibleItems.map(({ item, offsetY, offsetX, width }) => (
             <li
               key={item.pokemon.name}
               style={{
                 position: "absolute",
                 top: offsetY,
-                left: 0,
-                right: 0,
+                left: offsetX,
+                width: width,
                 height: "200px",
               }}
             >

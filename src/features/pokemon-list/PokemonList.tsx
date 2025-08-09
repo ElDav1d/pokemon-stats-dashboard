@@ -89,8 +89,8 @@ const PokemonList = () => {
   );
 
   const { visibleItems, totalHeight } = useVirtualGridList(sortedPokemonList, {
-    itemHeight: 200,
-    overscan: 5,
+    itemHeight: pokemonListConfig.ITEM_HEIGHT,
+    overscan: pokemonListConfig.ITEMS_OVERSCAN,
     gap: pokemonListConfig.GAP,
   });
 
@@ -134,6 +134,7 @@ const PokemonList = () => {
                 top: offsetY,
                 left: offsetX,
                 width: width,
+                height: pokemonListConfig.ITEM_HEIGHT,
               }}
             >
               <PokemonListItem

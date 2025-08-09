@@ -16,15 +16,19 @@ const PokemonListItem = ({
   return (
     <Link
       to={`${paths.BASE}${pokemon.name}`}
-      className="bg-stone-600 hover:bg-stone-400 rounded-lg p-4 animate duration-300 ease-in-out transform hover:scale-105 text-white flex flex-col items-center gap-2"
+      className="h-full bg-stone-600 hover:bg-stone-400 rounded-lg p-4 animate duration-300 ease-in-out transform hover:scale-105 text-white flex flex-col items-center gap-2"
     >
-      <img
-        src={imageUrl}
-        alt={pokemon.name}
-        loading="lazy"
-        className="w-auto"
-      />
-      <h3 className="text-lg font-semibold capitalize">{pokemon.name}</h3>
+      <div className="h-24 w-full flex items-center justify-center overflow-hidden">
+        <img
+          src={imageUrl}
+          alt={pokemon.name}
+          loading="lazy"
+          className="h-full w-auto object-contain"
+        />
+      </div>
+      <h3 className="text-lg font-semibold capitalize truncate w-full text-center">
+        {pokemon.name}
+      </h3>
       <p>Height: {height}</p>
     </Link>
   );

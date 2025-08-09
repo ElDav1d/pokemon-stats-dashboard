@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { url, pokemonListConfig } from "../../lib/constants";
 import { IPokemonListItem, IPokemonListItemWithDetails } from "./entities";
 import PokemonListItem from "./PokemonListItem";
-import { useVirtualGridList } from "./hooks/useVirtualList";
+import { useVirtualGridList } from "./hooks/useVirtualGridList";
 
 const PokemonList = () => {
   const [pokemonList, setPokemonList] = useState<IPokemonListItemWithDetails[]>(

@@ -21,7 +21,7 @@ export function useVirtualGridList<T>(
   items: T[],
   options: VirtualListOptions
 ): VirtualListResult<T> {
-  const { itemHeight, overscan = 5, gap = 0 } = options; // Extract with defaults
+  const { itemHeight, overscan = 0, gap = 0 } = options; // Extract with defaults
 
   // Move ALL hooks to the top - ALWAYS call them
   const [scrollTop, setScrollTop] = useState(0);
@@ -56,14 +56,7 @@ export function useVirtualGridList<T>(
     return () => window.removeEventListener("scroll", handleWindowScroll);
   }, []);
 
-  const isTestEnvironment =
-    typeof import.meta !== "undefined" && import.meta.env?.MODE === "test";
-
   const visibleRange = useMemo(() => {
-    if (isTestEnvironment) {
-      return { startIndex: 0, endIndex: items?.length || 0 };
-    }
-
     const rowHeight = itemHeight + gap;
     const containerTop = 0; // Assuming list starts at top of page, adjust if needed
     const viewportHeight =
@@ -85,31 +78,12 @@ export function useVirtualGridList<T>(
     );
 
     return { startIndex, endIndex };
-  }, [
-    scrollTop,
-    itemHeight,
-    gap,
-    items?.length,
-    overscan,
-    columns,
-    isTestEnvironment,
-  ]);
+  }, [scrollTop, itemHeight, gap, items?.length, overscan, columns]);
 
   const visibleItems = useMemo(() => {
     // Handle empty or undefined items INSIDE useMemo
     if (!items || items.length === 0) {
       return [];
-    }
-
-    // In test environment, return all items
-    if (isTestEnvironment) {
-      return items.map((item, index) => ({
-        item,
-        index,
-        offsetY: 0,
-        offsetX: "0%",
-        width: "100%",
-      }));
     }
 
     return items
@@ -127,7 +101,7 @@ export function useVirtualGridList<T>(
           width: `calc(${100 / columns}% - ${((columns - 1) * gap) / columns}px)`,
         };
       });
-  }, [items, visibleRange, itemHeight, gap, columns, isTestEnvironment]);
+  }, [items, visibleRange, itemHeight, gap, columns]);
 
   const totalHeight = useMemo(() => {
     if (!items || items.length === 0) return 0;
@@ -135,10 +109,8 @@ export function useVirtualGridList<T>(
     const totalRows = Math.ceil(items.length / columns);
     const rowHeight = itemHeight + gap;
 
-    if (isTestEnvironment) return items.length * itemHeight;
     return totalRows * rowHeight - gap; // Subtract last gap since there's no gap after the last row
-  }, [items, columns, itemHeight, gap, isTestEnvironment]);
-
+  }, [items, columns, itemHeight, gap]);
   return {
     visibleItems,
     totalHeight,

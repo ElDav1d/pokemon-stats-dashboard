@@ -23,7 +23,6 @@ export function useVirtualGridList<T>(
 ): VirtualListResult<T> {
   const { itemHeight, overscan = 0, gap = 0 } = options; // Extract with defaults
 
-  // Move ALL hooks to the top - ALWAYS call them
   const [scrollTop, setScrollTop] = useState(0);
   const [columns, setColumns] = useState(() => {
     if (typeof window === "undefined") return 2;
@@ -32,6 +31,17 @@ export function useVirtualGridList<T>(
     if (width >= 640) return 3;
     return 2;
   });
+
+  //  Ensure columns are correct on mount
+  useLayoutEffect(() => {
+    if (typeof window !== "undefined") {
+      const width = window.innerWidth;
+      const correctColumns = width >= 768 ? 5 : width >= 640 ? 3 : 2;
+      if (correctColumns !== columns) {
+        setColumns(correctColumns);
+      }
+    }
+  }, []);
 
   // Listen for window resize to update columns
   useLayoutEffect(() => {

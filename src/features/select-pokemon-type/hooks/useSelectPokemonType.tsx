@@ -1,0 +1,31 @@
+import { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+
+interface IUseSelectPokemonTypeReturn {
+  selectedTypeParam: string | null;
+  selectType: (type: string) => void;
+}
+
+const useSelectPokemonType = (
+  defaultType: string
+): IUseSelectPokemonTypeReturn => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedTypeParam = searchParams.get("type");
+
+  useEffect(() => {
+    setSearchParams((prev) => {
+      if (!prev.has("type")) {
+        prev.set("type", defaultType);
+      }
+      return prev;
+    });
+  }, [setSearchParams, defaultType]);
+
+  const selectType = (type: string) => {
+    setSearchParams({ type });
+  };
+
+  return { selectedTypeParam, selectType };
+};
+
+export default useSelectPokemonType;

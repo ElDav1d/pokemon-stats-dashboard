@@ -2,6 +2,10 @@ import { useState } from "react";
 import { IPokemonListItem } from "../pokemon-list/entities";
 import { Type } from "../../shared/entities";
 import { url } from "../../lib/constants";
+import {
+  SelectButton,
+  SelectButtonList,
+} from "../../components/select-button-list";
 
 interface PokemonTypesProps {
   types: Type[];
@@ -25,25 +29,32 @@ const PokemonDetailTypes = ({ types }: PokemonTypesProps) => {
     }
   };
 
+  const getOptionNames = (types: Type[]) => {
+    return types.map((type) => type.type.name);
+  };
+
   return (
     <section className="bg-stone-600  rounded-lg p-4 mb-4">
-      <h2 className="mb-2 text-lg l:text-xl xl:text-2xl font-semibold">
+      <h2
+        className="mb-2 text-lg l:text-xl xl:text-2xl font-semibold"
+        id="pokemon-type-list-heading"
+      >
         Types:
       </h2>
-      <ul aria-live="polite" className="flex flex-wrap gap-2 mb-2">
-        {types.map((type) => (
-          <li key={type.type.name}>
-            <button
-              onClick={() => fetchList(type.type.name)}
-              className={
-                selectedType === type.type.name ? "button-type-selected" : ""
-              }
-            >
-              {type.type.name}
-            </button>
-          </li>
-        ))}
-      </ul>
+      <SelectButtonList
+        aria-live="polite"
+        aria-labelledby="pokemon-type-list-heading"
+        optionNames={getOptionNames(types)}
+      >
+        {(name) => (
+          <SelectButton
+            selected={selectedType === name}
+            onClick={() => fetchList(name)}
+          >
+            {name}
+          </SelectButton>
+        )}
+      </SelectButtonList>
 
       {pokemonList.length > 0 && (
         <ul className="flex flex-wrap gap-2 mb-2" aria-live="polite">

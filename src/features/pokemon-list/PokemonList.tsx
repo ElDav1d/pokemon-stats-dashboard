@@ -1,8 +1,9 @@
-import { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { url } from "../../lib/constants";
+import { url, pokemonListConfig } from "../../lib/constants";
 import { IPokemonListItem, IPokemonListItemWithDetails } from "./entities";
 import PokemonListItem from "./PokemonListItem";
+import { useVirtualGridList } from "./hooks/useVirtualGridList";
 
 const PokemonList = () => {
   const [pokemonList, setPokemonList] = useState<IPokemonListItemWithDetails[]>(
@@ -27,6 +28,7 @@ const PokemonList = () => {
 
       try {
         const data = await response.json();
+
         return data;
       } catch (error) {
         console.error("Error fetching pokemon details:", error);
@@ -46,8 +48,9 @@ const PokemonList = () => {
         const data = await response.json();
 
         const pokemonDetailsPromises = data.pokemon.map(
-          (pokemonItem: IPokemonListItem) =>
-            fetchItemDetails(pokemonItem.pokemon.name)
+          (pokemonItem: IPokemonListItem) => {
+            return fetchItemDetails(pokemonItem.pokemon.name);
+          }
         );
 
         const pokemonDetails = await Promise.all(pokemonDetailsPromises);
@@ -85,6 +88,12 @@ const PokemonList = () => {
     [isSortedByHeight, pokemonList]
   );
 
+  const { visibleItems, totalHeight } = useVirtualGridList(sortedPokemonList, {
+    itemHeight: pokemonListConfig.ITEM_HEIGHT,
+    overscan: pokemonListConfig.ITEMS_OVERSCAN,
+    gap: pokemonListConfig.GAP,
+  });
+
   return (
     <section>
       <fieldset className="mb-6">
@@ -102,16 +111,38 @@ const PokemonList = () => {
       </fieldset>
       {sortedPokemonList.length > 0 && (
         <ul
+          aria-label="Pokemon List"
           aria-live="polite"
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"
+          className="relative"
+          style={{
+            minHeight: `${totalHeight}px`, // Set the total height to enable proper scrolling
+          }}
         >
-          {sortedPokemonList.map(({ pokemon, details }) => (
-            <PokemonListItem
-              key={pokemon.name}
-              pokemon={pokemon}
-              height={details.height}
-              imageUrl={details.sprites.front_default}
-            />
+          {/* Spacer to maintain total height */}
+          <li
+            className="absolute top-0 left-0 pointer-events-none invisible"
+            style={{
+              height: totalHeight,
+            }}
+            aria-hidden="true"
+          />
+          {visibleItems.map(({ item, offsetY, offsetX, width }) => (
+            <li
+              key={item.pokemon.name}
+              className="absolute"
+              style={{
+                top: offsetY,
+                left: offsetX,
+                width: width,
+                height: pokemonListConfig.ITEM_HEIGHT,
+              }}
+            >
+              <PokemonListItem
+                pokemon={item.pokemon}
+                height={item.details.height}
+                imageUrl={item.details.sprites.front_default}
+              />
+            </li>
           ))}
         </ul>
       )}

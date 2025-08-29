@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { paths } from "../../lib/constants";
 import { PokemonItem } from "./entities";
 
@@ -14,24 +14,23 @@ const PokemonListItem = ({
   imageUrl,
 }: IPokemonListItemProps) => {
   return (
-    <li
-      key={pokemon.name}
-      className="bg-stone-600  hover:bg-stone-400  rounded-lg p-4 animate duration-300 ease-in-out transform hover:scale-105"
+    <Link
+      to={`${paths.BASE}${pokemon.name}`}
+      className="h-full bg-stone-600 hover:bg-stone-400 rounded-lg p-4 animate duration-300 ease-in-out transform hover:scale-105 text-white flex flex-col items-center gap-2"
     >
-      <Link
-        to={`${paths.BASE}${pokemon.name}`}
-        className="text-white flex flex-col items-center gap-2"
-      >
+      <div className="h-24 w-full flex items-center justify-center overflow-hidden">
         <img
           src={imageUrl}
           alt={pokemon.name}
           loading="lazy"
-          className="w-auto"
+          className="h-full w-auto object-contain"
         />
-        <h3 className="text-lg font-semibold capitalize">{pokemon.name}</h3>
-        <p>Height: {height}</p>
-      </Link>
-    </li>
+      </div>
+      <h3 className="text-lg font-semibold capitalize truncate w-full text-center">
+        {pokemon.name}
+      </h3>
+      <p>Height: {height}</p>
+    </Link>
   );
 };
 export default PokemonListItem;

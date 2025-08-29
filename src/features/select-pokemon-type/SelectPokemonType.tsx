@@ -12,9 +12,14 @@ const SelectPokemonType = () => {
     PokemonType.defaultType
   );
 
-  const selectPokemonType = useCallback(
-    (type: string) => {
-      selectType(type);
+  const handleButtonClick = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      const target = e.target as HTMLButtonElement;
+      const value = target.dataset.value;
+
+      if (value && target.tagName === "BUTTON") {
+        selectType(value);
+      }
     },
     [selectType]
   );
@@ -43,11 +48,13 @@ const SelectPokemonType = () => {
           aria-live="polite"
           aria-labelledby="pokemon-type-list-heading"
           optionNames={typeNames}
+          onClick={handleButtonClick}
         >
           {(name) => (
             <SelectButton
+              key={name}
               selected={selectedTypeParam === name}
-              onClick={() => selectPokemonType(name)}
+              value={name}
             >
               {name}
             </SelectButton>

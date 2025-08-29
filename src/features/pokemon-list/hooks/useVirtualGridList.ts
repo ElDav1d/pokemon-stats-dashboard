@@ -47,7 +47,7 @@ export function useVirtualGridList<T>(
   }, []);
 
   // Listen for window scroll instead of container scroll
-  useEffect(() => {
+  useLayoutEffect(() => {
     const handleWindowScroll = () => {
       setScrollTop(window.scrollY);
     };

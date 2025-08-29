@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useLayoutEffect } from "react";
 
 interface VirtualListOptions {
   itemHeight: number;
@@ -34,7 +34,7 @@ export function useVirtualGridList<T>(
   });
 
   // Listen for window resize to update columns
-  useEffect(() => {
+  useLayoutEffect(() => {
     const updateColumns = () => {
       const width = window.innerWidth;
       if (width >= 768) setColumns(5);

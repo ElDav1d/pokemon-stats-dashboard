@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import {
   SelectButton,
   SelectButtonList,
@@ -9,6 +10,13 @@ const SelectPokemonType = () => {
   const { typeNames, isLoading, isError } = usePokemonTypes();
   const { selectedTypeParam, selectType } = useSelectPokemonType(
     PokemonType.defaultType
+  );
+
+  const selectPokemonType = useCallback(
+    (type: string) => {
+      selectType(type);
+    },
+    [selectType]
   );
 
   return (
@@ -39,7 +47,7 @@ const SelectPokemonType = () => {
           {(name) => (
             <SelectButton
               selected={selectedTypeParam === name}
-              onClick={() => selectType(name)}
+              onClick={() => selectPokemonType(name)}
             >
               {name}
             </SelectButton>

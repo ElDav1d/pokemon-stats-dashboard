@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useLayoutEffect, useCallback } from "react";
 
 interface VirtualListOptions {
   itemHeight: number;
@@ -23,7 +23,6 @@ export function useVirtualGridList<T>(
 ): VirtualListResult<T> {
   const { itemHeight, overscan = 0, gap = 0 } = options; // Extract with defaults
 
-  // Move ALL hooks to the top - ALWAYS call them
   const [scrollTop, setScrollTop] = useState(0);
   const [columns, setColumns] = useState(() => {
     if (typeof window === "undefined") return 2;
@@ -33,28 +32,60 @@ export function useVirtualGridList<T>(
     return 2;
   });
 
-  // Listen for window resize to update columns
-  useEffect(() => {
-    const updateColumns = () => {
-      const width = window.innerWidth;
-      if (width >= 768) setColumns(5);
-      else if (width >= 640) setColumns(3);
-      else setColumns(2);
-    };
+  // Optimized calculation functions with useCallback
+  const calculateColumns = useCallback((width: number) => {
+    if (width >= 768) return 5;
+    if (width >= 640) return 3;
+    return 2;
+  }, []);
 
+  // Ensure columns are correct on mount
+  useLayoutEffect(() => {
+    if (typeof window !== "undefined") {
+      const width = window.innerWidth;
+      const correctColumns = calculateColumns(width);
+      if (correctColumns !== columns) {
+        setColumns(correctColumns);
+      }
+    }
+  }, [calculateColumns]);
+
+  // Optimized event handlers with useCallback
+  const updateColumns = useCallback(() => {
+    const width = window.innerWidth;
+    setColumns(calculateColumns(width));
+  }, [calculateColumns]);
+
+  const handleWindowScroll = useCallback(() => {
+    setScrollTop(window.scrollY);
+  }, []);
+
+  // Optimized item positioning calculation
+  const calculateItemPosition = useCallback(
+    (actualIndex: number, columns: number, itemHeight: number, gap: number) => {
+      const row = Math.floor(actualIndex / columns);
+      const col = actualIndex % columns;
+
+      return {
+        offsetY: row * (itemHeight + gap),
+        offsetX: `calc(${(col * 100) / columns}% + ${col * gap}px)`,
+        width: `calc(${100 / columns}% - ${((columns - 1) * gap) / columns}px)`,
+      };
+    },
+    []
+  );
+
+  // Listen for window resize to update columns
+  useLayoutEffect(() => {
     window.addEventListener("resize", updateColumns);
     return () => window.removeEventListener("resize", updateColumns);
-  }, []);
+  }, [updateColumns]);
 
   // Listen for window scroll instead of container scroll
-  useEffect(() => {
-    const handleWindowScroll = () => {
-      setScrollTop(window.scrollY);
-    };
-
+  useLayoutEffect(() => {
     window.addEventListener("scroll", handleWindowScroll);
     return () => window.removeEventListener("scroll", handleWindowScroll);
-  }, []);
+  }, [handleWindowScroll]);
 
   const visibleRange = useMemo(() => {
     const rowHeight = itemHeight + gap;
@@ -90,18 +121,20 @@ export function useVirtualGridList<T>(
       .slice(visibleRange.startIndex, visibleRange.endIndex)
       .map((item, relativeIndex) => {
         const actualIndex = visibleRange.startIndex + relativeIndex;
-        const row = Math.floor(actualIndex / columns);
-        const col = actualIndex % columns;
+        const position = calculateItemPosition(
+          actualIndex,
+          columns,
+          itemHeight,
+          gap
+        );
 
         return {
           item,
           index: actualIndex,
-          offsetY: row * (itemHeight + gap),
-          offsetX: `calc(${(col * 100) / columns}% + ${col * gap}px)`,
-          width: `calc(${100 / columns}% - ${((columns - 1) * gap) / columns}px)`,
+          ...position,
         };
       });
-  }, [items, visibleRange, itemHeight, gap, columns]);
+  }, [items, visibleRange, columns, itemHeight, gap, calculateItemPosition]);
 
   const totalHeight = useMemo(() => {
     if (!items || items.length === 0) return 0;

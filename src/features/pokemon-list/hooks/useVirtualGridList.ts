@@ -39,7 +39,7 @@ export function useVirtualGridList<T>(
     return 2;
   }, []);
 
-  //  Ensure columns are correct on mount
+  // Ensure columns are correct on mount
   useLayoutEffect(() => {
     if (typeof window !== "undefined") {
       const width = window.innerWidth;
@@ -48,7 +48,7 @@ export function useVirtualGridList<T>(
         setColumns(correctColumns);
       }
     }
-  }, [calculateColumns, columns]);
+  }, [calculateColumns]);
 
   // Optimized event handlers with useCallback
   const updateColumns = useCallback(() => {

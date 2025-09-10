@@ -1,5 +1,5 @@
 import { useState, useMemo, useLayoutEffect, useCallback } from "react";
-import { VirtualGridCalculator } from "../../../shared/infrastructure/virtualization/VirtualGridCalculator";
+import { VirtualGridCalculator } from "../../../infraestructure/virtualization/VirtualGridCalculator";
 
 interface VirtualListOptions {
   itemHeight: number;
@@ -75,8 +75,14 @@ export function useVirtualGridList<T>(
     });
   }, [items, itemHeight, gap, overscan, columns, scrollTop]);
 
-  const visibleItems = useMemo(() => calculator.getVisibleItems(), [calculator]);
-  const totalHeight = useMemo(() => calculator.calculateTotalHeight(), [calculator]);
+  const visibleItems = useMemo(
+    () => calculator.getVisibleItems(),
+    [calculator]
+  );
+  const totalHeight = useMemo(
+    () => calculator.calculateTotalHeight(),
+    [calculator]
+  );
   return {
     visibleItems,
     totalHeight,

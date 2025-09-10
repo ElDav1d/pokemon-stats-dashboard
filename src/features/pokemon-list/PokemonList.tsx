@@ -6,7 +6,7 @@ import {
   IPokemonListItemWithDetails,
 } from "./domain/entities/entities";
 import PokemonListItem from "./PokemonListItem";
-import { useVirtualGridList } from "./hooks/useVirtualGridList";
+import { useVirtualGridList } from "../../infraestructure/react/hooks/useVirtualGridList";
 
 const PokemonList = () => {
   const [pokemonList, setPokemonList] = useState<IPokemonListItemWithDetails[]>(

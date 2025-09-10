@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import {
   SelectButton,
   SelectButtonList,
@@ -9,6 +10,18 @@ const SelectPokemonType = () => {
   const { typeNames, isLoading, isError } = usePokemonTypes();
   const { selectedTypeParam, selectType } = useSelectPokemonType(
     PokemonType.defaultType
+  );
+
+  const handleButtonClick = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      const target = e.target as HTMLButtonElement;
+      const value = target.dataset.value;
+
+      if (value && target.tagName === "BUTTON") {
+        selectType(value);
+      }
+    },
+    [selectType]
   );
 
   return (
@@ -35,11 +48,13 @@ const SelectPokemonType = () => {
           aria-live="polite"
           aria-labelledby="pokemon-type-list-heading"
           optionNames={typeNames}
+          onClick={handleButtonClick}
         >
           {(name) => (
             <SelectButton
+              key={name}
               selected={selectedTypeParam === name}
-              onClick={() => selectType(name)}
+              value={name}
             >
               {name}
             </SelectButton>

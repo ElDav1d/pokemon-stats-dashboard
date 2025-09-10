@@ -1,92 +1,124 @@
 [Español](/README.es.md) | [English](/README.en.md) | [Galego](/README.md)
 
-# Test Desarrollador Frontend
+# Pokemon Stats Dashboard
 
-Este es un proyecto template para la prueba técnica de Frontend.
+A **React-based Pokemon dashboard application** for exploring and analyzing Pokemon data with advanced performance optimizations and modern frontend patterns.
 
-Tienes 3 dias para hacer esta prueba. El tiempo empieza a contar desde el primer clone hasta el último commit. Una vez finalizado, evaluaremos tu trabajo internamente y después haremos una entrevista en la que te pediremos cambios en tiempo real.
+This project serves as a practical implementation of advanced React patterns, custom virtualization techniques, and comprehensive testing strategies using the **PokeAPI**.
 
-La prueba consiste en consumir esta API: **https://pokeapi.co/** para diseñar un dashboard que debe tener las características que te comunicaremos por privado.
+## 🎯 **Project Overview**
 
-El objetivo es que demuestres tu capacidad técnica, creatividad y atención al detalle.
+A comprehensive Pokemon data visualization tool that allows users to browse, filter, and analyze Pokemon information with a focus on performance, accessibility, and modern web development practices.
 
-Nosotros trabajamos con las siguientes librerías:
+## 🏗️ **Technical Architecture**
 
-- Svelte
-- Shadcn
-- Tailwind
-- D3.js
+### **Frontend Stack:**
 
-Si te sientes más cómodo con otras tecnologías como React, Vue o Angular, puedes hacer la prueba con ellas.
+- **React 18** with TypeScript
+- **Vite** for build tooling
+- **React Router** for navigation
+- **Tailwind CSS** for styling
+- **Custom Virtual Scrolling** implementation
+- **Vitest** for comprehensive testing
 
-## Consideraciones
+### **Advanced Technical Implementations:**
 
-Conceptos a aplicar que tendrán mucho peso en la evaluación:
+#### **Custom Virtual Scrolling System:**
 
-- Loading state al hacer fetch
-- Gestión de estado
-- Bindeo de estados entre componentes
-- HTML semántico
-- Scroll infinito
-- Uso de librerías que usamos en nuestro stack
-- Presentación UI/UX
-- Separación en componentes
+- **Browser-native scrolling** - Uses main browser scrollbar instead of container scrolling
+- **Responsive grid virtualization** - Adapts to different screen sizes:
+  - Mobile: 2 columns
+  - Tablet: 3 columns
+  - Desktop: 5 columns
+- **Performance optimized** - Only renders visible items plus overscan buffer
+- **Accessibility compliant** - Maintains semantic HTML structure (`<ul>` → `<li>`)
 
-¡Suerte!
+#### **Testing Strategy:**
 
-# Instrucciones prueba personal
+- **Viewport-specific test suites** - Separate test files for Desktop, Tablet, and Mobile behaviors
+- **Browser behavior simulation** - Tests actual virtualization logic
+- **Comprehensive coverage** - Tests responsive breakpoints, scroll behavior, and edge cases
 
-## Básicas:
+## 🚀 **Key Features Implemented**
 
-- Hacer un listado:
+#### ✅ **Complete Features:**
 
-  - Como cazador de pokemons amateur, quiero elegir un tipo de pokemon y poder ver una lista de pokemon de ese tipo.
+- **Pokemon Type Selection** - Choose Pokemon by type
+- **Virtualized Pokemon List** - High-performance scrolling for large datasets
+- **Pokemon Detail Pages** - Individual Pokemon statistics and information
+- **Height-based Sorting** - Order Pokemon by height
+- **Evolution Chain Navigation** - Browse Pokemon evolution lines
+- **Type-based Navigation** - Jump between Pokemon of the same type
 
-    ✅ DONE
+#### ⚠️ **Features In Development:**
 
-- Hacer ficha de pokemon:
+- Pokemon filtering capabilities
+- Pokemon comparison charts (2 Pokemon stats comparison)
+- Move-based analysis with type distribution charts
 
-  - Partiendo del listado, quiero pulsar sobre un pokemon y ver una imagen, y una lista de stats
+## 📋 **Development Backlog**
 
-    ✅ DONE
+### **Basic Features:**
 
-## Medias:
+- **Pokemon Type Listing**
+  - ✅ As a Pokemon trainer, I want to choose a Pokemon type and see a list of Pokemon of that type
+- **Pokemon Detail Page**
+  - ✅ From the listing, I want to click on a Pokemon and see its image and stats
 
-- Filtrar listado:
+### **Intermediate Features:**
 
-  - Quiero filtrar y ordenar el listado por altura
+- **List Filtering & Sorting**
+  - ⚠️ **Filtering:** Filter the Pokemon list by various criteria
+  - ✅ **Sorting:** Sort the Pokemon list by height
+- **Enhanced Pokemon Details**
+  - ✅ **Evolution Navigation:** If a Pokemon has evolutions, access the evolution Pokemon's details
+  - ✅ **Type Navigation:** Click on a Pokemon's type to see all Pokemon of that type
 
-  Filtrar: ⚠️ PENDING
+### **Advanced Features:**
 
-  Ordenar: ✅ DONE
+- **Pokemon Comparison**
+  - ⚠️ Select two Pokemon from the list and get a bar chart comparing 5 of their stats
 
-Profundizar en ficha de pokemon:
+### **Complex Features:**
 
-- Si tiene evolución, poder acceder a la ficha del pokemon al que evoluciona
+- **Move-based Analysis**
+  - ⚠️ Select two moves and get a bar chart comparing the number of Pokemon of each primary type that can learn them
 
-  ✅ DONE
+## 🎨 **UI/UX Features**
 
-- Al pulsar en su tipo, ver un listado de pokemon de ese tipo
+- **Semantic HTML** - Proper accessibility structure
+- **Loading states** - User feedback during API calls
+- **Hover effects** - Interactive card animations
+- **Responsive typography** - Scales appropriately across devices
+- **Error handling** - Graceful degradation for API failures
 
-  ✅ DONE
+## 📊 **Performance Characteristics**
 
-## Complejas:
+- **Scalable rendering** - Handles hundreds of Pokemon without performance degradation
+- **Memory efficient** - Only DOM nodes for visible items exist at any time
+- **Smooth scrolling** - Maintains 60fps even with large datasets
+- **Responsive design** - Adapts seamlessly across all device sizes
 
-- Quiero elegir dos pokemon del listado, y obtener un gráfico de barras que me compare 5 de sus stats
+## 🔧 **Development Workflow**
 
-  ⚠️ PENDING
+- **TypeScript** for type safety
+- **ESLint/Prettier** for code quality
+- **Vitest** for unit testing
+- **Hot module replacement** for development efficiency
 
-## Muy compleja:
+## 📈 **Project Status**
 
-- Quiero elegir dos moves y obtener un gráfico de barras que me compare el número de pokemon de cada tipo principal que pueden aprenderlo.
+This personal project demonstrates advanced React patterns, performance optimization techniques, and modern frontend architecture. The custom virtual scrolling implementation showcases deep understanding of browser APIs, performance considerations, and accessibility requirements.
 
-  ⚠️ PENDING
+The application successfully balances technical complexity with user experience, creating a performant and accessible Pokemon exploration tool that scales efficiently with large datasets.
 
-# Instrucciones del proyecto
+---
 
-## Prequisitos:
+## 🚀 **Getting Started**
 
-Necesitas tener Node.js y npm instalados en tu máquina. Para comprobar si tienes Node.js instalado, ejecuta este comando en tu terminal:
+## Prerequisites:
+
+You need to have Node.js and npm/yarn installed on your machine. To check if you have Node.js installed, run this command in your terminal:
 
 ```bash
 node -v
@@ -96,18 +128,18 @@ node -v
 yarn -v
 ```
 
-## Clona el repositorio:
+## Clone the repository:
 
 ```
 git clone <https://github.com/ElDav1d/pokemon-stats-dashboard>
 ```
 
-## Instala las dependencias:
+## Install dependencies:
 
 ```
-npm install` or `yarn`
+npm install or yarn
 ```
 
 ## Available Scripts
 
-`npm run dev` or `yarn dev` para ejecutar en modo de desarrollo
+`npm run dev` or `yarn dev` to run in development mode

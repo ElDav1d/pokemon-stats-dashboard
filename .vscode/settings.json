@@ -8,7 +8,7 @@
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.expand": false,
   "explorer.fileNesting.patterns": {
-    "svelte.config.*": "components.json, *.env, env.d.ts, lighthouserc.*, playwright.config.*, postcss.config.*, puppeteer.config.*, svgo.config.*, tailwind.config.*, tsconfig.*, jsconfig.*, tsdoc.*, uno.config.*, unocss.config.*, vite.config.*, vitest.config.*, .prettierrc.json, .prettierignore, eslint.config.js",
+    "vite.config.*": "components.json, *.env, env.d.ts, lighthouserc.*, playwright.config.*, postcss.config.*, puppeteer.config.*, svgo.config.*, tailwind.config.*, tsconfig.*, jsconfig.*, tsdoc.*, uno.config.*, unocss.config.*, vitest.config.*, .prettierrc.json, .prettierignore, eslint.config.js",
     "package.json": "bun.lockb, bun.lock, pnpm-lock.yaml, yarn.lock, npm-lock.json",
     "*/index.html": ""
   }

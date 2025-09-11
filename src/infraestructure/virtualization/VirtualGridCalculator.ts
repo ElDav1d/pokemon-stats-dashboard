@@ -1,3 +1,12 @@
+// Domain constants for responsive breakpoints
+export const responsiveBreakpoints = {
+  DESKTOP_MIN_WIDTH: 768,
+  TABLET_MIN_WIDTH: 640,
+  DESKTOP_COLUMNS: 5,
+  TABLET_COLUMNS: 3,
+  MOBILE_COLUMNS: 2,
+} as const;
+
 export interface VirtualGridConfig {
   itemHeight: number;
   gap: number;
@@ -99,8 +108,12 @@ export class VirtualGridCalculator<T> {
   }
 
   static calculateColumns(width: number): number {
-    if (width >= 768) return 5;
-    if (width >= 640) return 3;
-    return 2;
+    if (width >= responsiveBreakpoints.DESKTOP_MIN_WIDTH) {
+      return responsiveBreakpoints.DESKTOP_COLUMNS;
+    }
+    if (width >= responsiveBreakpoints.TABLET_MIN_WIDTH) {
+      return responsiveBreakpoints.TABLET_COLUMNS;
+    }
+    return responsiveBreakpoints.MOBILE_COLUMNS;
   }
 }

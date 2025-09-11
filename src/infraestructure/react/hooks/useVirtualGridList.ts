@@ -1,5 +1,8 @@
 import { useState, useMemo, useLayoutEffect, useCallback } from "react";
-import { VirtualGridCalculator } from "../../virtualization/VirtualGridCalculator";
+import {
+  VirtualGridCalculator,
+  responsiveBreakpoints,
+} from "../../virtualization/VirtualGridCalculator";
 
 interface VirtualListOptions {
   itemHeight: number;
@@ -26,7 +29,8 @@ export function useVirtualGridList<T>(
 
   const [scrollTop, setScrollTop] = useState(0);
   const [columns, setColumns] = useState(() => {
-    if (typeof window === "undefined") return 2;
+    if (typeof window === "undefined")
+      return responsiveBreakpoints.MOBILE_COLUMNS;
     return VirtualGridCalculator.calculateColumns(window.innerWidth);
   });
 

@@ -1,8 +1,6 @@
 import { useState, useMemo, useLayoutEffect, useCallback } from "react";
-import {
-  VirtualGridCalculator,
-  responsiveBreakpoints,
-} from "../../virtualization/VirtualGridCalculator";
+import { VirtualGridCalculator } from "../../virtualization/VirtualGridCalculator";
+import { responsiveBreakpoints } from "../../../features/pokemon-list/domain/constants";
 
 interface VirtualListOptions {
   itemHeight: number;

@@ -1,12 +1,6 @@
-// Domain constants for responsive breakpoints
-export const responsiveBreakpoints = {
-  DESKTOP_MIN_WIDTH: 768,
-  TABLET_MIN_WIDTH: 640,
-  DESKTOP_COLUMNS: 5,
-  TABLET_COLUMNS: 3,
-  MOBILE_COLUMNS: 2,
-} as const;
+import { responsiveBreakpoints } from "../../features/pokemon-list/domain/constants";
 
+// Domain constants for responsive breakpoints
 export interface VirtualGridConfig {
   itemHeight: number;
   gap: number;
@@ -117,3 +111,4 @@ export class VirtualGridCalculator<T> {
     return responsiveBreakpoints.MOBILE_COLUMNS;
   }
 }
+export { responsiveBreakpoints };

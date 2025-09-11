@@ -7,6 +7,7 @@ import {
 } from "./domain/entities/entities";
 import PokemonListItem from "./PokemonListItem";
 import { useVirtualGridList } from "../../infraestructure/react/hooks/useVirtualGridList";
+import { responsiveBreakpoints } from "./domain/constants";
 
 const PokemonList = () => {
   const [pokemonList, setPokemonList] = useState<IPokemonListItemWithDetails[]>(
@@ -95,6 +96,7 @@ const PokemonList = () => {
     itemHeight: pokemonListConfig.ITEM_HEIGHT,
     overscan: pokemonListConfig.ITEMS_OVERSCAN,
     gap: pokemonListConfig.GAP,
+    breakpoints: responsiveBreakpoints,
   });
 
   return (

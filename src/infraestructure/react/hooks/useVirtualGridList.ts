@@ -1,11 +1,23 @@
 import { useState, useMemo, useLayoutEffect, useCallback } from "react";
-import { VirtualGridCalculator } from "../../virtualization/VirtualGridCalculator";
-import { responsiveBreakpoints } from "../../../features/pokemon-list/domain/constants";
+import {
+  VirtualGridCalculator,
+  ResponsiveBreakpoints,
+} from "../../virtualization/VirtualGridCalculator";
+
+// Default breakpoints for infrastructure layer (fallback)
+const DEFAULT_BREAKPOINTS: ResponsiveBreakpoints = {
+  DESKTOP_MIN_WIDTH: 768,
+  TABLET_MIN_WIDTH: 640,
+  DESKTOP_COLUMNS: 5,
+  TABLET_COLUMNS: 3,
+  MOBILE_COLUMNS: 2,
+};
 
 interface VirtualListOptions {
   itemHeight: number;
   overscan?: number;
   gap?: number;
+  breakpoints?: ResponsiveBreakpoints; // 🎯 Inject domain breakpoints
 }
 
 interface VirtualListResult<T> {
@@ -23,20 +35,27 @@ export function useVirtualGridList<T>(
   items: T[],
   options: VirtualListOptions
 ): VirtualListResult<T> {
-  const { itemHeight, overscan = 0, gap = 0 } = options; // Extract with defaults
+  const {
+    itemHeight,
+    overscan = 0,
+    gap = 0,
+    breakpoints = DEFAULT_BREAKPOINTS,
+  } = options;
 
   const [scrollTop, setScrollTop] = useState(0);
   const [columns, setColumns] = useState(() => {
-    if (typeof window === "undefined")
-      return responsiveBreakpoints.MOBILE_COLUMNS;
-    return VirtualGridCalculator.calculateColumns(window.innerWidth);
+    if (typeof window === "undefined") return breakpoints.MOBILE_COLUMNS;
+    return VirtualGridCalculator.calculateColumns(
+      window.innerWidth,
+      breakpoints
+    );
   });
 
   // Optimized event handlers with useCallback
   const updateColumns = useCallback(() => {
     const width = window.innerWidth;
-    setColumns(VirtualGridCalculator.calculateColumns(width));
-  }, []);
+    setColumns(VirtualGridCalculator.calculateColumns(width, breakpoints));
+  }, [breakpoints]);
 
   const handleWindowScroll = useCallback(() => {
     setScrollTop(window.scrollY);
@@ -46,12 +65,15 @@ export function useVirtualGridList<T>(
   useLayoutEffect(() => {
     if (typeof window !== "undefined") {
       const width = window.innerWidth;
-      const correctColumns = VirtualGridCalculator.calculateColumns(width);
+      const correctColumns = VirtualGridCalculator.calculateColumns(
+        width,
+        breakpoints
+      );
       if (correctColumns !== columns) {
         setColumns(correctColumns);
       }
     }
-  }, [columns]);
+  }, [columns, breakpoints]);
 
   // Listen for window resize to update columns
   useLayoutEffect(() => {

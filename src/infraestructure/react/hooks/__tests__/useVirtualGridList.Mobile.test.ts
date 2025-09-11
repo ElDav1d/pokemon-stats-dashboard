@@ -1,7 +1,16 @@
 import { renderHook, act } from "@testing-library/react";
 import { useVirtualGridList } from "../useVirtualGridList";
 import { it, expect, beforeEach, afterEach } from "vitest";
-import { responsiveBreakpoints } from "../../../virtualization/VirtualGridCalculator";
+import { ResponsiveBreakpoints } from "../../../virtualization/VirtualGridCalculator";
+
+// Test breakpoints for mobile tests
+const testBreakpoints: ResponsiveBreakpoints = {
+  DESKTOP_MIN_WIDTH: 768,
+  TABLET_MIN_WIDTH: 640,
+  DESKTOP_COLUMNS: 5,
+  TABLET_COLUMNS: 3,
+  MOBILE_COLUMNS: 2,
+};
 
 const mockItems = Array.from({ length: 100 }, (_, index) => ({
   id: index + 1,
@@ -43,7 +52,11 @@ afterEach(() => {
 
 it("should use 2 columns on mobile viewport", () => {
   const { result } = renderHook(() =>
-    useVirtualGridList(mockItems, { itemHeight: 50, gap: 10 })
+    useVirtualGridList(mockItems, {
+      breakpoints: testBreakpoints,
+      itemHeight: 50,
+      gap: 10,
+    })
   );
 
   // With 100 items and 2 columns, we have 50 rows (100 ÷ 2 = 50)
@@ -103,7 +116,11 @@ it("should calculate correct offsetX for each column in 2-column layout", () => 
 
 it("should maintain 2 columns when resizing within mobile range", () => {
   const { result } = renderHook(() =>
-    useVirtualGridList(mockItems, { itemHeight: 50, gap: 10 })
+    useVirtualGridList(mockItems, {
+      breakpoints: testBreakpoints,
+      itemHeight: 50,
+      gap: 10,
+    })
   );
 
   const initialHeight = result.current.totalHeight;
@@ -124,7 +141,11 @@ it("should maintain 2 columns when resizing within mobile range", () => {
 
 it("should switch from 2 to 3 columns when resizing to tablet", () => {
   const { result } = renderHook(() =>
-    useVirtualGridList(mockItems, { itemHeight: 50, gap: 10 })
+    useVirtualGridList(mockItems, {
+      breakpoints: testBreakpoints,
+      itemHeight: 50,
+      gap: 10,
+    })
   );
 
   const mobileHeight = result.current.totalHeight; // 2 columns = 2990px
@@ -148,7 +169,11 @@ it("should switch from 2 to 3 columns when resizing to tablet", () => {
 
 it("should switch from 2 to 5 columns when resizing to desktop", () => {
   const { result } = renderHook(() =>
-    useVirtualGridList(mockItems, { itemHeight: 50, gap: 10 })
+    useVirtualGridList(mockItems, {
+      breakpoints: testBreakpoints,
+      itemHeight: 50,
+      gap: 10,
+    })
   );
 
   const mobileHeight = result.current.totalHeight; // 2 columns = 2990px
@@ -172,7 +197,12 @@ it("should switch from 2 to 5 columns when resizing to desktop", () => {
 
 it("should render correct visible items for mobile scroll behavior", () => {
   const { result } = renderHook(() =>
-    useVirtualGridList(mockItems, { itemHeight: 100, overscan: 1, gap: 10 })
+    useVirtualGridList(mockItems, {
+      breakpoints: testBreakpoints,
+      itemHeight: 100,
+      overscan: 1,
+      gap: 10,
+    })
   );
 
   act(() => {
@@ -198,7 +228,12 @@ it("should render correct visible items for mobile scroll behavior", () => {
 
 it("should handle mobile viewport with longer scroll distances", () => {
   const { result } = renderHook(() =>
-    useVirtualGridList(mockItems, { itemHeight: 120, overscan: 2, gap: 16 })
+    useVirtualGridList(mockItems, {
+      breakpoints: testBreakpoints,
+      itemHeight: 120,
+      overscan: 2,
+      gap: 16,
+    })
   );
 
   // Mobile has more rows, so test scrolling deeper
@@ -235,7 +270,11 @@ it("should handle edge case at mobile breakpoint boundary", () => {
   });
 
   const { result } = renderHook(() =>
-    useVirtualGridList(mockItems, { itemHeight: 50, gap: 10 })
+    useVirtualGridList(mockItems, {
+      breakpoints: testBreakpoints,
+      itemHeight: 50,
+      gap: 10,
+    })
   );
 
   expect(result.current.totalHeight).toBe(2990); // Should be 2 columns
@@ -256,7 +295,11 @@ it("should work with very small mobile screens", () => {
   });
 
   const { result } = renderHook(() =>
-    useVirtualGridList(mockItems, { itemHeight: 80, gap: 8 })
+    useVirtualGridList(mockItems, {
+      breakpoints: testBreakpoints,
+      itemHeight: 80,
+      gap: 8,
+    })
   );
 
   // Should still work with 2 columns
@@ -271,12 +314,16 @@ it("should use mobile layout below tablet breakpoint (639px)", () => {
     Object.defineProperty(window, "innerWidth", {
       writable: true,
       configurable: true,
-      value: responsiveBreakpoints.TABLET_MIN_WIDTH - 1, // 639px
+      value: testBreakpoints.TABLET_MIN_WIDTH - 1, // 639px
     });
   });
 
   const { result } = renderHook(() =>
-    useVirtualGridList(mockItems, { itemHeight: 50, gap: 10 })
+    useVirtualGridList(mockItems, {
+      breakpoints: testBreakpoints,
+      itemHeight: 50,
+      gap: 10,
+    })
   );
 
   // Should use 2 columns (mobile layout)
@@ -286,5 +333,5 @@ it("should use mobile layout below tablet breakpoint (639px)", () => {
 
 it("should verify mobile domain constants", () => {
   // Ensure mobile constants match expected business rules
-  expect(responsiveBreakpoints.MOBILE_COLUMNS).toBe(2);
+  expect(testBreakpoints.MOBILE_COLUMNS).toBe(2);
 });

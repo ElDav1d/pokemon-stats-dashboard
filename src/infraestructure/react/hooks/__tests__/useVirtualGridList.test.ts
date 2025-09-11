@@ -1,6 +1,16 @@
 import { renderHook, act } from "@testing-library/react";
 import { useVirtualGridList } from "../useVirtualGridList";
 import { it, expect, beforeEach, afterEach } from "vitest";
+import { ResponsiveBreakpoints } from "../../../virtualization/VirtualGridCalculator";
+
+// Test breakpoints
+const testBreakpoints: ResponsiveBreakpoints = {
+  DESKTOP_MIN_WIDTH: 768,
+  TABLET_MIN_WIDTH: 640,
+  DESKTOP_COLUMNS: 5,
+  TABLET_COLUMNS: 3,
+  MOBILE_COLUMNS: 2,
+};
 
 const mockItems = Array.from({ length: 100 }, (_, index) => ({
   id: index + 1,
@@ -60,7 +70,12 @@ it("should handle undefined items", () => {
 
 it("should return visible items based on scroll position", () => {
   const { result } = renderHook(() =>
-    useVirtualGridList(mockItems, { itemHeight: 200, overscan: 2, gap: 16 })
+    useVirtualGridList(mockItems, {
+      breakpoints: testBreakpoints,
+      itemHeight: 200,
+      overscan: 2,
+      gap: 16,
+    })
   );
 
   act(() => {
@@ -83,7 +98,12 @@ it("should return visible items based on scroll position", () => {
 
 it("should handle overscan correctly", () => {
   const { result } = renderHook(() =>
-    useVirtualGridList(mockItems, { itemHeight: 100, overscan: 3, gap: 16 })
+    useVirtualGridList(mockItems, {
+      breakpoints: testBreakpoints,
+      itemHeight: 100,
+      overscan: 3,
+      gap: 16,
+    })
   );
 
   act(() => {
@@ -112,7 +132,11 @@ it("should handle overscan correctly", () => {
 
 it("should update scroll position when window scroll event occurs", () => {
   const { result } = renderHook(() =>
-    useVirtualGridList(mockItems, { itemHeight: 50, gap: 10 })
+    useVirtualGridList(mockItems, {
+      breakpoints: testBreakpoints,
+      itemHeight: 50,
+      gap: 10,
+    })
   );
 
   // Initial scroll position should be 0

@@ -1,6 +1,12 @@
-import { responsiveBreakpoints } from "../../features/pokemon-list/domain/constants";
+// Domain constants interface for responsive breakpoints
+export interface ResponsiveBreakpoints {
+  DESKTOP_MIN_WIDTH: number;
+  TABLET_MIN_WIDTH: number;
+  DESKTOP_COLUMNS: number;
+  TABLET_COLUMNS: number;
+  MOBILE_COLUMNS: number;
+}
 
-// Domain constants for responsive breakpoints
 export interface VirtualGridConfig {
   itemHeight: number;
   gap: number;
@@ -101,14 +107,16 @@ export class VirtualGridCalculator<T> {
     });
   }
 
-  static calculateColumns(width: number): number {
-    if (width >= responsiveBreakpoints.DESKTOP_MIN_WIDTH) {
-      return responsiveBreakpoints.DESKTOP_COLUMNS;
+  static calculateColumns(
+    width: number,
+    breakpoints: ResponsiveBreakpoints
+  ): number {
+    if (width >= breakpoints.DESKTOP_MIN_WIDTH) {
+      return breakpoints.DESKTOP_COLUMNS;
     }
-    if (width >= responsiveBreakpoints.TABLET_MIN_WIDTH) {
-      return responsiveBreakpoints.TABLET_COLUMNS;
+    if (width >= breakpoints.TABLET_MIN_WIDTH) {
+      return breakpoints.TABLET_COLUMNS;
     }
-    return responsiveBreakpoints.MOBILE_COLUMNS;
+    return breakpoints.MOBILE_COLUMNS;
   }
 }
-export { responsiveBreakpoints };

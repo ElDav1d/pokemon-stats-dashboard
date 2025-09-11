@@ -1,7 +1,16 @@
 import { renderHook, act } from "@testing-library/react";
 import { useVirtualGridList } from "../useVirtualGridList";
 import { it, expect, beforeEach, afterEach } from "vitest";
-import { responsiveBreakpoints } from "../../../virtualization/VirtualGridCalculator";
+import { ResponsiveBreakpoints } from "../../../virtualization/VirtualGridCalculator";
+
+// Test breakpoints for tablet tests
+const testBreakpoints: ResponsiveBreakpoints = {
+  DESKTOP_MIN_WIDTH: 768,
+  TABLET_MIN_WIDTH: 640,
+  DESKTOP_COLUMNS: 5,
+  TABLET_COLUMNS: 3,
+  MOBILE_COLUMNS: 2,
+};
 
 const mockItems = Array.from({ length: 100 }, (_, index) => ({
   id: index + 1,
@@ -43,7 +52,12 @@ afterEach(() => {
 
 it("should use 3 columns on tablet viewport", () => {
   const { result } = renderHook(() =>
-    useVirtualGridList(mockItems, { itemHeight: 50, gap: 10 })
+    useVirtualGridList(mockItems, {
+      breakpoints: testBreakpoints,
+      itemHeight: 50,
+      gap: 10,
+      breakpoints: testBreakpoints,
+    })
   );
 
   // With 100 items and 3 columns, we have 34 rows (100 ÷ 3 = 33.33 → 34)
@@ -107,7 +121,12 @@ it("should calculate correct offsetX for each column in 3-column layout", () => 
 
 it("should maintain 3 columns when resizing within tablet range", () => {
   const { result } = renderHook(() =>
-    useVirtualGridList(mockItems, { itemHeight: 50, gap: 10 })
+    useVirtualGridList(mockItems, {
+      breakpoints: testBreakpoints,
+      itemHeight: 50,
+      gap: 10,
+      breakpoints: testBreakpoints,
+    })
   );
 
   const initialHeight = result.current.totalHeight;
@@ -128,7 +147,12 @@ it("should maintain 3 columns when resizing within tablet range", () => {
 
 it("should switch from 3 to 5 columns when resizing to desktop", () => {
   const { result } = renderHook(() =>
-    useVirtualGridList(mockItems, { itemHeight: 50, gap: 10 })
+    useVirtualGridList(mockItems, {
+      breakpoints: testBreakpoints,
+      itemHeight: 50,
+      gap: 10,
+      breakpoints: testBreakpoints,
+    })
   );
 
   const tabletHeight = result.current.totalHeight; // 3 columns = 2030px
@@ -152,7 +176,12 @@ it("should switch from 3 to 5 columns when resizing to desktop", () => {
 
 it("should switch from 3 to 2 columns when resizing to mobile", () => {
   const { result } = renderHook(() =>
-    useVirtualGridList(mockItems, { itemHeight: 50, gap: 10 })
+    useVirtualGridList(mockItems, {
+      breakpoints: testBreakpoints,
+      itemHeight: 50,
+      gap: 10,
+      breakpoints: testBreakpoints,
+    })
   );
 
   const tabletHeight = result.current.totalHeight; // 3 columns = 2030px
@@ -176,7 +205,12 @@ it("should switch from 3 to 2 columns when resizing to mobile", () => {
 
 it("should render correct visible items for tablet scroll behavior", () => {
   const { result } = renderHook(() =>
-    useVirtualGridList(mockItems, { itemHeight: 100, overscan: 1, gap: 10 })
+    useVirtualGridList(mockItems, {
+      breakpoints: testBreakpoints,
+      itemHeight: 100,
+      overscan: 1,
+      gap: 10,
+    })
   );
 
   act(() => {
@@ -211,7 +245,12 @@ it("should handle edge case at tablet breakpoint boundaries", () => {
   });
 
   const { result: result640 } = renderHook(() =>
-    useVirtualGridList(mockItems, { itemHeight: 50, gap: 10 })
+    useVirtualGridList(mockItems, {
+      breakpoints: testBreakpoints,
+      itemHeight: 50,
+      gap: 10,
+      breakpoints: testBreakpoints,
+    })
   );
 
   expect(result640.current.totalHeight).toBe(2030); // Should be 3 columns
@@ -226,7 +265,12 @@ it("should handle edge case at tablet breakpoint boundaries", () => {
   });
 
   const { result: result767 } = renderHook(() =>
-    useVirtualGridList(mockItems, { itemHeight: 50, gap: 10 })
+    useVirtualGridList(mockItems, {
+      breakpoints: testBreakpoints,
+      itemHeight: 50,
+      gap: 10,
+      breakpoints: testBreakpoints,
+    })
   );
 
   expect(result767.current.totalHeight).toBe(2030); // Should still be 3 columns
@@ -237,12 +281,17 @@ it("should use tablet layout at upper boundary (767px)", () => {
     Object.defineProperty(window, "innerWidth", {
       writable: true,
       configurable: true,
-      value: responsiveBreakpoints.DESKTOP_MIN_WIDTH - 1, // 767px
+      value: testBreakpoints.DESKTOP_MIN_WIDTH - 1, // 767px
     });
   });
 
   const { result } = renderHook(() =>
-    useVirtualGridList(mockItems, { itemHeight: 50, gap: 10 })
+    useVirtualGridList(mockItems, {
+      breakpoints: testBreakpoints,
+      itemHeight: 50,
+      gap: 10,
+      breakpoints: testBreakpoints,
+    })
   );
 
   // Should use 3 columns (tablet layout)
@@ -255,12 +304,17 @@ it("should use tablet layout at lower boundary (640px)", () => {
     Object.defineProperty(window, "innerWidth", {
       writable: true,
       configurable: true,
-      value: responsiveBreakpoints.TABLET_MIN_WIDTH, // 640px exactly
+      value: testBreakpoints.TABLET_MIN_WIDTH, // 640px exactly
     });
   });
 
   const { result } = renderHook(() =>
-    useVirtualGridList(mockItems, { itemHeight: 50, gap: 10 })
+    useVirtualGridList(mockItems, {
+      breakpoints: testBreakpoints,
+      itemHeight: 50,
+      gap: 10,
+      breakpoints: testBreakpoints,
+    })
   );
 
   // Should use 3 columns (tablet layout)
@@ -270,6 +324,6 @@ it("should use tablet layout at lower boundary (640px)", () => {
 
 it("should verify tablet domain constants", () => {
   // Ensure tablet constants match expected business rules
-  expect(responsiveBreakpoints.TABLET_MIN_WIDTH).toBe(640);
-  expect(responsiveBreakpoints.TABLET_COLUMNS).toBe(3);
+  expect(testBreakpoints.TABLET_MIN_WIDTH).toBe(640);
+  expect(testBreakpoints.TABLET_COLUMNS).toBe(3);
 });

@@ -1,6 +1,7 @@
 import { renderHook, act } from "@testing-library/react";
 import { useVirtualGridList } from "../useVirtualGridList";
 import { it, expect, beforeEach, afterEach } from "vitest";
+import { responsiveBreakpoints } from "../../../virtualization/VirtualGridCalculator";
 
 const mockItems = Array.from({ length: 100 }, (_, index) => ({
   id: index + 1,
@@ -168,4 +169,28 @@ it("should render correct visible items for desktop scroll behavior", () => {
     (vi) => vi.index >= minExpectedIndex
   );
   expect(hasItemsFromSecondRow).toBe(true);
+});
+
+it("should use desktop layout at exact breakpoint (768px)", () => {
+  act(() => {
+    Object.defineProperty(window, "innerWidth", {
+      writable: true,
+      configurable: true,
+      value: responsiveBreakpoints.DESKTOP_MIN_WIDTH, // 768px exactly
+    });
+  });
+
+  const { result } = renderHook(() =>
+    useVirtualGridList(mockItems, { itemHeight: 50, gap: 10 })
+  );
+
+  // Should use 5 columns (desktop layout)
+  expect(result.current.totalHeight).toBe(1190); // 20 rows * 60px - 10px
+  expect(result.current.visibleItems[0].width).toContain("20%"); // 100% / 5 = 20%
+});
+
+it("should verify desktop domain constants", () => {
+  // Ensure desktop constants match expected business rules
+  expect(responsiveBreakpoints.DESKTOP_MIN_WIDTH).toBe(768);
+  expect(responsiveBreakpoints.DESKTOP_COLUMNS).toBe(5);
 });

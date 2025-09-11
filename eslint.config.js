@@ -38,9 +38,10 @@ export default [
       "no-restricted-syntax": [
         "error",
         {
-          "selector": "CallExpression[callee.name='describe']",
-          "message": "Use file naming for test context instead of describe blocks. Tests should be flat with descriptive names."
-        }
+          selector: "CallExpression[callee.name='describe']",
+          message:
+            "Use file naming for test context instead of describe blocks. Tests should be flat with descriptive names.",
+        },
       ],
     },
   },

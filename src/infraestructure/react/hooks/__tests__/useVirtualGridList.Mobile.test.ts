@@ -1,6 +1,7 @@
 import { renderHook, act } from "@testing-library/react";
 import { useVirtualGridList } from "../useVirtualGridList";
 import { it, expect, beforeEach, afterEach } from "vitest";
+import { responsiveBreakpoints } from "../../../virtualization/VirtualGridCalculator";
 
 const mockItems = Array.from({ length: 100 }, (_, index) => ({
   id: index + 1,
@@ -263,4 +264,27 @@ it("should work with very small mobile screens", () => {
   // 50 rows * (80 + 8) - 8 = 4392px
   expect(result.current.totalHeight).toBe(4392);
   expect(result.current.visibleItems.length).toBeGreaterThan(0);
+});
+
+it("should use mobile layout below tablet breakpoint (639px)", () => {
+  act(() => {
+    Object.defineProperty(window, "innerWidth", {
+      writable: true,
+      configurable: true,
+      value: responsiveBreakpoints.TABLET_MIN_WIDTH - 1, // 639px
+    });
+  });
+
+  const { result } = renderHook(() =>
+    useVirtualGridList(mockItems, { itemHeight: 50, gap: 10 })
+  );
+
+  // Should use 2 columns (mobile layout)
+  expect(result.current.totalHeight).toBe(2990); // 50 rows * 60px - 10px
+  expect(result.current.visibleItems[0].width).toContain("50%"); // 100% / 2 = 50%
+});
+
+it("should verify mobile domain constants", () => {
+  // Ensure mobile constants match expected business rules
+  expect(responsiveBreakpoints.MOBILE_COLUMNS).toBe(2);
 });

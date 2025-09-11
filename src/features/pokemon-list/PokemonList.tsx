@@ -6,7 +6,7 @@ import {
   IPokemonListItemWithDetails,
 } from "./domain/entities/entities";
 import PokemonListItem from "./PokemonListItem";
-import { useVirtualGridList } from "../../infraestructure/react/hooks/useVirtualGridList";
+import { useVirtualGridList } from "../../infrastructure/react/hooks/useVirtualGridList";
 import { pokemonListConfig, responsiveBreakpoints } from "./domain/constants";
 
 const PokemonList = () => {
@@ -93,9 +93,7 @@ const PokemonList = () => {
   );
 
   const { visibleItems, totalHeight } = useVirtualGridList(sortedPokemonList, {
-    itemHeight: pokemonListConfig.ITEM_HEIGHT,
-    overscan: pokemonListConfig.ITEMS_OVERSCAN,
-    gap: pokemonListConfig.GAP,
+    config: pokemonListConfig,
     breakpoints: responsiveBreakpoints,
   });
 
@@ -139,7 +137,7 @@ const PokemonList = () => {
                 top: offsetY,
                 left: offsetX,
                 width: width,
-                height: pokemonListConfig.ITEM_HEIGHT,
+                height: pokemonListConfig.itemHeight,
               }}
             >
               <PokemonListItem

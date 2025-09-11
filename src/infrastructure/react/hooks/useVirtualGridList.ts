@@ -6,17 +6,27 @@ import {
 
 // Default breakpoints for infrastructure layer (fallback)
 const DEFAULT_BREAKPOINTS: ResponsiveBreakpoints = {
-  DESKTOP_MIN_WIDTH: 768,
-  TABLET_MIN_WIDTH: 640,
-  DESKTOP_COLUMNS: 5,
-  TABLET_COLUMNS: 3,
-  MOBILE_COLUMNS: 2,
+  desktopMinWidth: 768,
+  tabletMinWidth: 640,
+  desktopColumns: 5,
+  tabletColumns: 3,
+  mobileColumns: 2,
+};
+
+interface UseVirtualGridListConfig {
+  itemHeight: number;
+  gap: number;
+  overscan: number;
+}
+
+const DEFAULT_CONFIG: UseVirtualGridListConfig = {
+  itemHeight: 200,
+  gap: 0,
+  overscan: 0,
 };
 
 interface VirtualListOptions {
-  itemHeight: number;
-  overscan?: number;
-  gap?: number;
+  config?: UseVirtualGridListConfig;
   breakpoints?: ResponsiveBreakpoints; // 🎯 Inject domain breakpoints
 }
 
@@ -35,23 +45,18 @@ export function useVirtualGridList<T>(
   items: T[],
   options: VirtualListOptions
 ): VirtualListResult<T> {
-  const {
-    itemHeight,
-    overscan = 0,
-    gap = 0,
-    breakpoints = DEFAULT_BREAKPOINTS,
-  } = options;
+  const { config = DEFAULT_CONFIG, breakpoints = DEFAULT_BREAKPOINTS } =
+    options;
 
   const [scrollTop, setScrollTop] = useState(0);
   const [columns, setColumns] = useState(() => {
-    if (typeof window === "undefined") return breakpoints.MOBILE_COLUMNS;
+    if (typeof window === "undefined") return breakpoints.mobileColumns;
     return VirtualGridCalculator.calculateColumns(
       window.innerWidth,
       breakpoints
     );
   });
 
-  // Optimized event handlers with useCallback
   const updateColumns = useCallback(() => {
     const width = window.innerWidth;
     setColumns(VirtualGridCalculator.calculateColumns(width, breakpoints));
@@ -90,14 +95,14 @@ export function useVirtualGridList<T>(
   // Core virtualization logic delegation
   const calculator = useMemo(() => {
     return new VirtualGridCalculator(items, {
-      itemHeight,
-      gap,
-      overscan,
+      itemHeight: config.itemHeight,
+      gap: config.gap,
+      overscan: config.overscan,
       columns,
       viewportHeight: typeof window !== "undefined" ? window.innerHeight : 600,
       scrollTop,
     });
-  }, [items, itemHeight, gap, overscan, columns, scrollTop]);
+  }, [items, config, columns, scrollTop]);
 
   const visibleItems = useMemo(
     () => calculator.getVisibleItems(),

@@ -1,10 +1,10 @@
 // Domain constants interface for responsive breakpoints
 export interface ResponsiveBreakpoints {
-  DESKTOP_MIN_WIDTH: number;
-  TABLET_MIN_WIDTH: number;
-  DESKTOP_COLUMNS: number;
-  TABLET_COLUMNS: number;
-  MOBILE_COLUMNS: number;
+  desktopMinWidth: number;
+  tabletMinWidth: number;
+  desktopColumns: number;
+  tabletColumns: number;
+  mobileColumns: number;
 }
 
 export interface VirtualGridConfig {
@@ -111,12 +111,12 @@ export class VirtualGridCalculator<T> {
     width: number,
     breakpoints: ResponsiveBreakpoints
   ): number {
-    if (width >= breakpoints.DESKTOP_MIN_WIDTH) {
-      return breakpoints.DESKTOP_COLUMNS;
+    if (width >= breakpoints.desktopMinWidth) {
+      return breakpoints.desktopColumns;
     }
-    if (width >= breakpoints.TABLET_MIN_WIDTH) {
-      return breakpoints.TABLET_COLUMNS;
+    if (width >= breakpoints.tabletMinWidth) {
+      return breakpoints.tabletColumns;
     }
-    return breakpoints.MOBILE_COLUMNS;
+    return breakpoints.mobileColumns;
   }
 }

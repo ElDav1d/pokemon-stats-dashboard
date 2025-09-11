@@ -1,6 +1,6 @@
 import { it, expect, beforeEach, afterEach, vi } from "vitest";
 import { FetchHttpClient } from "../FetchHttpClient";
-import { url } from "../../../lib/constants";
+import { url } from "../../../../lib/constants";
 
 declare const global: any;
 

@@ -3,7 +3,7 @@ import { url } from "../../../../../lib/constants";
 import { HttpPokemonRepository } from "../HttpPokemonRepository";
 import { PokemonType } from "../../../domain/value-objects/PokemonType";
 import { pokemonByNameResponseMock, pokemonByTypeResponseMock } from "./mocks";
-import { FetchHttpClient } from "../../../../../infraestructure/http/FetchHttpClient";
+import { FetchHttpClient } from "../../../../../infraestructure/client/fetch/FetchHttpClient";
 import { PokemonByType } from "../../../domain/value-objects/PokemonByType";
 import { PokemonByName } from "../../../domain/value-objects/PokemonByName";
 

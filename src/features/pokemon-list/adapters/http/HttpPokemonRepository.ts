@@ -2,7 +2,7 @@ import { url } from "../../../../lib/constants";
 import { PokemonByType } from "../../domain/value-objects/PokemonByType";
 import { PokemonRepository } from "../../domain/ports/PokemonRepository";
 import { PokemonType } from "../../domain/value-objects/PokemonType";
-import { HttpClient } from "../../../../infraestructure/http/HttpClient";
+import { HttpClient } from "../../../../infraestructure/client/http/HttpClient";
 import {
   RawPokemonByType,
   RawPokemonTypeResponse,

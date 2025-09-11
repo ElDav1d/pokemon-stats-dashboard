@@ -1,4 +1,4 @@
-import { HttpClient } from "./HttpClient";
+import { HttpClient } from "../http/HttpClient";
 
 export class FetchHttpClient implements HttpClient {
   constructor(private readonly baseUrl: string) {}

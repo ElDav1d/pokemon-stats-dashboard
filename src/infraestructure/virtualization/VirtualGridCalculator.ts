@@ -22,8 +22,8 @@ export interface VirtualGridRange {
 
 export class VirtualGridCalculator<T> {
   constructor(
-    private items: T[],
-    private config: VirtualGridConfig
+    private readonly items: T[],
+    private readonly config: VirtualGridConfig
   ) {}
 
   calculateVisibleRange(): VirtualGridRange {
@@ -33,7 +33,7 @@ export class VirtualGridCalculator<T> {
 
     const rowHeight = this.config.itemHeight + this.config.gap;
     const containerTop = 0; // Assuming list starts at top of page
-    
+
     const visibleStartRow = Math.floor(
       Math.max(0, this.config.scrollTop - containerTop) / rowHeight
     );
@@ -43,7 +43,10 @@ export class VirtualGridCalculator<T> {
       totalRows
     );
 
-    const startIndex = Math.max(0, (visibleStartRow - this.config.overscan) * this.config.columns);
+    const startIndex = Math.max(
+      0,
+      (visibleStartRow - this.config.overscan) * this.config.columns
+    );
     const endIndex = Math.min(
       this.items.length,
       (visibleEndRow + this.config.overscan) * this.config.columns
@@ -52,7 +55,11 @@ export class VirtualGridCalculator<T> {
     return { startIndex, endIndex };
   }
 
-  calculateItemPosition(actualIndex: number): { offsetY: number; offsetX: string; width: string } {
+  calculateItemPosition(actualIndex: number): {
+    offsetY: number;
+    offsetX: string;
+    width: string;
+  } {
     const row = Math.floor(actualIndex / this.config.columns);
     const col = actualIndex % this.config.columns;
 
@@ -78,19 +85,17 @@ export class VirtualGridCalculator<T> {
     }
 
     const { startIndex, endIndex } = this.calculateVisibleRange();
-    
-    return this.items
-      .slice(startIndex, endIndex)
-      .map((item, relativeIndex) => {
-        const actualIndex = startIndex + relativeIndex;
-        const position = this.calculateItemPosition(actualIndex);
 
-        return {
-          item,
-          index: actualIndex,
-          ...position,
-        };
-      });
+    return this.items.slice(startIndex, endIndex).map((item, relativeIndex) => {
+      const actualIndex = startIndex + relativeIndex;
+      const position = this.calculateItemPosition(actualIndex);
+
+      return {
+        item,
+        index: actualIndex,
+        ...position,
+      };
+    });
   }
 
   static calculateColumns(width: number): number {

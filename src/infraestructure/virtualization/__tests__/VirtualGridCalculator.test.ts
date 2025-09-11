@@ -71,13 +71,16 @@ describe("VirtualGridCalculator (Framework Independent)", () => {
 
     expect(calculator.calculateTotalHeight()).toBe(0);
     expect(calculator.getVisibleItems()).toEqual([]);
-    expect(calculator.calculateVisibleRange()).toEqual({ startIndex: 0, endIndex: 0 });
+    expect(calculator.calculateVisibleRange()).toEqual({
+      startIndex: 0,
+      endIndex: 0,
+    });
   });
 
   it("should calculate columns correctly", () => {
     expect(VirtualGridCalculator.calculateColumns(1024)).toBe(5); // Desktop
-    expect(VirtualGridCalculator.calculateColumns(700)).toBe(3);  // Tablet
-    expect(VirtualGridCalculator.calculateColumns(500)).toBe(2);  // Mobile
+    expect(VirtualGridCalculator.calculateColumns(700)).toBe(3); // Tablet
+    expect(VirtualGridCalculator.calculateColumns(500)).toBe(2); // Mobile
   });
 
   it("should get visible items with correct structure", () => {
@@ -91,13 +94,13 @@ describe("VirtualGridCalculator (Framework Independent)", () => {
     });
 
     const visibleItems = calculator.getVisibleItems();
-    
+
     expect(visibleItems.length).toBeGreaterThan(0);
-    expect(visibleItems[0]).toHaveProperty('item');
-    expect(visibleItems[0]).toHaveProperty('index');
-    expect(visibleItems[0]).toHaveProperty('offsetY');
-    expect(visibleItems[0]).toHaveProperty('offsetX');
-    expect(visibleItems[0]).toHaveProperty('width');
+    expect(visibleItems[0]).toHaveProperty("item");
+    expect(visibleItems[0]).toHaveProperty("index");
+    expect(visibleItems[0]).toHaveProperty("offsetY");
+    expect(visibleItems[0]).toHaveProperty("offsetX");
+    expect(visibleItems[0]).toHaveProperty("width");
     expect(visibleItems[0].item).toEqual(mockItems[0]);
   });
 });

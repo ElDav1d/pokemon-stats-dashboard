@@ -2,27 +2,36 @@ import { it, expect, vi } from "vitest";
 import { PokemonRepository } from "../../../domain/ports/PokemonRepository";
 import { PokemonListItem } from "../../../domain/entities/PokemonListItem";
 import { PokemonByType } from "../../../domain/value-objects/PokemonByType";
+import { PokemonByName } from "../../../domain/value-objects/PokemonByName";
+import { PokemonType } from "../../../domain/value-objects/PokemonType";
 import { PokemonListViewModel } from "../PokemonListViewModel";
 
 it("should load pokemon list by type", async () => {
-  const mockPokemon1 = new PokemonListItem(
-    "1",
+  const mockPokemonByType1 = new PokemonByType(
     "charizard",
-    "https://pokeapi.co/api/v2/pokemon/6/",
+    "https://pokeapi.co/api/v2/pokemon/6/"
+  );
+  const mockPokemonByType2 = new PokemonByType(
+    "vulpix",
+    "https://pokeapi.co/api/v2/pokemon/37/"
+  );
+
+  const mockPokemonByName1 = new PokemonByName(
+    "charizard",
     17,
     "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png"
   );
-  const mockPokemon2 = new PokemonListItem(
-    "2",
+  const mockPokemonByName2 = new PokemonByName(
     "vulpix",
-    "https://pokeapi.co/api/v2/pokemon/37/",
     6,
     "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/37.png"
   );
 
   const mockRepository: PokemonRepository = {
-    findAllByType: vi.fn().mockResolvedValue([mockPokemon1, mockPokemon2]),
-    findDetailsByName: vi.fn(),
+    findAllByType: vi.fn().mockResolvedValue([mockPokemonByType1, mockPokemonByType2]),
+    findDetailsByName: vi.fn()
+      .mockResolvedValueOnce(mockPokemonByName1)
+      .mockResolvedValueOnce(mockPokemonByName2),
   };
 
   const viewModel = new PokemonListViewModel(mockRepository);
@@ -33,7 +42,7 @@ it("should load pokemon list by type", async () => {
   expect(result[0].name).toBe("charizard");
   expect(result[1].name).toBe("vulpix");
   expect(mockRepository.findAllByType).toHaveBeenCalledWith(
-    new PokemonByType("fire", "")
+    new PokemonType("fire")
   );
 });
 

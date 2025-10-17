@@ -1,11 +1,20 @@
 import { useState } from "react";
-import { IPokemonListItem } from "../pokemon-list/domain/entities/entities";
 import { Type } from "../../pages/Detail/entities";
 import { url } from "../../lib/constants";
 import {
   SelectButton,
   SelectButtonList,
 } from "../../components/select-button-list";
+
+type PokemonItem = {
+  name: string;
+  url: string;
+};
+
+interface IPokemonListItem {
+  pokemon: PokemonItem;
+  slot: number;
+}
 
 interface PokemonTypesProps {
   types: Type[];

@@ -1,7 +1,11 @@
 import { memo } from "react";
 import { Link } from "react-router-dom";
 import { paths } from "../../lib/constants";
-import { PokemonItem } from "./domain/entities/entities";
+
+type PokemonItem = {
+  name: string;
+  url: string;
+};
 
 export interface IPokemonListItemProps {
   pokemon: PokemonItem;

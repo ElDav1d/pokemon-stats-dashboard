@@ -1,13 +1,24 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { url } from "../../lib/constants";
-import {
-  IPokemonListItem,
-  IPokemonListItemWithDetails,
-} from "./domain/entities/entities";
+import { IPokemonDetail } from "../../pages/Detail/entities";
 import PokemonListItem from "./PokemonListItem";
 import { useVirtualGridList } from "../../infrastructure/react/hooks/useVirtualGridList";
 import { pokemonListConfig, responsiveBreakpoints } from "./domain/constants";
+
+type PokemonItem = {
+  name: string;
+  url: string;
+};
+
+interface IPokemonListItem {
+  pokemon: PokemonItem;
+  slot: number;
+}
+
+interface IPokemonListItemWithDetails extends IPokemonListItem {
+  details: IPokemonDetail;
+}
 
 const PokemonList = () => {
   const [pokemonList, setPokemonList] = useState<IPokemonListItemWithDetails[]>(

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { PokemonListItem } from "../../domain/entities/PokemonListItem";
-import { PokemonRepository } from "../../domain/ports/PokemonRepository";
-import { PokemonType } from "../../domain/value-objects/PokemonType";
-import { GetPokemonListUseCase } from "../use-cases/get-pokemon-list/GetPokemonListUseCase";
+import { PokemonListItem } from "../../../domain/entities/PokemonListItem";
+import { PokemonRepository } from "../../../domain/ports/PokemonRepository";
+import { PokemonType } from "../../../domain/value-objects/PokemonType";
+import { GetPokemonListUseCase } from "../../../application/use-cases/get-pokemon-list/GetPokemonListUseCase";
 
 interface UsePokemonListResult {
   pokemonList: PokemonListItem[];

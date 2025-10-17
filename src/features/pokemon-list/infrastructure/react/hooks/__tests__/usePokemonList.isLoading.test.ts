@@ -1,9 +1,9 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { vi, it, expect } from "vitest";
 import usePokemonList from "../usePokemonList";
-import { PokemonRepository } from "../../../domain/ports/PokemonRepository";
-import { PokemonByType } from "../../../domain/value-objects/PokemonByType";
-import { PokemonByName } from "../../../domain/value-objects/PokemonByName";
+import { PokemonRepository } from "../../../../domain/ports/PokemonRepository";
+import { PokemonByType } from "../../../../domain/value-objects/PokemonByType";
+import { PokemonByName } from "../../../../domain/value-objects/PokemonByName";
 import { testData, createDelayedPromise } from "./setupTests";
 
 it("starts as false when no selectedType is provided", () => {

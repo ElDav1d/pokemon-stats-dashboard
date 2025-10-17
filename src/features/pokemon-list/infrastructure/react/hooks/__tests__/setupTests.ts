@@ -1,7 +1,7 @@
 import { vi, beforeEach } from "vitest";
-import { PokemonRepository } from "../../../domain/ports/PokemonRepository";
-import { PokemonByType } from "../../../domain/value-objects/PokemonByType";
-import { PokemonByName } from "../../../domain/value-objects/PokemonByName";
+import { PokemonRepository } from "../../../../domain/ports/PokemonRepository";
+import { PokemonByType } from "../../../../domain/value-objects/PokemonByType";
+import { PokemonByName } from "../../../../domain/value-objects/PokemonByName";
 
 // Global test data and mocks
 export const testData = {

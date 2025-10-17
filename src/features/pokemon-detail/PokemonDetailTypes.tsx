@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { IPokemonListItem } from "../pokemon-list/domain/entities/entities";
-import { Type } from "../../shared/entities";
+import { Type } from "../../pages/Detail/entities";
 import { url } from "../../lib/constants";
 import {
   SelectButton,
@@ -48,6 +48,7 @@ const PokemonDetailTypes = ({ types }: PokemonTypesProps) => {
       >
         {(name) => (
           <SelectButton
+            value={name}
             selected={selectedType === name}
             onClick={() => fetchList(name)}
           >

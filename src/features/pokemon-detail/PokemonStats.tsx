@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Stat } from "../../shared/entities";
+import { Stat } from "../../pages/Detail/entities";
 import { useStatsGraph } from "./useStatsGraph";
 
 interface IPokemonStatsProps {

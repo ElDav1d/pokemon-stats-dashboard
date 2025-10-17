@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { url } from "../../lib/constants";
-import { IPokemonDetail } from "../../shared/entities";
+import { IPokemonDetail } from "../../pages/Detail/entities";
 import PokemonEvolutions from "./PokemonEvolutions";
 import PokemonStats from "./PokemonStats";
 import PokemonDetailTypes from "./PokemonDetailTypes";

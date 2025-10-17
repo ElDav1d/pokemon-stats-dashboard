@@ -21,6 +21,9 @@ export interface PokemonDetail {
   weight: number;
 }
 
+// Alias for compatibility
+export type IPokemonDetail = PokemonDetail;
+
 export interface Ability {
   ability: Species | null;
   is_hidden: boolean;

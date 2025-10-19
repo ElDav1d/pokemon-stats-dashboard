@@ -36,22 +36,23 @@ const usePokemonList = (
       return;
     }
 
-    setIsLoading(true);
-    setIsError(false);
+    const fetchData = async () => {
+      setIsLoading(true);
+      setIsError(false);
 
-    viewModel
-      .loadPokemonList(selectedType)
-      .then((result) => {
+      try {
+        const result = await viewModel.loadPokemonList(selectedType);
         setPokemonList(result);
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error("Error fetching pokemon list:", error);
         setPokemonList([]);
         setIsError(true);
-      })
-      .finally(() => {
+      } finally {
         setIsLoading(false);
-      });
+      }
+    };
+
+    fetchData();
   }, [selectedType, viewModel]);
 
   return { pokemonList, isLoading, isError, sortByHeight };

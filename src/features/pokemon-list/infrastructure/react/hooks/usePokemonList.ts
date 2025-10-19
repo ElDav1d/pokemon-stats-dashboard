@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { PokemonListItem } from "../../../domain/entities/PokemonListItem";
 import { PokemonRepository } from "../../../domain/ports/PokemonRepository";
-import { PokemonType } from "../../../domain/value-objects/PokemonType";
-import { GetPokemonListUseCase } from "../../../application/use-cases/get-pokemon-list/GetPokemonListUseCase";
+import { PokemonListViewModel } from "../../../application/view-models/PokemonListViewModel";
 
 interface UsePokemonListResult {
   pokemonList: PokemonListItem[];
   isLoading: boolean;
   isError: boolean;
+  sortByHeight: (list: PokemonListItem[]) => PokemonListItem[];
 }
 
 const usePokemonList = (
@@ -18,6 +18,16 @@ const usePokemonList = (
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
 
+  const viewModel = useMemo(
+    () => new PokemonListViewModel(repository),
+    [repository]
+  );
+
+  const sortByHeight = useCallback(
+    (list: PokemonListItem[]) => viewModel.sortPokemonListByHeight(list),
+    [viewModel]
+  );
+
   useEffect(() => {
     if (!selectedType) {
       setPokemonList([]);
@@ -26,28 +36,25 @@ const usePokemonList = (
       return;
     }
 
-    const fetchPokemonList = async () => {
-      setIsLoading(true);
-      setIsError(false);
+    setIsLoading(true);
+    setIsError(false);
 
-      try {
-        const useCase = new GetPokemonListUseCase(repository);
-        const type = new PokemonType(selectedType);
-        const result = await useCase.execute(type);
+    viewModel
+      .loadPokemonList(selectedType)
+      .then((result) => {
         setPokemonList(result);
-      } catch (error) {
+      })
+      .catch((error) => {
         console.error("Error fetching pokemon list:", error);
         setPokemonList([]);
         setIsError(true);
-      } finally {
+      })
+      .finally(() => {
         setIsLoading(false);
-      }
-    };
+      });
+  }, [selectedType, viewModel]);
 
-    fetchPokemonList();
-  }, [selectedType, repository]);
-
-  return { pokemonList, isLoading, isError };
+  return { pokemonList, isLoading, isError, sortByHeight };
 };
 
 export default usePokemonList;

@@ -15,7 +15,7 @@ export class HttpPokemonRepository implements PokemonRepository {
 
   async findAllByType(type: PokemonType): Promise<PokemonByType[]> {
     const data = await this.http.get<RawPokemonTypeResponse>(
-      `${url.BASE}${url.TYPE}${type.value}`
+      `${url.TYPE}${type.value}`
     );
 
     return data.pokemon.map(
@@ -26,7 +26,7 @@ export class HttpPokemonRepository implements PokemonRepository {
 
   async findDetailsByName(name: string): Promise<PokemonByName> {
     const data = await this.http.get<RawPokemonDetailResponse>(
-      `${url.BASE}${url.POKEMON}${name}`
+      `${url.POKEMON}${name}`
     );
 
     return new PokemonByName(

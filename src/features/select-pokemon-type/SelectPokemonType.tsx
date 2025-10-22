@@ -34,11 +34,13 @@ const SelectPokemonType = () => {
       </h2>
 
       {isLoading && (
-        <h3 className="text-center text-gray-500">Loading pokemon types...</h3>
+        <h3 className="text-center my-4 text-gray-500">
+          Loading pokemon types...
+        </h3>
       )}
 
       {isError && (
-        <h3 className="text-center text-red-500">
+        <h3 className="text-center my-4 text-red-500">
           Error loading pokemon types
         </h3>
       )}

@@ -75,18 +75,21 @@ The codebase implements **Hexagonal Architecture** (Ports & Adapters) with clear
 **Features** (`src/features/`) - Feature modules with hexagonal structure:
 
 - `pokemon-list/` - Main list feature
-  - `domain/` - Business logic layer
-    - `ports/` - Interfaces (e.g., `PokemonRepository`)
+  - `domain/` - Core business rules
+    - `ports/` - Interfaces defining contracts (e.g., `PokemonRepository`)
     - `entities/` - Domain models (e.g., `PokemonListItem`)
-    - `value-objects/` - Immutable objects (e.g., `PokemonType`)
+    - `value-objects/` - Immutable domain objects (e.g., `PokemonType`)
     - `constants.ts` - Domain configuration (grid config, breakpoints)
-  - `application/` - Use cases and hooks
-    - `use-cases/` - Business operations (`GetPokemonListUseCase`)
-    - `hooks/` - React integration (`usePokemonList`)
-  - `adapters/` - Infrastructure implementations
-    - `http/` - HTTP adapter (`HttpPokemonRepository`)
-      - `dto/` - Data Transfer Objects
-      - `mappers.ts` - DTO to domain transformations
+  - `application/` - Business logic orchestration
+    - `use-cases/` - Business operations (e.g., `GetPokemonListUseCase`)
+    - `view-models/` - Application-layer orchestration (e.g., `PokemonListViewModel`)
+  - `infrastructure/` - Framework-specific implementations (adapters)
+    - `http/` - HTTP adapter implementing `PokemonRepository`
+      - `HttpPokemonRepository.ts` - REST API adapter
+      - `dto/` - Data Transfer Objects from API
+      - `mappers.ts` - DTO → domain entity transformation
+    - `react/` - React-specific utilities
+      - `hooks/` - Custom React hooks (e.g., `usePokemonList`)
   - Component files (`PokemonList.tsx`, `PokemonListItem.tsx`)
 
 **Infrastructure** (`src/infrastructure/`) - Cross-cutting concerns:

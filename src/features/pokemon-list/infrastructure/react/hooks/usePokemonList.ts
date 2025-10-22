@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { PokemonListItem } from "../../../domain/entities/PokemonListItem";
 import { PokemonRepository } from "../../../domain/ports/PokemonRepository";
 import { PokemonListViewModel } from "../../../application/view-models/PokemonListViewModel";
-import { HttpPokemonRepository } from "../../../adapters/http/HttpPokemonRepository";
+import { HttpPokemonRepository } from "../../http/HttpPokemonRepository";
 import { FetchHttpClient } from "../../../../../infrastructure/client/fetch/FetchHttpClient";
 
 interface UsePokemonListResult {

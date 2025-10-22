@@ -1,5 +1,5 @@
 import { UuidGenerator } from "../../../../../lib/IdGenerator";
-import { mapToDomainList } from "../../../infrastructure/http/dto/mappers";
+import { mapToDomainList } from "../../mappers/PokemonListMapper";
 import { PokemonListItem } from "../../../domain/entities/PokemonListItem";
 import { PokemonRepository } from "../../../domain/ports/PokemonRepository";
 import { PokemonType } from "../../../domain/value-objects/PokemonType";

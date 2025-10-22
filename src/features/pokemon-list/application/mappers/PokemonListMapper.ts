@@ -1,7 +1,7 @@
-import { PokemonListItem } from "../../../domain/entities/PokemonListItem";
-import { PokemonByName } from "../../../domain/value-objects/PokemonByName";
-import { PokemonByType } from "../../../domain/value-objects/PokemonByType";
-import { IdGenerator } from "../../../../../lib/IdGenerator";
+import { PokemonListItem } from "../../domain/entities/PokemonListItem";
+import { PokemonByName } from "../../domain/value-objects/PokemonByName";
+import { PokemonByType } from "../../domain/value-objects/PokemonByType";
+import { IdGenerator } from "../../../../lib/IdGenerator";
 
 export function mapToDomainList(
   list: PokemonByType[],

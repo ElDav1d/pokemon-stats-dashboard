@@ -630,6 +630,70 @@ Recent refactoring focused on:
 - Use co-located `__tests__/` directories
 - Follow existing test patterns for consistency
 
+## React Hook Architecture
+
+### Hook Design: Separation of Concerns
+
+Hooks should each have a **single, well-defined responsibility**. Do NOT combine unrelated concerns into one hook.
+
+**✅ Correct: Separate hooks for separate concerns**
+
+```typescript
+// Hook 1: Data fetching and business logic
+const { pokemonList, isLoading, isError, sortByHeight } = usePokemonList("grass");
+
+// Hook 2: Performance optimization (virtualization)
+const { visibleItems, totalHeight } = useVirtualGridList(pokemonList, {
+  config: pokemonListConfig,
+  breakpoints: responsiveBreakpoints,
+});
+
+// Component composes them
+const sortedList = isSortedByHeight ? sortByHeight(pokemonList) : pokemonList;
+const { visibleItems, totalHeight } = useVirtualGridList(sortedList, config);
+```
+
+**❌ Avoid: Combining unrelated concerns**
+
+```typescript
+// BAD: One hook doing 3+ things
+const { visibleItems, totalHeight, pokemonList, sortByHeight, isLoading } =
+  usePokemonListWithVirtualization("grass", config);
+// ↑ Data fetching + sorting + virtualization = too many responsibilities
+```
+
+### Why Separation Matters
+
+| Aspect | Benefit |
+|--------|---------|
+| **Testability** | Test each hook independently with different props |
+| **Reusability** | Use `useVirtualGridList` with any array, not just Pokemon |
+| **Maintainability** | Changes to one concern don't affect others |
+| **Clarity** | Each hook's purpose is obvious from its name |
+| **Composability** | Easy to add/remove concerns (sorting, filtering, etc.) |
+
+### Component Humility: Hook Orchestration
+
+Components may orchestrate **multiple hooks** while remaining "humble" if they don't:
+- Instantiate infrastructure (HTTP clients, repositories)
+- Implement business logic (use hooks for that)
+- Import application-layer classes directly
+
+**✅ Humble component:**
+```typescript
+const { pokemonList, sortByHeight } = usePokemonList(type);
+const sortedList = isSortedByHeight ? sortByHeight(pokemonList) : pokemonList;
+const { visibleItems, totalHeight } = useVirtualGridList(sortedList, config);
+// All infrastructure is hidden inside hooks, not in component
+```
+
+**❌ Not humble:**
+```typescript
+const repository = new HttpPokemonRepository(httpClient); // ❌ Infrastructure in component
+const { pokemonList } = usePokemonList(type, repository);
+const sorted = viewModel.sortPokemonList(pokemonList); // ❌ Business logic in component
+```
+
 ### Modifying Virtual Scrolling
 
 - Core logic in `VirtualGridCalculator` (framework-agnostic)

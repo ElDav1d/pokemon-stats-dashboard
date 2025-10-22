@@ -1,11 +1,8 @@
 import React, { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { url } from "../../lib/constants";
 import PokemonListItem from "./PokemonListItem";
-import { useVirtualGridList } from "../../infrastructure/react/hooks/useVirtualGridList";
 import usePokemonList from "./infrastructure/react/hooks/usePokemonList";
-import { HttpPokemonRepository } from "./adapters/http/HttpPokemonRepository";
-import { FetchHttpClient } from "../../infrastructure/client/fetch/FetchHttpClient";
+import { useVirtualGridList } from "../../infrastructure/react/hooks/useVirtualGridList";
 import { pokemonListConfig, responsiveBreakpoints } from "./domain/constants";
 
 const PokemonList = () => {
@@ -13,36 +10,26 @@ const PokemonList = () => {
   const selectedTypeParam = searchParams.get("type");
   const [isSortedByHeight, setIsSortedByHeight] = useState(false);
 
-  // Initialize repository for the hook
-  const httpClient = useMemo(() => new FetchHttpClient(url.BASE), []);
-  const repository = useMemo(
-    () => new HttpPokemonRepository(httpClient),
-    [httpClient]
-  );
-
-  const safeParamType = selectedTypeParam ?? "";
-
+  // Hook 1: Data fetching and sorting logic
   const { pokemonList, isLoading, isError, sortByHeight } = usePokemonList(
-    safeParamType,
-    repository
+    selectedTypeParam ?? ""
   );
 
+  // Component composition: Apply sorting if enabled
   const sortablePokemonList = useMemo(() => {
-    if (isSortedByHeight) {
+    if (isSortedByHeight && pokemonList.length > 0) {
       return sortByHeight(pokemonList);
     }
     return pokemonList;
   }, [isSortedByHeight, pokemonList, sortByHeight]);
 
-  const { visibleItems, totalHeight } = useVirtualGridList(
-    sortablePokemonList,
-    {
-      config: pokemonListConfig,
-      breakpoints: responsiveBreakpoints,
-    }
-  );
+  // Hook 2: Virtualization for performance
+  const { visibleItems, totalHeight } = useVirtualGridList(sortablePokemonList, {
+    config: pokemonListConfig,
+    breakpoints: responsiveBreakpoints,
+  });
 
-  const orderByHeight = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSortChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setIsSortedByHeight(event.target.checked);
   };
 
@@ -77,11 +64,11 @@ const PokemonList = () => {
           type="checkbox"
           id="height"
           name="height"
-          onChange={orderByHeight}
+          onChange={handleSortChange}
         />
         <label htmlFor="height">By height</label>
       </fieldset>
-      {sortablePokemonList.length > 0 && (
+      {visibleItems.length > 0 && (
         <ul
           aria-label="Pokemon List"
           aria-live="polite"

@@ -18,17 +18,11 @@ it("renders the initial elements", async () => {
     level: 1,
   });
 
-  const contentArea = within(screen.getByRole("main")).getByRole("article");
-  const orderCheckboxes = within(contentArea).getByRole("group", {
-    name: /order the pokemons/i,
-  });
-  const sortByHeightCheckbox = within(orderCheckboxes).getByRole("checkbox", {
-    name: /by height/i,
-  });
-
   expect(heading).toBeInTheDocument();
-  expect(sortByHeightCheckbox).toBeInTheDocument();
 
+  const contentArea = within(screen.getByRole("main")).getByRole("article");
+
+  // Wait for type list to load
   await waitFor(async () => {
     const selectTypeList = await within(contentArea).findByRole("list", {
       name: /select a pokemon type to get the list/i,
@@ -46,6 +40,17 @@ it("renders the initial elements", async () => {
     expect(
       await within(selectTypeList).findByRole("button", { name: /grass/i })
     ).toBeInTheDocument();
+  });
+
+  // Wait for checkbox to appear (after default type is selected)
+  await waitFor(() => {
+    const orderCheckboxes = within(contentArea).getByRole("group", {
+      name: /order the pokemons/i,
+    });
+    const sortByHeightCheckbox = within(orderCheckboxes).getByRole("checkbox", {
+      name: /by height/i,
+    });
+    expect(sortByHeightCheckbox).toBeInTheDocument();
   });
 
   await waitFor(() => {

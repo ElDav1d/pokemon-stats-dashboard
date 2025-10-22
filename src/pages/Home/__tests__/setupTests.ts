@@ -6,13 +6,10 @@ import {
   pidgeottoMock,
   pidgeyMock,
   typesMock,
-  charmanderMock,
-  charizardMock,
-  charmeleonMock,
+  charmanderSimpleMock,
+  charmeleonSimpleMock,
+  charizardSimpleMock,
 } from "./mocks";
-
-// Declare global as any to avoid TypeScript errors
-declare const global: any;
 
 beforeEach(() => {
   global.fetch = vi.fn((url: string) =>
@@ -38,13 +35,13 @@ beforeEach(() => {
           return pidgeotMock;
         }
         if (url.includes("/pokemon/charmander")) {
-          return charmanderMock;
+          return charmanderSimpleMock;
         }
         if (url.includes("/pokemon/charmeleon")) {
-          return charmeleonMock;
+          return charmeleonSimpleMock;
         }
         if (url.includes("/pokemon/charizard")) {
-          return charizardMock;
+          return charizardSimpleMock;
         }
 
         return {};

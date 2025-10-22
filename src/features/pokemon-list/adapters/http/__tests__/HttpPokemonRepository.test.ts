@@ -1,5 +1,4 @@
 import { it, expect, vi, beforeEach } from "vitest";
-import { url } from "../../../../../lib/constants";
 import { HttpPokemonRepository } from "../HttpPokemonRepository";
 import { PokemonType } from "../../../domain/value-objects/PokemonType";
 import { pokemonByNameResponseMock, pokemonByTypeResponseMock } from "./mocks";
@@ -15,27 +14,25 @@ class HttpClientStub {
   }
 }
 
-declare const global: any;
-
 let httpClientStub: HttpClientStub;
 let repo: HttpPokemonRepository;
 
 beforeEach(() => {
   httpClientStub = new HttpClientStub();
   // Patch the repository to use the stub instead of fetch
-  const httpClient = new FetchHttpClient(url.BASE);
+  const httpClient = new FetchHttpClient("https://pokeapi.co/api/v2/");
   repo = new HttpPokemonRepository(httpClient);
   // @ts-ignore
   repo.fetch = httpClientStub.get.bind(httpClientStub);
   // @ts-ignore
-  global.fetch = vi.fn();
+  globalThis.fetch = vi.fn();
 });
 
 it("should return a list of pokemons by type", async () => {
   const type = new PokemonType("fire");
 
   // @ts-ignore
-  global.fetch.mockResolvedValue({
+  globalThis.fetch.mockResolvedValue({
     json: async () => pokemonByTypeResponseMock,
     status: 200,
     ok: true,
@@ -45,17 +42,17 @@ it("should return a list of pokemons by type", async () => {
 
   expect(pokemon1).toBeInstanceOf(PokemonByType);
   expect(pokemon1.name).toBe("charmander");
-  expect(pokemon1.url).toBe(`${url.BASE}${url.POKEMON}4/`);
+  expect(pokemon1.url).toBe("https://pokeapi.co/api/v2/pokemon/4/");
 
   expect(pokemon2).toBeInstanceOf(PokemonByType);
   expect(pokemon2.name).toBe("vulpix");
-  expect(pokemon2.url).toBe(`${url.BASE}${url.POKEMON}37/`);
+  expect(pokemon2.url).toBe("https://pokeapi.co/api/v2/pokemon/37/");
 });
 
 it("should return the details of a pokemon by name", async () => {
   const pokemonName = "charmander";
 
-  global.fetch.mockResolvedValue({
+  (globalThis.fetch as any).mockResolvedValue({
     json: async () => pokemonByNameResponseMock,
     status: 200,
     ok: true,
@@ -72,7 +69,7 @@ it("should return the details of a pokemon by name", async () => {
 it("should call fetch with the correct URL", async () => {
   const type = new PokemonType("water");
   // @ts-ignore
-  global.fetch.mockResolvedValue({
+  globalThis.fetch.mockResolvedValue({
     json: async () => ({ pokemon: [] }),
     status: 200,
     ok: true,
@@ -80,7 +77,33 @@ it("should call fetch with the correct URL", async () => {
 
   await repo.findAllByType(type);
 
-  expect(global.fetch).toHaveBeenCalledWith(
-    expect.stringContaining(type.value)
-  );
+  // Verify URL is built correctly without duplication
+  const expectedUrl = "https://pokeapi.co/api/v2/type/water";
+  expect(globalThis.fetch).toHaveBeenCalledWith(expectedUrl);
+
+  // Ensure no duplication of base URL
+  const actualUrl = (globalThis.fetch as any).mock.calls[0][0];
+  const baseUrlCount = (actualUrl.match(/https:\/\/pokeapi\.co\/api\/v2/g) || []).length;
+  expect(baseUrlCount).toBe(1);
+});
+
+it("should call fetch with correct URL for pokemon details", async () => {
+  const pokemonName = "charmander";
+  // @ts-ignore
+  globalThis.fetch.mockResolvedValue({
+    json: async () => pokemonByNameResponseMock,
+    status: 200,
+    ok: true,
+  });
+
+  await repo.findDetailsByName(pokemonName);
+
+  // Verify URL is built correctly without duplication
+  const expectedUrl = "https://pokeapi.co/api/v2/pokemon/charmander";
+  expect(globalThis.fetch).toHaveBeenCalledWith(expectedUrl);
+
+  // Ensure no duplication of base URL
+  const actualUrl = (globalThis.fetch as any).mock.calls[0][0];
+  const baseUrlCount = (actualUrl.match(/https:\/\/pokeapi\.co\/api\/v2/g) || []).length;
+  expect(baseUrlCount).toBe(1);
 });

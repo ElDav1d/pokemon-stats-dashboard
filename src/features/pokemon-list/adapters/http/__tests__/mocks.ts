@@ -1,4 +1,3 @@
-import { url } from "../../../../../lib/constants";
 import {
   RawPokemonDetailResponse,
   RawPokemonTypeResponse,
@@ -8,13 +7,13 @@ export const mockApiResponse = {
   pokemon: [
     {
       name: "charmander",
-      url: `${url.BASE}${url.POKEMON}4/`,
+      url: "https://pokeapi.co/api/v2/pokemon/4/",
       height: 6,
       sprites: { front_default: "sprite-url" },
     },
     {
       name: "vulpix",
-      url: `${url.BASE}${url.POKEMON}37/`,
+      url: "https://pokeapi.co/api/v2/pokemon/37/",
       height: 10,
       sprites: { front_default: "sprite-url2" },
     },
@@ -45,14 +44,14 @@ export const pokemonByTypeResponseMock: RawPokemonTypeResponse = {
     {
       pokemon: {
         name: "charmander",
-        url: `${url.BASE}${url.POKEMON}4/`,
+        url: "https://pokeapi.co/api/v2/pokemon/4/",
       },
       slot: 1,
     },
     {
       pokemon: {
         name: "vulpix",
-        url: `${url.BASE}${url.POKEMON}37/`,
+        url: "https://pokeapi.co/api/v2/pokemon/37/",
       },
       slot: 1,
     },

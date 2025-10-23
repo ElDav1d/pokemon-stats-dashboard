@@ -198,20 +198,105 @@ React State → UI Render
 
 ### Test Organization
 
-Tests are co-located with source code in `__tests__/` directories:
+Tests are co-located with source code in `__tests__/` directories.
+
+**Mock Scoping Rule**: Feature-level mocks must be consolidated in a single `__tests__/mocks.ts` file at the feature root. Page-level mocks are scoped to `pages/{page}/__tests__/mocks.ts` for UI-specific test data.
 
 ```
 feature/
+├── __tests__/
+│   ├── mocks.ts                    ← Feature-level mocks (all domain entities for this feature)
+├── domain/
+│   └── entities/
 ├── application/
 │   ├── use-cases/
 │   │   └── use-case-name/
 │   │       ├── UseCase.ts
 │   │       └── __tests__/
-│   │           ├── UseCase.test.ts
-│   │           └── mocks.ts
+│   │           └── UseCase.test.ts  ← Imports mocks from feature-level
 │   └── hooks/
 │       └── __tests__/
-│           └── hook.test.ts
+│           └── hook.test.ts         ← Imports mocks from feature-level
+└── infrastructure/
+
+pages/
+├── Page/
+│   └── __tests__/
+│       ├── Page.test.tsx
+│       ├── setupTests.ts           ← Page-level fetch mocks
+│       └── mocks.ts                ← Page-level UI test data
+```
+
+### Mock Usage Pattern
+
+**Feature-Level Mocks** (`src/features/{feature}/__tests__/mocks.ts`):
+
+Use when testing domain entities, use cases, and hooks within a feature. Export named, descriptive mock instances:
+
+```typescript
+// src/features/pokemon-list/__tests__/mocks.ts
+export const mockPokemonByTypeCharizard = new PokemonByType(
+  "charizard",
+  "https://pokeapi.co/api/v2/pokemon/6/"
+);
+
+export const mockPokemonListItemCharizard = new PokemonListItem(
+  "1",
+  "charizard",
+  "https://pokeapi.co/api/v2/pokemon/6/",
+  20,
+  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png"
+);
+```
+
+Then import in any test file within the feature:
+
+```typescript
+// src/features/pokemon-list/application/view-models/__tests__/PokemonListViewModel.test.ts
+import {
+  mockPokemonByTypeCharizard,
+  mockPokemonListItemCharizard,
+} from "../../../__tests__/mocks";
+
+it("loads pokemon by type", async () => {
+  const mockRepository = {
+    findAllByType: vi.fn().mockResolvedValue([mockPokemonByTypeCharizard]),
+  };
+  // ... rest of test
+});
+```
+
+**Page-Level Mocks** (`src/pages/{page}/__tests__/mocks.ts`):
+
+Use for HTTP response mocks and UI-specific test data. Scoped to the page directory:
+
+```typescript
+// src/pages/Home/__tests__/mocks.ts
+export const listByTypeFireMock = {
+  pokemon: [
+    { pokemon: { name: "charmander", url: "..." }, slot: 1 },
+    // ...
+  ],
+};
+```
+
+Setup fetch mocks in the page's `setupTests.ts`:
+
+```typescript
+// src/pages/Home/__tests__/setupTests.ts
+import { listByTypeFireMock } from "./mocks";
+
+beforeEach(() => {
+  global.fetch = vi.fn((url: string) => {
+    if (url.includes("/type/fire")) {
+      return Promise.resolve({
+        ok: true,
+        json: async () => listByTypeFireMock,
+      });
+    }
+    // ...
+  });
+});
 ```
 
 ### Testing Patterns by Layer
@@ -263,6 +348,25 @@ Vitest uses `jsdom` environment with auto-discovered setup files:
 
 - Automatically loads all `setupTests.ts` files via glob pattern
 - Global test utilities available (`describe`, `it`, `expect`, `vi`)
+
+### Mock Organization Best Practices
+
+**Rule: Mocks are scoped at feature or page level, never scattered across individual test files.**
+
+**Benefits:**
+
+1. **Single Source of Truth**: All domain entity mocks for a feature in one place
+2. **Consistency**: Tests use the same mock instances, preventing divergence
+3. **Maintainability**: Update mock data in one location
+4. **Discoverability**: New contributors know where to find/add mocks
+5. **Reusability**: Easy to share mocks across multiple test files in the feature
+
+**Current Implementation:**
+
+- Feature-level: `src/features/pokemon-list/__tests__/mocks.ts`
+- Page-level: `src/pages/Home/__tests__/mocks.ts`
+
+When adding new tests, always check if a mock already exists in the feature's `__tests__/mocks.ts` before creating new ones. If the mock data doesn't exist, add it there instead of defining it inline in the test file.
 
 ## Test Writing Style Guide
 

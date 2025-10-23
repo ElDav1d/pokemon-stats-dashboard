@@ -1,31 +1,23 @@
 import { it, expect, vi } from "vitest";
 import { PokemonRepository } from "../../../domain/ports/PokemonRepository";
-import { PokemonListItem } from "../../../domain/entities/PokemonListItem";
-import { PokemonByType } from "../../../domain/value-objects/PokemonByType";
-import { PokemonByName } from "../../../domain/value-objects/PokemonByName";
 import { PokemonType } from "../../../domain/value-objects/PokemonType";
 import { PokemonListViewModel } from "../PokemonListViewModel";
+import {
+  mockPokemonByTypeCharizard,
+  mockPokemonByTypeVulpix,
+  mockPokemonByNameCharizard,
+  mockPokemonByNameVulpix,
+  mockPokemonListItemCharizard,
+  mockPokemonListItemVulpix,
+  mockPokemonListItemCharmander,
+} from "../../../__tests__/mocks";
 
 it("should load pokemon list by type", async () => {
-  const mockPokemonByType1 = new PokemonByType(
-    "charizard",
-    "https://pokeapi.co/api/v2/pokemon/6/"
-  );
-  const mockPokemonByType2 = new PokemonByType(
-    "vulpix",
-    "https://pokeapi.co/api/v2/pokemon/37/"
-  );
+  const mockPokemonByType1 = mockPokemonByTypeCharizard;
+  const mockPokemonByType2 = mockPokemonByTypeVulpix;
 
-  const mockPokemonByName1 = new PokemonByName(
-    "charizard",
-    17,
-    "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png"
-  );
-  const mockPokemonByName2 = new PokemonByName(
-    "vulpix",
-    6,
-    "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/37.png"
-  );
+  const mockPokemonByName1 = mockPokemonByNameCharizard;
+  const mockPokemonByName2 = mockPokemonByNameVulpix;
 
   const mockRepository: PokemonRepository = {
     findAllByType: vi.fn().mockResolvedValue([mockPokemonByType1, mockPokemonByType2]),
@@ -67,27 +59,9 @@ it("should sort pokemon list by height", () => {
   };
 
   const unsortedList = [
-    new PokemonListItem(
-      "1",
-      "charizard",
-      "https://pokeapi.co/api/v2/pokemon/6/",
-      20,
-      "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png"
-    ),
-    new PokemonListItem(
-      "2",
-      "vulpix",
-      "https://pokeapi.co/api/v2/pokemon/37/",
-      6,
-      "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/37.png"
-    ),
-    new PokemonListItem(
-      "3",
-      "charmander",
-      "https://pokeapi.co/api/v2/pokemon/4/",
-      5,
-      "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png"
-    ),
+    mockPokemonListItemCharizard,
+    mockPokemonListItemVulpix,
+    mockPokemonListItemCharmander,
   ];
 
   const viewModel = new PokemonListViewModel(mockRepository);

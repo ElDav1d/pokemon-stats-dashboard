@@ -10,8 +10,8 @@ it("returns a list of Pokemon items with the required values", async () => {
   const fakeType = new PokemonType("fire");
 
   const fakePokemons = [
-    new PokemonByType("charmander", "url1"),
-    new PokemonByType("vulpix", "url2"),
+    new PokemonByType("charmander"),
+    new PokemonByType("vulpix"),
   ];
 
   const fakeDetails = [
@@ -31,7 +31,6 @@ it("returns a list of Pokemon items with the required values", async () => {
     return new PokemonListItem(
       `test-id-${index}`,
       pokemon.name,
-      pokemon.url,
       fakeDetails[index].height,
       fakeDetails[index].imageUrl
     );
@@ -46,7 +45,6 @@ it("returns a list of Pokemon items with the required values", async () => {
     expect(item.name).toEqual(expectedPokemons[index].name);
     expect(item.imageUrl).toEqual(expectedPokemons[index].imageUrl);
     expect(item.height).toEqual(expectedPokemons[index].height);
-    expect(item.url).toEqual(expectedPokemons[index].url);
   });
 });
 

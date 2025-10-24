@@ -1,9 +1,7 @@
 export class PokemonByType {
   public readonly name: string;
-  public readonly url: string;
 
-  constructor(name: string, url: string) {
+  constructor(name: string) {
     this.name = name;
-    this.url = url;
   }
 }

@@ -1,4 +1,3 @@
-import { url } from "../../../lib/constants.ts";
 import type { PokemonRepository } from "./ports/PokemonRepository.ts";
 import { PokemonType } from "./value-objects/PokemonType.ts";
 import { PokemonByType } from "./value-objects/PokemonByType.ts";
@@ -6,9 +5,9 @@ import { PokemonByName } from "./value-objects/PokemonByName.ts";
 
 class SmokeTestPokemonRepository implements PokemonRepository {
   private readonly pokemonList: PokemonByType[] = [
-    new PokemonByType("charmander", `${url.BASE}${url.POKEMON}4/`),
-    new PokemonByType("squirtle", `${url.BASE}${url.POKEMON}7/`),
-    new PokemonByType("bulbasaur", `${url.BASE}${url.POKEMON}1/`),
+    new PokemonByType("charmander"),
+    new PokemonByType("squirtle"),
+    new PokemonByType("bulbasaur"),
   ];
 
   async findAllByType(type: PokemonType): Promise<PokemonByType[]> {
@@ -52,7 +51,6 @@ const smokeTestPokemonRepository = new SmokeTestPokemonRepository();
     const details = listOfDetails[index];
     console.log(
       `Pokemon: ${pokemon.name},
-       URL: ${pokemon.url},
        Height: ${details?.height},
        Image: ${details?.imageUrl}`
     );

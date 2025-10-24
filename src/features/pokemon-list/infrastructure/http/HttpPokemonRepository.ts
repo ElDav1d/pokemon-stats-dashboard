@@ -20,7 +20,7 @@ export class HttpPokemonRepository implements PokemonRepository {
 
     return data.pokemon.map(
       (rawItem: RawPokemonByType) =>
-        new PokemonByType(rawItem.pokemon.name, rawItem.pokemon.url)
+        new PokemonByType(rawItem.pokemon.name)
     );
   }
 

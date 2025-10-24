@@ -18,9 +18,9 @@ export const createDelayedPromise = (data: any, delay = 100) => {
 
 beforeEach(() => {
   testData.mockPokemonsByType = [
-    new PokemonByType("bulbasaur", "https://pokeapi.co/api/v2/pokemon/1/"),
-    new PokemonByType("ivysaur", "https://pokeapi.co/api/v2/pokemon/2/"),
-    new PokemonByType("venusaur", "https://pokeapi.co/api/v2/pokemon/3/"),
+    new PokemonByType("bulbasaur"),
+    new PokemonByType("ivysaur"),
+    new PokemonByType("venusaur"),
   ];
 
   testData.mockPokemonsByName = [

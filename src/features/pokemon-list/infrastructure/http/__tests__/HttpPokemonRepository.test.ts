@@ -42,11 +42,9 @@ it("should return a list of pokemons by type", async () => {
 
   expect(pokemon1).toBeInstanceOf(PokemonByType);
   expect(pokemon1.name).toBe("charmander");
-  expect(pokemon1.url).toBe("https://pokeapi.co/api/v2/pokemon/4/");
 
   expect(pokemon2).toBeInstanceOf(PokemonByType);
   expect(pokemon2.name).toBe("vulpix");
-  expect(pokemon2.url).toBe("https://pokeapi.co/api/v2/pokemon/37/");
 });
 
 it("should return the details of a pokemon by name", async () => {

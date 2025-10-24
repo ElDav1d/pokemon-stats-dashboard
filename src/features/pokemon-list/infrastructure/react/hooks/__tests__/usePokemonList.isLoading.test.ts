@@ -70,7 +70,7 @@ it("sets loading to false after failed fetch", async () => {
 
 it("shows loading state when selectedType changes", async () => {
   const newMockPokemonsByType = [
-    new PokemonByType("charmander", "https://pokeapi.co/api/v2/pokemon/4/"),
+    new PokemonByType("charmander"),
   ];
   const newMockPokemonByName = new PokemonByName(
     "charmander",

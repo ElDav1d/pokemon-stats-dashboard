@@ -24,7 +24,6 @@ export function mapToDomainList(
     return new PokemonListItem(
       idGenerator.generate(),
       item.name,
-      item.url,
       detail.height,
       detail.imageUrl
     );

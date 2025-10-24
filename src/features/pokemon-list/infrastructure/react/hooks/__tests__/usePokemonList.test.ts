@@ -19,7 +19,6 @@ it("returns a list of Pokemon items with the required values", async () => {
   result.current.pokemonList.forEach((pokemon, index) => {
     expect(pokemon.id).toBeDefined();
     expect(pokemon.name).toBe(testData.mockPokemonsByType[index].name);
-    expect(pokemon.url).toBe(testData.mockPokemonsByType[index].url);
     expect(pokemon.height).toBe(testData.mockPokemonsByName[index].height);
     expect(pokemon.imageUrl).toBe(testData.mockPokemonsByName[index].imageUrl);
   });
@@ -35,7 +34,7 @@ it("returns empty array when selectedType is empty", async () => {
 
 it("updates pokemon list when selectedType changes", async () => {
   const newMockPokemonsByType = [
-    new PokemonByType("charmander", "https://pokeapi.co/api/v2/pokemon/4/"),
+    new PokemonByType("charmander"),
   ];
   const newMockPokemonByName = new PokemonByName(
     "charmander",

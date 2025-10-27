@@ -70,40 +70,6 @@ The codebase implements **Hexagonal Architecture** (Ports & Adapters) with clear
 └─────────────────────────────────────┘
 ```
 
-### Directory Organization
-
-**Features** (`src/features/`) - Feature modules with hexagonal structure:
-
-- `pokemon-list/` - Main list feature
-  - `domain/` - Core business rules
-    - `ports/` - Interfaces defining contracts (e.g., `PokemonRepository`)
-    - `entities/` - Domain models (e.g., `PokemonListItem`)
-    - `value-objects/` - Immutable domain objects (e.g., `PokemonType`)
-    - `constants.ts` - Domain configuration (grid config, breakpoints)
-  - `application/` - Business logic orchestration
-    - `use-cases/` - Business operations (e.g., `GetPokemonListUseCase`)
-    - `view-models/` - Application-layer orchestration (e.g., `PokemonListViewModel`)
-  - `infrastructure/` - Framework-specific implementations (adapters)
-    - `http/` - HTTP adapter implementing `PokemonRepository`
-      - `HttpPokemonRepository.ts` - REST API adapter
-      - `dto/` - Data Transfer Objects from API
-      - `mappers.ts` - DTO → domain entity transformation
-    - `react/` - React-specific utilities
-      - `hooks/` - Custom React hooks (e.g., `usePokemonList`)
-  - Component files (`PokemonList.tsx`, `PokemonListItem.tsx`)
-
-**Infrastructure** (`src/infrastructure/`) - Cross-cutting concerns:
-
-- `client/` - HTTP client abstraction
-  - `http/` - `HttpClient` interface (port)
-  - `fetch/` - `FetchHttpClient` implementation (adapter)
-- `react/hooks/` - React-specific utilities (`useVirtualGridList`)
-- `virtualization/` - Framework-agnostic virtual scrolling logic
-
-**Shared** (`src/lib/`) - Utilities and constants
-**Components** (`src/components/`) - Reusable presentational components
-**Pages** (`src/pages/`) - Route-level page components
-
 ### Key Architectural Patterns
 
 **1. Ports and Adapters**
@@ -119,15 +85,103 @@ The codebase implements **Hexagonal Architecture** (Ports & Adapters) with clear
 
 **3. Value Objects**
 
-- Immutable domain concepts (e.g., `PokemonType`)
-- Self-validating, encapsulate business rules
+- Immutable domain concepts that prevent "primitive obsession"
+- Examples: `PokemonType`, `PokemonByType`, `PokemonByName`
+- Self-validating with encapsulated business rules
 
-**4. DTO Mapping**
+**4. Rich Domain Entities (Classes, not Interfaces)**
+
+Entities are **classes** (not interfaces) to encapsulate behavior alongside data:
+
+```typescript
+// ✅ Entity encapsulates behavior
+export class PokemonListItem {
+  constructor(
+    public readonly id: string,
+    public readonly name: string,
+    public height: number,
+    public imageUrl: string
+  ) {}
+
+  // Behavior lives in the entity
+  getSizeCategory(): "small" | "medium" | "large" {
+    if (this.height < 10) return "small";
+    if (this.height <= 20) return "medium";
+    return "large";
+  }
+
+  isBossTier(): boolean {
+    return this.height > 30;
+  }
+}
+```
+
+**Why classes instead of interfaces:**
+- Centralizes domain logic (single source of truth for "what is large")
+- Encapsulates validation and business rules
+- Prevents duplication across UI components
+- Testeable without rendering components
+- Future behavior can be added without breaking contracts
+
+**Domain-layer tests don't need React:**
+```typescript
+// Pure domain logic test, no framework needed
+it("should classify large pokemon correctly", () => {
+  const onix = new PokemonListItem("3", "onix", 88, "img.png");
+
+  expect(onix.getSizeCategory()).toBe("large");
+  expect(onix.isBossTier()).toBe(true);
+});
+```
+
+**5. View as a Humble Object**
+
+React components are "humble" — they don't contain business logic, only rendering decisions:
+
+```typescript
+// ✅ Humble component: delegates all logic to hooks
+const PokemonList = () => {
+  const { pokemonList, isLoading, sortByHeight } = usePokemonList(selectedType);
+
+  // Only orchestrates hooks and renders
+  const sortedList = isSortedByHeight ? sortByHeight(pokemonList) : pokemonList;
+  const { visibleItems, totalHeight } = useVirtualGridList(sortedList, config);
+
+  return <ul>{visibleItems.map(...)}</ul>;
+};
+```
+
+**Compare with non-humble (before):**
+```typescript
+// ❌ Non-humble: business logic mixed with rendering
+const PokemonListBad = () => {
+  const [list, setList] = useState([]);
+
+  useEffect(() => {
+    // Business logic should not be here
+    fetch(url).then(data => {
+      const sorted = data.sort((a, b) => a.height - b.height);
+      setList(sorted);
+    });
+  }, []);
+
+  return <ul>{list.map(...)}</ul>;
+};
+```
+
+**Why humble objects matter:**
+- Infrastructure complexity is hidden in hooks (HttpClient, Repository, ViewModel)
+- Components become simple "orchestrators" not "doers"
+- Easy to test UI through user behavior (outside-in testing from pages)
+- Easy to refactor UI without touching business logic
+
+**6. DTO Mapping**
 
 - HTTP responses mapped to domain entities in adapter layer
-- Mappers in `adapters/http/mappers.ts`
+- Mappers transform raw API data to domain value objects
+- Creates a boundary between external API contracts and internal domain model
 
-**5. URL-Based State**
+**7. URL-Based State**
 
 - React Router's `useSearchParams` for Pokemon type selection
 - No global state management (Redux/MobX)
@@ -231,116 +285,133 @@ pages/
 
 **Feature-Level Mocks** (`src/features/{feature}/__tests__/mocks.ts`):
 
-Use when testing domain entities, use cases, and hooks within a feature. Export named, descriptive mock instances:
+Use when testing domain entities, use cases, and hooks within a feature. Export named, descriptive mock instances of domain entities:
 
 ```typescript
-// src/features/pokemon-list/__tests__/mocks.ts
-export const mockPokemonByTypeCharizard = new PokemonByType(
-  "charizard",
-  "https://pokeapi.co/api/v2/pokemon/6/"
-);
+// Pattern: export const mock{EntityType}{Variant} = new Entity(...)
+export const mockEntityItemA = new Entity(/* constructor args */);
+export const mockEntityItemB = new Entity(/* different constructor args */);
 
-export const mockPokemonListItemCharizard = new PokemonListItem(
-  "1",
-  "charizard",
-  "https://pokeapi.co/api/v2/pokemon/6/",
-  20,
-  "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png"
-);
+export const mockValueObjectA = new ValueObject(/* args */);
+export const mockValueObjectB = new ValueObject(/* different args */);
 ```
 
-Then import in any test file within the feature:
-
-```typescript
-// src/features/pokemon-list/application/view-models/__tests__/PokemonListViewModel.test.ts
-import {
-  mockPokemonByTypeCharizard,
-  mockPokemonListItemCharizard,
-} from "../../../__tests__/mocks";
-
-it("loads pokemon by type", async () => {
-  const mockRepository = {
-    findAllByType: vi.fn().mockResolvedValue([mockPokemonByTypeCharizard]),
-  };
-  // ... rest of test
-});
-```
+Then import in any test file within the feature. The benefit is all tests within the feature share the same mock instances, preventing divergence.
 
 **Page-Level Mocks** (`src/pages/{page}/__tests__/mocks.ts`):
 
-Use for HTTP response mocks and UI-specific test data. Scoped to the page directory:
+Use for HTTP response mocks and UI-specific test data. Export raw API response shapes (DTOs):
 
 ```typescript
-// src/pages/Home/__tests__/mocks.ts
-export const listByTypeFireMock = {
-  pokemon: [
-    { pokemon: { name: "charmander", url: "..." }, slot: 1 },
-    // ...
-  ],
+// Pattern: export const {operation}{variant}Mock = { /* raw API response */ }
+export const apiResponseMock = {
+  id: "123",
+  name: "item",
+  // ... other API fields
 };
 ```
 
 Setup fetch mocks in the page's `setupTests.ts`:
 
 ```typescript
-// src/pages/Home/__tests__/setupTests.ts
-import { listByTypeFireMock } from "./mocks";
+// Pattern: Mock fetch to return your HTTP response mocks
+import { apiResponseMock } from "./mocks";
 
 beforeEach(() => {
   global.fetch = vi.fn((url: string) => {
-    if (url.includes("/type/fire")) {
+    if (url.includes("/api/endpoint")) {
       return Promise.resolve({
         ok: true,
-        json: async () => listByTypeFireMock,
+        json: async () => apiResponseMock,
       });
     }
-    // ...
+    // ... handle other endpoints
   });
 });
 ```
 
+### Testing Strategy Overview
+
+**Test Structure (TDD Foundation + Integration Safeguard):**
+
+```
+┌────────────────────────────────────────┐
+│   UNIT TESTS (Foundation of TDD)       │
+│   ────────────────────────────────────│
+│   - Domain Layer (pure logic)          │
+│   - Application Layer (use cases, VMs) │
+│   - Infrastructure (adapters, calcs)   │
+│                                        │
+│   No framework dependencies            │
+│   Test in isolation with mocks         │
+│   Fast execution                       │
+│   100% code coverage target            │
+└────────────────────────────────────────┘
+              ↑
+              │
+┌────────────────────────────────────────┐
+│   INTEGRATION TESTS (Outside-In)       │
+│   ────────────────────────────────────│
+│   - Pages (React components)           │
+│   - Mocked HTTP/External APIs          │
+│                                        │
+│   Integration safeguard on UI layer    │
+│   Tests from user perspective          │
+│   Ensures feature pieces work together │
+│   No E2E tools (Cypress, Selenium)     │
+└────────────────────────────────────────┘
+
+**Why No E2E Tests:**
+- UI integration tests from pages provide sufficient safeguard
+- TDD approach with unit tests catches logic errors early
+- Pages tests verify component composition works correctly
+- External E2E tools add complexity without proportional value
+```
+
+**TDD Workflow:**
+1. Write unit test first (Red phase)
+2. Implement minimal code to pass test (Green phase)
+3. Refactor while tests remain green (Refactor phase)
+4. Repeat for all layers
+5. Integration tests from pages verify composition
+
 ### Testing Patterns by Layer
 
 **Domain Layer** - Pure logic, no mocks needed:
+- Test entities, value objects, and domain logic directly
+- No framework imports required
+- Tests run instantly
+- Example: `expect(entity.getSizeCategory()).toBe("large")`
 
-```typescript
-const calculator = new VirtualGridCalculator(mockItems, config);
-expect(calculator.calculateTotalHeight()).toBe(1190);
-```
+**Application Layer (Use Cases)** - Mock port interfaces:
+- Inject mock repository implementations
+- Test orchestration and business logic
+- Mock only the ports defined in domain
+- Example: Mock repository's `findAll()` method, test use case coordinates calls correctly
 
-**Application Layer (Use Cases)** - Mock repository interfaces:
+**Application Layer (ViewModels)** - Mock repository, test preparation:
+- Inject mock repository
+- Test input validation and data transformation
+- Test coordination of multiple use cases
+- Example: Mock repository, test ViewModel validates inputs before calling use cases
 
-```typescript
-const repoMock: PokemonRepository = {
-  findAllByType: vi.fn().mockResolvedValue(fakePokemons),
-  findDetailsByName: vi.fn().mockResolvedValue(details[0]),
-};
-```
+**Infrastructure Layer (Adapters)** - Mock external dependencies:
+- HTTP: Mock `fetch` or HTTP client responses
+- Browser APIs: Mock `window.scrollY`, `window.resize`, etc.
+- Storage: Mock localStorage, sessionStorage
+- Example: `global.fetch = vi.fn().mockResolvedValue({ json: async () => mockData })`
 
-**Application Layer (Hooks)** - React Testing Library:
+**React Hooks (Thin Adapters)** - Use React Testing Library:
+- Test hook with mocked repository
+- Use `renderHook` from React Testing Library
+- Verify hook exposes correct state and callbacks
+- Example: `renderHook(() => useFeature(mockRepository))`
 
-```typescript
-const { result } = renderHook(() => usePokemonList("grass", mockRepository));
-await waitFor(() => {
-  expect(result.current.pokemonList.length).toBe(3);
-});
-```
-
-**Infrastructure Layer** - Mock browser APIs:
-
-```typescript
-Object.defineProperty(window, "scrollY", { writable: true, value: 400 });
-window.dispatchEvent(new Event("scroll"));
-```
-
-**HTTP Adapters** - Mock fetch responses:
-
-```typescript
-global.fetch = vi.fn().mockResolvedValue({
-  json: async () => pokemonByTypeResponseMock,
-  ok: true,
-});
-```
+**Pages (UI Components)** - Integration tests from user perspective:
+- Mock HTTP responses in `setupTests.ts`
+- Test page composition of multiple hooks
+- Verify user interactions trigger correct behavior
+- Example: User selects type → list updates → items visible
 
 ### Test Configuration
 
@@ -361,12 +432,17 @@ Vitest uses `jsdom` environment with auto-discovered setup files:
 4. **Discoverability**: New contributors know where to find/add mocks
 5. **Reusability**: Easy to share mocks across multiple test files in the feature
 
-**Current Implementation:**
+**How to Organize Mocks:**
 
-- Feature-level: `src/features/pokemon-list/__tests__/mocks.ts`
-- Page-level: `src/pages/Home/__tests__/mocks.ts`
+- **Feature-level:** `src/features/{feature}/__tests__/mocks.ts`
+  - All domain entity mocks for the feature
+  - Shared across use case, view model, and hook tests
 
-When adding new tests, always check if a mock already exists in the feature's `__tests__/mocks.ts` before creating new ones. If the mock data doesn't exist, add it there instead of defining it inline in the test file.
+- **Page-level:** `src/pages/{page}/__tests__/mocks.ts`
+  - HTTP response mocks specific to the page
+  - UI-specific test data
+
+When adding new tests, always check if a mock already exists in the appropriate `__tests__/mocks.ts` before creating new ones. Keep mocks centralized in one place per layer to maintain consistency.
 
 ## Test Writing Style Guide
 

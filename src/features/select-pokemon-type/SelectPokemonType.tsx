@@ -2,10 +2,11 @@ import { useCallback } from "react";
 import {
   SelectButton,
   SelectButtonList,
-} from "../../components/select-button-list";
+  LoadingMessage,
+  ErrorMessage,
+} from "../../ui";
 import PokemonType from "./domain/PokemonType";
 import { usePokemonTypes, useSelectPokemonType } from "./hooks";
-import { LoadingMessage, ErrorMessage } from "../../ui";
 
 const SelectPokemonType = () => {
   const { typeNames, isLoading, isError } = usePokemonTypes();

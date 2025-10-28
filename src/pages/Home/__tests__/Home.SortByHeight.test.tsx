@@ -1,12 +1,10 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import { expect, it } from "vitest";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import userEvent from "@testing-library/user-event";
 import Home from "../Home";
+import { clickSortByHeightCheckbox } from "./helpers";
 
 it("sorts pokemon list by height when checkbox is clicked", async () => {
-  const user = userEvent.setup();
-
   render(
     <MemoryRouter initialEntries={["/?type=normal"]}>
       <Routes>
@@ -17,6 +15,7 @@ it("sorts pokemon list by height when checkbox is clicked", async () => {
 
   const contentArea = within(screen.getByRole("main")).getByRole("article");
 
+  // Wait for initial list to load
   await waitFor(() => {
     const pokemonItemList = within(contentArea).getByRole("list", {
       name: /pokemon list/i,
@@ -36,14 +35,7 @@ it("sorts pokemon list by height when checkbox is clicked", async () => {
     ).toBeInTheDocument();
   });
 
-  const orderCheckboxes = within(contentArea).getByRole("group", {
-    name: /order the pokemons/i,
-  });
-  const sortByHeightCheckbox = within(orderCheckboxes).getByRole("checkbox", {
-    name: /by height/i,
-  });
-
-  await user.click(sortByHeightCheckbox);
+  await clickSortByHeightCheckbox();
 
   await waitFor(() => {
     const pokemonItemList = within(contentArea).getByRole("list", {
@@ -71,8 +63,7 @@ it("sorts pokemon list by height when checkbox is clicked", async () => {
 });
 
 it("unsorts pokemon list when checkbox is unchecked", async () => {
-  const user = userEvent.setup();
-
+  // Arrange
   render(
     <MemoryRouter initialEntries={["/?type=normal"]}>
       <Routes>
@@ -83,6 +74,7 @@ it("unsorts pokemon list when checkbox is unchecked", async () => {
 
   const contentArea = within(screen.getByRole("main")).getByRole("article");
 
+  // Wait for initial list to load
   await waitFor(() => {
     const pokemonItemList = within(contentArea).getByRole("list", {
       name: /pokemon list/i,
@@ -90,22 +82,30 @@ it("unsorts pokemon list when checkbox is unchecked", async () => {
     expect(pokemonItemList).toBeInTheDocument();
   });
 
-  const orderCheckboxes = within(contentArea).getByRole("group", {
-    name: /order the pokemons/i,
-  });
-  const sortByHeightCheckbox = within(orderCheckboxes).getByRole("checkbox", {
-    name: /by height/i,
-  });
-
-  await user.click(sortByHeightCheckbox);
+  // Act - sort the list
+  await clickSortByHeightCheckbox();
 
   await waitFor(() => {
+    const orderCheckboxes = within(contentArea).getByRole("group", {
+      name: /order the pokemons/i,
+    });
+    const sortByHeightCheckbox = within(orderCheckboxes).getByRole("checkbox", {
+      name: /by height/i,
+    });
     expect(sortByHeightCheckbox).toBeChecked();
   });
 
-  await user.click(sortByHeightCheckbox);
+  // Act - unsort the list
+  await clickSortByHeightCheckbox();
 
+  // Assert
   await waitFor(() => {
+    const orderCheckboxes = within(contentArea).getByRole("group", {
+      name: /order the pokemons/i,
+    });
+    const sortByHeightCheckbox = within(orderCheckboxes).getByRole("checkbox", {
+      name: /by height/i,
+    });
     expect(sortByHeightCheckbox).not.toBeChecked();
 
     const pokemonItemList = within(contentArea).getByRole("list", {

@@ -4,6 +4,7 @@ import PokemonListItem from "./PokemonListItem";
 import usePokemonList from "./infrastructure/react/hooks/usePokemonList";
 import { useVirtualGridList } from "../../infrastructure/react/hooks/useVirtualGridList";
 import { pokemonListConfig, responsiveBreakpoints } from "./domain/constants";
+import { LoadingMessage } from "../../ui";
 
 const PokemonList = () => {
   const [searchParams] = useSearchParams();
@@ -36,9 +37,7 @@ const PokemonList = () => {
   if (isLoading) {
     return (
       <section>
-        <h3 className="text-center my-4 text-gray-500">
-          Loading pokemon list...
-        </h3>
+        <LoadingMessage message="Loading pokemon list..." />
       </section>
     );
   }

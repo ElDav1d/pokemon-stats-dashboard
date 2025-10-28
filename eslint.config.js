@@ -34,6 +34,15 @@ export default [
     },
     rules: {
       ...typescript.configs.recommended.rules,
+      // Prevent describe blocks in tests - use file naming for context
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "CallExpression[callee.name='describe']",
+          message:
+            "Use file naming for test context instead of describe blocks. Tests should be flat with descriptive names.",
+        },
+      ],
     },
   },
 ];

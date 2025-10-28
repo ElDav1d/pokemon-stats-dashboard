@@ -21,6 +21,40 @@ A comprehensive Pokemon data visualization tool that allows users to browse, fil
 - **Custom Virtual Scrolling** implementation
 - **Vitest** for comprehensive testing
 
+### **Hexagonal Architecture (Ports & Adapters)**
+
+The application implements clean architecture principles with clear separation of concerns across layers:
+
+```
+┌─────────────────────────────────────┐
+│   UI LAYER (Pages)                  │  Route handlers, minimal logic
+└─────────────────────────────────────┘
+              ↓
+┌─────────────────────────────────────┐
+│   FEATURE LAYER (Components)        │  Connected feature components
+└─────────────────────────────────────┘
+              ↓
+┌─────────────────────────────────────┐
+│   APPLICATION LAYER (Use Cases)     │  Business logic orchestration
+└─────────────────────────────────────┘
+              ↓
+┌─────────────────────────────────────┐
+│   DOMAIN LAYER (Ports & Entities)   │  Core business rules, interfaces
+└─────────────────────────────────────┘
+              ↑ (implements)
+┌─────────────────────────────────────┐
+│   INFRASTRUCTURE (Adapters)         │  HTTP, virtualization, React hooks
+└─────────────────────────────────────┘
+```
+
+**Key Architectural Patterns:**
+
+- **Ports & Adapters** - Infrastructure depends on Domain (implements the interfaces); Domain defines interfaces; infrastructure provides implementations
+- **Dependency Injection** - Configuration injected into hooks for testability
+- **Value Objects** - Immutable domain concepts with self-validation
+- **DTO Mapping** - HTTP responses mapped to domain entities in adapter layer
+- **URL-Based State** - React Router's `useSearchParams` for type selection (no Redux/MobX)
+
 ### **Advanced Technical Implementations:**
 
 #### **Custom Virtual Scrolling System:**
@@ -35,9 +69,24 @@ A comprehensive Pokemon data visualization tool that allows users to browse, fil
 
 #### **Testing Strategy:**
 
-- **Viewport-specific test suites** - Separate test files for Desktop, Tablet, and Mobile behaviors
-- **Browser behavior simulation** - Tests actual virtualization logic
-- **Comprehensive coverage** - Tests responsive breakpoints, scroll behavior, and edge cases
+- **TDD Approach with Layered Tests**
+  - **Unit Tests (Foundation)** - Domain, Application, and Infrastructure layers
+    - Pure logic testing without framework dependencies
+    - Fast execution, 100% coverage target
+  - **Integration Tests (Safeguard)** - Pages and component composition
+    - Outside-in testing from user perspective
+    - HTTP responses mocked, not external E2E tools
+
+- **Mock Organization**
+  - **Feature-level mocks** - Centralized in `__tests__/mocks.ts` at feature root
+  - **Page-level mocks** - Scoped to `pages/{page}/__tests__/mocks.ts` for HTTP responses
+  - **Consistent test data** - All tests within a feature use the same mock instances
+
+- **Test Coverage**
+  - Domain logic: entities, value objects, business rules
+  - Application layer: use cases, view models, orchestration
+  - Infrastructure: HTTP adapters, browser APIs, state management
+  - UI: component composition and user interactions
 
 ## 🚀 **Key Features Implemented**
 
@@ -101,16 +150,25 @@ A comprehensive Pokemon data visualization tool that allows users to browse, fil
 
 ## 🔧 **Development Workflow**
 
-- **TypeScript** for type safety
-- **ESLint/Prettier** for code quality
-- **Vitest** for unit testing
+- **TypeScript** for type safety and strict mode enforcement
+- **ESLint/Prettier** for code quality and formatting
+- **Vitest** for unit and integration testing with layered approach
 - **Hot module replacement** for development efficiency
+- **Hexagonal architecture** for maintainable, testable code organization
+- **Dependency injection** for decoupled component design
 
 ## 📈 **Project Status**
 
-This personal project demonstrates advanced React patterns, performance optimization techniques, and modern frontend architecture. The custom virtual scrolling implementation showcases deep understanding of browser APIs, performance considerations, and accessibility requirements.
+This personal project demonstrates advanced React patterns, performance optimization techniques, and clean architecture principles. The codebase implements **Hexagonal Architecture** for separation of concerns, with clear boundaries between domain, application, and infrastructure layers.
 
-The application successfully balances technical complexity with user experience, creating a performant and accessible Pokemon exploration tool that scales efficiently with large datasets.
+**Recent Refactoring Focus:**
+- Implementation of Hexagonal/Clean Architecture patterns
+- Extraction of domain constants for configuration injection
+- Centralized mock organization for consistent testing
+- Comprehensive test coverage across all layers
+- Improved separation of concerns and testability
+
+The application successfully balances technical complexity with user experience, creating a performant and accessible Pokemon exploration tool that demonstrates enterprise-grade architecture patterns in a practical context.
 
 ---
 

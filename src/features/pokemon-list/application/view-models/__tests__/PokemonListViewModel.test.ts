@@ -1,0 +1,74 @@
+import { it, expect, vi } from "vitest";
+import { PokemonRepository } from "../../../domain/ports/PokemonRepository";
+import { PokemonType } from "../../../domain/value-objects/PokemonType";
+import { PokemonListViewModel } from "../PokemonListViewModel";
+import {
+  mockPokemonByTypeCharizard,
+  mockPokemonByTypeVulpix,
+  mockPokemonByNameCharizard,
+  mockPokemonByNameVulpix,
+  mockPokemonListItemCharizard,
+  mockPokemonListItemVulpix,
+  mockPokemonListItemCharmander,
+} from "../../../__tests__/mocks";
+
+it("should load pokemon list by type", async () => {
+  const mockPokemonByType1 = mockPokemonByTypeCharizard;
+  const mockPokemonByType2 = mockPokemonByTypeVulpix;
+
+  const mockPokemonByName1 = mockPokemonByNameCharizard;
+  const mockPokemonByName2 = mockPokemonByNameVulpix;
+
+  const mockRepository: PokemonRepository = {
+    findAllByType: vi.fn().mockResolvedValue([mockPokemonByType1, mockPokemonByType2]),
+    findDetailsByName: vi.fn()
+      .mockResolvedValueOnce(mockPokemonByName1)
+      .mockResolvedValueOnce(mockPokemonByName2),
+  };
+
+  const viewModel = new PokemonListViewModel(mockRepository);
+
+  const result = await viewModel.loadPokemonList("fire");
+
+  expect(result).toHaveLength(2);
+  expect(result[0].name).toBe("charizard");
+  expect(result[1].name).toBe("vulpix");
+  expect(mockRepository.findAllByType).toHaveBeenCalledWith(
+    new PokemonType("fire")
+  );
+});
+
+it("should return empty array when type is empty", async () => {
+  const mockRepository: PokemonRepository = {
+    findAllByType: vi.fn(),
+    findDetailsByName: vi.fn(),
+  };
+
+  const viewModel = new PokemonListViewModel(mockRepository);
+
+  const result = await viewModel.loadPokemonList("");
+
+  expect(result).toEqual([]);
+  expect(mockRepository.findAllByType).not.toHaveBeenCalled();
+});
+
+it("should sort pokemon list by height", () => {
+  const mockRepository: PokemonRepository = {
+    findAllByType: vi.fn(),
+    findDetailsByName: vi.fn(),
+  };
+
+  const unsortedList = [
+    mockPokemonListItemCharizard,
+    mockPokemonListItemVulpix,
+    mockPokemonListItemCharmander,
+  ];
+
+  const viewModel = new PokemonListViewModel(mockRepository);
+
+  const result = viewModel.sortPokemonListByHeight(unsortedList);
+
+  expect(result[0].height).toBe(5);
+  expect(result[1].height).toBe(6);
+  expect(result[2].height).toBe(20);
+});

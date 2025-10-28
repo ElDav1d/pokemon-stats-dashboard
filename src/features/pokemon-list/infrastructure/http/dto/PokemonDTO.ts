@@ -1,4 +1,43 @@
-export interface IPokemonDetail {
+export interface RawPokemonTypeDamageRelations {
+  double_damage_from: { name: string; url: string }[];
+  double_damage_to: { name: string; url: string }[];
+  half_damage_from: { name: string; url: string }[];
+  half_damage_to: { name: string; url: string }[];
+  no_damage_from: { name: string; url: string }[];
+  no_damage_to: { name: string; url: string }[];
+}
+
+export interface RawPokemonTypeResponse {
+  damage_relations: RawPokemonTypeDamageRelations;
+  game_indices: {
+    game_index: number;
+    generation: { name: string; url: string };
+  }[];
+  generation: { name: string; url: string };
+  id: number;
+  move_damage_class: { name: string; url: string };
+  moves: { name: string; url: string }[];
+  name: string;
+  names: {
+    language: { name: string; url: string };
+    name: string;
+  }[];
+  past_damage_relations: RawPokemonTypeDamageRelations[];
+  pokemon: RawPokemonByType[];
+  sprites: {
+    [generation: string]: {
+      [game: string]: {
+        name_icon: string;
+      };
+    };
+  };
+}
+export interface RawPokemonByType {
+  pokemon: { name: string; url: string };
+  slot: number;
+}
+
+export interface RawPokemonDetailResponse {
   abilities: Ability[];
   base_experience: number;
   cries: Cries;
@@ -191,15 +230,4 @@ export interface Stat {
 export interface Type {
   slot: number;
   type: Species;
-}
-
-// Converts JSON strings to/from your types
-export class Convert {
-  public static toPokemonDetail(json: string): IPokemonDetail {
-    return JSON.parse(json);
-  }
-
-  public static pokemonDetailToJson(value: IPokemonDetail): string {
-    return JSON.stringify(value);
-  }
 }

@@ -69158,3 +69158,24 @@ export const charizardMock = {
   ],
   weight: 199,
 };
+
+export const charmanderSimpleMock = {
+  name: "charmander",
+  height: 6,
+  id: 4,
+  sprites: { front_default: "https://example.com/charmander.png" },
+};
+
+export const charmeleonSimpleMock = {
+  name: "charmeleon",
+  height: 11,
+  id: 5,
+  sprites: { front_default: "https://example.com/charmeleon.png" },
+};
+
+export const charizardSimpleMock = {
+  name: "charizard",
+  height: 17,
+  id: 6,
+  sprites: { front_default: "https://example.com/charizard.png" },
+};

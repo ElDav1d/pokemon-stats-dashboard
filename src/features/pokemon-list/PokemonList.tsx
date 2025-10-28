@@ -1,102 +1,61 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { url, pokemonListConfig } from "../../lib/constants";
-import { IPokemonListItem, IPokemonListItemWithDetails } from "./entities";
 import PokemonListItem from "./PokemonListItem";
-import { useVirtualGridList } from "./hooks/useVirtualGridList";
+import usePokemonList from "./infrastructure/react/hooks/usePokemonList";
+import { useVirtualGridList } from "../../infrastructure/react/hooks/useVirtualGridList";
+import { pokemonListConfig, responsiveBreakpoints } from "./domain/constants";
 
 const PokemonList = () => {
-  const [pokemonList, setPokemonList] = useState<IPokemonListItemWithDetails[]>(
-    []
-  );
-  const [isSortedByHeight, setIsSortedByHeight] = useState(false);
-
   const [searchParams] = useSearchParams();
   const selectedTypeParam = searchParams.get("type");
+  const [isSortedByHeight, setIsSortedByHeight] = useState(false);
 
-  useEffect(() => {
-    if (!selectedTypeParam) return;
-
-    const fetchItemDetails = async (pokemonName: string) => {
-      if (!pokemonName) return;
-
-      const response = await fetch(`${url.BASE}${url.POKEMON}${pokemonName}`);
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch pokemon details");
-      }
-
-      try {
-        const data = await response.json();
-
-        return data;
-      } catch (error) {
-        console.error("Error fetching pokemon details:", error);
-      }
-    };
-
-    const fetchList = async (type: string | null) => {
-      if (!type) return;
-
-      const response = await fetch(`${url.BASE}${url.TYPE}${type}`);
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch pokemon list");
-      }
-
-      try {
-        const data = await response.json();
-
-        const pokemonDetailsPromises = data.pokemon.map(
-          (pokemonItem: IPokemonListItem) => {
-            return fetchItemDetails(pokemonItem.pokemon.name);
-          }
-        );
-
-        const pokemonDetails = await Promise.all(pokemonDetailsPromises);
-
-        const pokemonList: IPokemonListItemWithDetails[] = data.pokemon.map(
-          (pokemonItem: IPokemonListItem, index: number) => ({
-            pokemon: {
-              name: pokemonItem.pokemon.name,
-              url: pokemonItem.pokemon.url,
-            },
-            details: pokemonDetails[index],
-          })
-        );
-
-        setPokemonList(pokemonList);
-      } catch (error) {
-        console.error("Error fetching pokemon details:", error);
-      }
-    };
-
-    fetchList(selectedTypeParam);
-  }, [selectedTypeParam]);
-
-  const orderByHeight = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const isChecked = event.target.checked;
-    setIsSortedByHeight(isChecked);
-  };
-
-  const sortByHeight = (pokemonList: IPokemonListItemWithDetails[]) => {
-    return [...pokemonList].sort((a, b) => a.details.height - b.details.height);
-  };
-
-  const sortedPokemonList = useMemo(
-    () => (isSortedByHeight ? sortByHeight(pokemonList) : pokemonList),
-    [isSortedByHeight, pokemonList]
+  // Hook 1: Data fetching and sorting logic
+  const { pokemonList, isLoading, isError, sortByHeight } = usePokemonList(
+    selectedTypeParam ?? ""
   );
 
-  const { visibleItems, totalHeight } = useVirtualGridList(sortedPokemonList, {
-    itemHeight: pokemonListConfig.ITEM_HEIGHT,
-    overscan: pokemonListConfig.ITEMS_OVERSCAN,
-    gap: pokemonListConfig.GAP,
+  // Component composition: Apply sorting if enabled
+  const sortablePokemonList = useMemo(() => {
+    if (isSortedByHeight && pokemonList.length > 0) {
+      return sortByHeight(pokemonList);
+    }
+    return pokemonList;
+  }, [isSortedByHeight, pokemonList, sortByHeight]);
+
+  // Hook 2: Virtualization for performance
+  const { visibleItems, totalHeight } = useVirtualGridList(sortablePokemonList, {
+    config: pokemonListConfig,
+    breakpoints: responsiveBreakpoints,
   });
+
+  const handleSortChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setIsSortedByHeight(event.target.checked);
+  };
+
+  if (isLoading) {
+    return (
+      <section>
+        <h3 className="text-center my-4 text-gray-500">
+          Loading pokemon list...
+        </h3>
+      </section>
+    );
+  }
+
+  if (isError) {
+    return (
+      <section>
+        <h3 className="text-center my-4 text-red-500">
+          Error loading pokemon list. Please try again.
+        </h3>
+      </section>
+    );
+  }
 
   return (
     <section>
-      <fieldset className="mb-6">
+      <fieldset className="my-6">
         <legend className="text-lg l:text-xl xl:text-2xl">
           Order the pokemons:
         </legend>
@@ -105,11 +64,11 @@ const PokemonList = () => {
           type="checkbox"
           id="height"
           name="height"
-          onChange={orderByHeight}
+          onChange={handleSortChange}
         />
         <label htmlFor="height">By height</label>
       </fieldset>
-      {sortedPokemonList.length > 0 && (
+      {visibleItems.length > 0 && (
         <ul
           aria-label="Pokemon List"
           aria-live="polite"
@@ -128,19 +87,19 @@ const PokemonList = () => {
           />
           {visibleItems.map(({ item, offsetY, offsetX, width }) => (
             <li
-              key={item.pokemon.name}
+              key={item.id}
               className="absolute"
               style={{
                 top: offsetY,
                 left: offsetX,
                 width: width,
-                height: pokemonListConfig.ITEM_HEIGHT,
+                height: pokemonListConfig.itemHeight,
               }}
             >
               <PokemonListItem
-                pokemon={item.pokemon}
-                height={item.details.height}
-                imageUrl={item.details.sprites.front_default}
+                name={item.name}
+                height={item.height}
+                imageUrl={item.imageUrl}
               />
             </li>
           ))}

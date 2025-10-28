@@ -15,28 +15,7 @@ it("sorts pokemon list by height when checkbox is clicked", async () => {
 
   const contentArea = within(screen.getByRole("main")).getByRole("article");
 
-  // Wait for initial list to load
-  await waitFor(() => {
-    const pokemonItemList = within(contentArea).getByRole("list", {
-      name: /pokemon list/i,
-    });
-
-    const [pokemonOne, pokemonTwo, pokemonThree] =
-      within(pokemonItemList).getAllByRole("listitem");
-
-    expect(
-      within(pokemonOne).getByRole("heading", { level: 3, name: /pidgey/i })
-    ).toBeInTheDocument();
-    expect(
-      within(pokemonTwo).getByRole("heading", { level: 3, name: /pidgeotto/i })
-    ).toBeInTheDocument();
-    expect(
-      within(pokemonThree).getByRole("heading", { level: 3, name: /pidgeot/i })
-    ).toBeInTheDocument();
-  });
-
-  await clickSortByHeightCheckbox();
-
+  // Wait for initial list to load (unsorted - API order)
   await waitFor(() => {
     const pokemonItemList = within(contentArea).getByRole("list", {
       name: /pokemon list/i,
@@ -55,6 +34,36 @@ it("sorts pokemon list by height when checkbox is clicked", async () => {
     ).toBeInTheDocument();
     expect(within(pokemonTwo).getByText(/height: 11/i)).toBeInTheDocument();
 
+    expect(
+      within(pokemonThree).getByRole("heading", { level: 3, name: /pidgeot/i })
+    ).toBeInTheDocument();
+    expect(within(pokemonThree).getByText(/height: 15/i)).toBeInTheDocument();
+  });
+
+  await clickSortByHeightCheckbox();
+
+  // Verify list is sorted by height in ascending order
+  await waitFor(() => {
+    const pokemonItemList = within(contentArea).getByRole("list", {
+      name: /pokemon list/i,
+    });
+
+    const [pokemonOne, pokemonTwo, pokemonThree] =
+      within(pokemonItemList).getAllByRole("listitem");
+
+    // Pidgey (height 3) should be first
+    expect(
+      within(pokemonOne).getByRole("heading", { level: 3, name: /pidgey/i })
+    ).toBeInTheDocument();
+    expect(within(pokemonOne).getByText(/height: 3/i)).toBeInTheDocument();
+
+    // Pidgeotto (height 11) should be second
+    expect(
+      within(pokemonTwo).getByRole("heading", { level: 3, name: /pidgeotto/i })
+    ).toBeInTheDocument();
+    expect(within(pokemonTwo).getByText(/height: 11/i)).toBeInTheDocument();
+
+    // Pidgeot (height 15) should be third
     expect(
       within(pokemonThree).getByRole("heading", { level: 3, name: /pidgeot/i })
     ).toBeInTheDocument();
@@ -82,7 +91,6 @@ it("unsorts pokemon list when checkbox is unchecked", async () => {
     expect(pokemonItemList).toBeInTheDocument();
   });
 
-  // Act - sort the list
   await clickSortByHeightCheckbox();
 
   await waitFor(() => {
@@ -95,10 +103,8 @@ it("unsorts pokemon list when checkbox is unchecked", async () => {
     expect(sortByHeightCheckbox).toBeChecked();
   });
 
-  // Act - unsort the list
   await clickSortByHeightCheckbox();
 
-  // Assert
   await waitFor(() => {
     const orderCheckboxes = within(contentArea).getByRole("group", {
       name: /order the pokemons/i,
@@ -112,10 +118,22 @@ it("unsorts pokemon list when checkbox is unchecked", async () => {
       name: /pokemon list/i,
     });
 
-    const [pokemonOne] = within(pokemonItemList).getAllByRole("listitem");
+    const [pokemonOne, pokemonTwo, pokemonThree] =
+      within(pokemonItemList).getAllByRole("listitem");
 
     expect(
       within(pokemonOne).getByRole("heading", { level: 3, name: /pidgey/i })
     ).toBeInTheDocument();
+    expect(within(pokemonOne).getByText(/height: 3/i)).toBeInTheDocument();
+
+    expect(
+      within(pokemonTwo).getByRole("heading", { level: 3, name: /pidgeotto/i })
+    ).toBeInTheDocument();
+    expect(within(pokemonTwo).getByText(/height: 11/i)).toBeInTheDocument();
+
+    expect(
+      within(pokemonThree).getByRole("heading", { level: 3, name: /pidgeot/i })
+    ).toBeInTheDocument();
+    expect(within(pokemonThree).getByText(/height: 15/i)).toBeInTheDocument();
   });
 });

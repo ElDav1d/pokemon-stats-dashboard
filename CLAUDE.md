@@ -10,6 +10,8 @@ A React-based Pokemon dashboard application implementing advanced performance op
 
 **Package Manager**: npm 10.6.5 (required)
 
+**Dependency Constraint**: All dependencies are **pinned to exact versions** (no `^` or `~`). This ensures consistency across all environments and builds. Never add `^` or `~` prefixes when installing new packages. Use `npm install <package>@version` with exact version.
+
 ## Common Commands
 
 ### Development
@@ -33,6 +35,22 @@ vitest --ui       # Open Vitest UI
 ```bash
 npm lint         # Run ESLint (TypeScript files)
 npm format       # Format code with Prettier
+```
+
+### Installing Dependencies
+
+**Workflow for adding new packages**:
+
+1. Install the latest version: `npm install package-name`
+2. Manually remove `^` and `~` prefixes in `package.json` to pin to exact version
+
+**Example**:
+
+```bash
+npm install lodash
+# This adds "lodash": "^4.17.21" in package.json
+# ↓ manually change to:
+# "lodash": "4.17.21"
 ```
 
 ### Running Single Test
@@ -190,6 +208,299 @@ const PokemonListBad = () => {
 
 - React Router's `useSearchParams` for Pokemon type selection
 - No global state management (Redux/MobX)
+
+**8. Shared Infrastructure Agnosticism**
+
+Shared infrastructure (`/src/infrastructure/`) must NEVER know about specific features (`/src/features/`).
+
+**Shared infrastructure MUST NOT:**
+
+- ❌ Import from feature directories
+- ❌ Reference specific slice names, action types, or feature properties
+- ❌ Have hard-coded feature logic
+- ❌ Assume feature implementation details
+- ❌ Create tight coupling to feature structure
+
+**Instead, use configuration-based patterns:**
+
+```typescript
+// ❌ BAD: Infrastructure knows about 'listPreferences' feature
+export const middleware = (store) => (next) => (action) => {
+  const result = next(action);
+  if (action.type?.startsWith("listPreferences/")) {
+    // ← Hard-coded feature name
+    const dataToSave = {
+      listPreferences: store.getState().listPreferences, // ← Feature-specific
+    };
+    localStorage.setItem(key, JSON.stringify(dataToSave));
+  }
+  return result;
+};
+
+// ✅ GOOD: Infrastructure accepts configuration from feature layer
+export const createPersistenceMiddleware = (config: {
+  storageKey: string;
+  slicesToPersist: string[]; // Features decide what to persist
+}) => {
+  return (store) => (next) => (action) => {
+    const result = next(action);
+    if (
+      config.slicesToPersist.some((slice) =>
+        action.type?.startsWith(`${slice}/`)
+      )
+    ) {
+      const dataToSave = config.slicesToPersist.reduce(
+        (acc, slice) => ({
+          ...acc,
+          [slice]: store.getState()[slice],
+        }),
+        {}
+      );
+      localStorage.setItem(config.storageKey, JSON.stringify(dataToSave));
+    }
+    return result;
+  };
+};
+
+// Feature layer configures infrastructure
+const persistenceMiddleware = createPersistenceMiddleware({
+  storageKey: "__pokemon-dashboard__",
+  slicesToPersist: ["listPreferences"],
+});
+```
+
+**Why this matters:**
+
+- **Reusability**: Same middleware works for ANY feature
+- **Decoupling**: Shared code independent from feature changes
+- **Testability**: Infrastructure tested without feature knowledge
+- **Scalability**: Adding new features doesn't modify shared infrastructure
+- **Clean Architecture**: Respects Dependency Rule
+
+## Pre-Flight Checklists
+
+Use these checklists BEFORE implementing code to ensure compliance with project constraints.
+
+### Before Writing ANY Code (MANDATORY)
+
+**⚠️ STOP AND READ CLAUDE.md FIRST ⚠️**
+
+Before touching ANY file, complete this checklist:
+
+- [ ] I have read the relevant sections of CLAUDE.md for this task
+- [ ] I understand which architectural layer I'm working in (Domain/Application/Infrastructure/UI)
+- [ ] I know what testing patterns apply to this layer
+- [ ] I have identified which constraints apply to my changes
+- [ ] I can explain why my approach follows the guidelines
+
+**If you answered NO to any of these, STOP and read CLAUDE.md thoroughly first.**
+
+### Before Creating Test Helpers
+
+**Helper Scope Verification:**
+
+- [ ] Does this helper use `userEvent` methods (`click`, `type`, `hover`)? If NO → Don't create it
+- [ ] Does this helper simulate a user action? If NO → Don't create it
+- [ ] Am I extracting DOM queries, `waitFor()`, or assertions? If YES → Don't create it
+- [ ] Does this helper combine element finding + user interaction? If NO → It's not a valid helper
+
+**Valid Helper Pattern:**
+
+```typescript
+// ✅ VALID: userEvent action
+export const clickTypeButton = async (typeName: string) => {
+  const user = userEvent.setup();
+  const button = await screen.findByRole("button", { name: new RegExp(typeName, "i") });
+  await user.click(button);
+};
+
+// ❌ INVALID: DOM query without userEvent
+export const getTypeSection = () => {
+  return screen.getByRole("main");
+};
+
+// ❌ INVALID: waitFor wrapper
+export const waitForList = () => {
+  return waitFor(() => { ... });
+};
+```
+
+**Remember:** Only `userEvent` actions belong in helpers. Everything else stays in the test.
+
+### Before Implementing Shared Infrastructure (`/src/infrastructure/`)
+
+**Feature Agnosticism Check:**
+
+- [ ] Does my code import from `/src/features/`? If YES → Refactor to accept configuration instead
+- [ ] Does my code reference specific slice names (e.g., `listPreferences`)? If YES → Use generic string parameters
+- [ ] Does my code assume feature implementation details? If YES → Move to feature layer
+- [ ] Can this code work with ANY feature configuration? If NO → It's not truly shared
+
+**Example Red Flag:**
+
+```typescript
+// ❌ BAD: Hard-coded feature knowledge
+if (action.type.startsWith("listPreferences/")) {
+}
+
+// ✅ GOOD: Configurable
+if (
+  config.slicesToPersist.some((slice) => action.type.startsWith(`${slice}/`))
+) {
+}
+```
+
+### Before Writing Tests
+
+**Test Agnosticism Check:**
+
+- [ ] Do my tests reference specific feature names? If YES → Use generic test data
+- [ ] Are test values hard-coded feature properties (e.g., `sortByHeight`)? If YES → Use generic names
+- [ ] Do tests prove the code works with ANY input, not just current features? If NO → Refactor tests
+- [ ] Are tests for shared infrastructure fully feature-agnostic? If NO → Fix immediately
+
+**Example Red Flag:**
+
+```typescript
+// ❌ BAD: Feature-specific test data
+const SLICES_TO_PERSIST = ["listPreferences"];
+mockState = { listPreferences: { sortByHeight: true } };
+
+// ✅ GOOD: Generic test data
+const SLICES_TO_PERSIST = ["testSlice"];
+mockState = { testSlice: { testProp: true } };
+```
+
+**Blackbox Principle Check:**
+
+- [ ] Am I testing browser APIs (localStorage, fetch, window)? If YES → Mock them completely
+- [ ] Am I testing Redux internals (dispatch, reducers, state updates)? If YES → Mock Redux components
+- [ ] Am I testing my code's logic, not the library's behavior? If NO → Add mocks
+- [ ] Do my tests prove I call external APIs correctly, not that APIs work? If NO → Refactor
+
+**Example Red Flag:**
+
+```typescript
+// ❌ BAD: Testing localStorage's JSON behavior
+localStorage.setItem("key", JSON.stringify(data));
+expect(JSON.parse(localStorage.getItem("key"))).toEqual(data);
+
+// ✅ GOOD: Mocking localStorage, testing MY code
+const setItemSpy = vi
+  .spyOn(Storage.prototype, "setItem")
+  .mockImplementation(() => {});
+myFunction();
+expect(setItemSpy).toHaveBeenCalledWith("key", JSON.stringify(data));
+```
+
+**No Feature-Specific Details Check:**
+
+- [ ] Are action types hard-coded as `'featureName/action'`? If YES → Use generic names
+- [ ] Are state shapes tied to specific features? If YES → Use generic object structures
+- [ ] Could a colleague understand the test without knowing about Pokemon features? If NO → Make it generic
+
+### Before Writing Feature Code
+
+**Architecture Check:**
+
+- [ ] Am I putting business logic in components? If YES → Move to hooks/use-cases
+- [ ] Am I directly accessing infrastructure in components? If YES → Move to hooks
+- [ ] Are my components humble (only orchestrating hooks)? If NO → Extract logic
+- [ ] Did I follow TDD (tests first, then code)? If NO → Write tests now
+
+**Dependency Injection Check:**
+
+- [ ] Am I hard-coding dependencies instead of passing them? If YES → Add DI
+- [ ] Can I test this without rendering React? If NO → Add DI
+- [ ] Are dependencies configurable? If NO → Add configuration parameter
+
+**Example Red Flag:**
+
+```typescript
+// ❌ BAD: Hard-coded dependency
+const repository = new HttpPokemonRepository();
+
+// ✅ GOOD: Injected dependency
+function usePokemonList(repository: PokemonRepository) {}
+```
+
+### Quick Implementation Ritual
+
+Before you start coding:
+
+1. **Read relevant constraints** - What rules apply to this code?
+2. **State them explicitly** - Write down which constraints you must follow
+3. **Design for those constraints** - Shape your code to satisfy them
+4. **Implement with verification** - After writing, verify constraint compliance
+
+This ritual takes 2 minutes but prevents hours of rework.
+
+## YAGNI Principle (You Aren't Gonna Need It)
+
+**Core Rule:** Only implement what is **strictly necessary** to solve the current problem. Stay within scope.
+
+**What we build:**
+
+- ✅ Features explicitly requested or required
+- ✅ Infrastructure for scalability, flexibility, and agnosticism (e.g., configuration-based middleware)
+- ✅ Risk mitigation (error handling, validation)
+
+**What we DON'T build:**
+
+- ❌ "Nice to have" features
+- ❌ Speculative functionality ("we might need this later")
+- ❌ Extra actions, selectors, or helpers not currently used
+- ❌ Abstractions before they're needed
+
+**Example - Redux Slice:**
+
+```typescript
+// ❌ BAD: Over-engineered for future use
+export const slice = createSlice({
+  name: "preferences",
+  initialState: { sortByHeight: false, sortByName: false, theme: "light" },
+  reducers: {
+    toggleSortByHeight: (state) => {
+      state.sortByHeight = !state.sortByHeight;
+    },
+    toggleSortByName: (state) => {
+      state.sortByName = !state.sortByName;
+    }, // NOT NEEDED
+    setSortByHeight: (state, action) => {
+      state.sortByHeight = action.payload;
+    }, // NOT NEEDED
+    resetPreferences: () => initialState, // NOT NEEDED
+    setTheme: (state, action) => {
+      state.theme = action.payload;
+    }, // NOT NEEDED
+  },
+});
+
+// ✅ GOOD: Only what we need NOW
+export const slice = createSlice({
+  name: "preferences",
+  initialState: { sortByHeight: false },
+  reducers: {
+    toggleSortByHeight: (state) => {
+      state.sortByHeight = !state.sortByHeight;
+    },
+    // Add more ONLY when requirements arrive
+  },
+});
+```
+
+**When to add more:**
+
+- When a new requirement explicitly asks for it
+- Not before
+
+**Benefits:**
+
+- Less code to maintain
+- Faster implementation
+- Easier to test
+- Simpler to understand
+- No unused code
 
 ## Custom Virtual Scrolling System
 
@@ -371,6 +682,45 @@ beforeEach(() => {
 - TDD approach with unit tests catches logic errors early
 - Pages tests verify component composition works correctly
 - External E2E tools add complexity without proportional value
+```
+
+### Testing Constraint: Blackbox Principle
+
+**Do NOT test blackboxes, browser APIs, or third-party libraries.**
+
+We only test **our implementation decisions** and **our project code**. Never test:
+
+- ❌ Browser APIs (localStorage, sessionStorage, fetch, etc.)
+- ❌ Third-party libraries (Redux, React Router, Tailwind, etc.)
+- ❌ Framework internals (Redux dispatch, state updates, reducers)
+- ❌ Library behavior
+
+**Instead, mock them completely:**
+
+- ✅ Mock browser APIs: `vi.spyOn(Storage.prototype, 'setItem')`
+- ✅ Mock Redux internals: mock `store`, `next`, `action`
+- ✅ Test only that we call them with correct parameters
+- ✅ Test that we handle errors they might throw
+- ✅ Test our code's logic, not their code's logic
+
+**Example (Wrong):**
+
+```typescript
+// ❌ This tests localStorage's JSON behavior, not our code
+localStorage.setItem("key", JSON.stringify(data));
+const loaded = JSON.parse(localStorage.getItem("key"));
+expect(loaded).toEqual(data); // Tests JSON + localStorage
+```
+
+**Example (Correct):**
+
+```typescript
+// ✅ This tests only our code's behavior
+const setItemSpy = vi
+  .spyOn(Storage.prototype, "setItem")
+  .mockImplementation(() => {});
+myFunction();
+expect(setItemSpy).toHaveBeenCalledWith("key", JSON.stringify(data)); // Tests our code
 ```
 
 **TDD Workflow:**
@@ -643,7 +993,9 @@ When adding new tests, always check if a mock already exists in the appropriate 
 
 14. **User-Oriented Helpers Pattern (userEvent Only)**
 
-    - Extract **all user interactions** (`userEvent` methods) into named helper functions
+    **⚠️ CRITICAL RULE: Only `userEvent` actions can be helpers. Nothing else.**
+
+    - Extract **ONLY user interactions** (`userEvent` methods) into named helper functions
     - Helpers encapsulate the complete user action (setup → find element → interact)
     - Apply to all user interactions, whether repeated or not (purpose is legibility, not DRY)
     - Name helpers from the user's perspective (what action, not implementation)
@@ -652,8 +1004,24 @@ When adding new tests, always check if a mock already exists in the appropriate 
     **Scope:**
 
     - ✅ Extract: `await user.click()`, `await user.type()`, `await user.hover()`, etc.
-    - ❌ Don't extract: DOM queries, `waitFor()`, `findByRole()`, assertions
+    - ❌ **NEVER extract**: DOM queries, `waitFor()`, `findByRole()`, `getByRole()`, `within()`, assertions
     - ✅ Combine element queries with userEvent actions inside the helper
+
+    **What NOT to Extract (Keep in Tests):**
+
+    ```typescript
+    // ❌ DON'T extract DOM queries
+    export const getTypeSection = () => screen.getByRole("main");
+
+    // ❌ DON'T extract waitFor
+    export const waitForList = () => waitFor(() => { ... });
+
+    // ❌ DON'T extract assertions
+    export const checkItemExists = (name) => expect(screen.getByText(name)).toBeInTheDocument();
+
+    // ❌ DON'T extract element finding
+    export const findButton = () => screen.findByRole("button");
+    ```
 
     **Benefits:**
 

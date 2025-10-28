@@ -10,6 +10,8 @@ A React-based Pokemon dashboard application implementing advanced performance op
 
 **Package Manager**: npm 10.6.5 (required)
 
+**Dependency Constraint**: All dependencies are **pinned to exact versions** (no `^` or `~`). This ensures consistency across all environments and builds. Never add `^` or `~` prefixes when installing new packages. Use `npm install <package>@version` with exact version.
+
 ## Common Commands
 
 ### Development
@@ -33,6 +35,20 @@ vitest --ui       # Open Vitest UI
 ```bash
 npm lint         # Run ESLint (TypeScript files)
 npm format       # Format code with Prettier
+```
+
+### Installing Dependencies
+
+**Workflow for adding new packages**:
+1. Install the latest version: `npm install package-name`
+2. Manually remove `^` and `~` prefixes in `package.json` to pin to exact version
+
+**Example**:
+```bash
+npm install lodash
+# This adds "lodash": "^4.17.21" in package.json
+# ↓ manually change to:
+# "lodash": "4.17.21"
 ```
 
 ### Running Single Test
@@ -371,6 +387,41 @@ beforeEach(() => {
 - TDD approach with unit tests catches logic errors early
 - Pages tests verify component composition works correctly
 - External E2E tools add complexity without proportional value
+```
+
+### Testing Constraint: Blackbox Principle
+
+**Do NOT test blackboxes, browser APIs, or third-party libraries.**
+
+We only test **our implementation decisions** and **our project code**. Never test:
+
+- ❌ Browser APIs (localStorage, sessionStorage, fetch, etc.)
+- ❌ Third-party libraries (Redux, React Router, Tailwind, etc.)
+- ❌ Framework internals (Redux dispatch, state updates, reducers)
+- ❌ Library behavior
+
+**Instead, mock them completely:**
+
+- ✅ Mock browser APIs: `vi.spyOn(Storage.prototype, 'setItem')`
+- ✅ Mock Redux internals: mock `store`, `next`, `action`
+- ✅ Test only that we call them with correct parameters
+- ✅ Test that we handle errors they might throw
+- ✅ Test our code's logic, not their code's logic
+
+**Example (Wrong):**
+```typescript
+// ❌ This tests localStorage's JSON behavior, not our code
+localStorage.setItem('key', JSON.stringify(data));
+const loaded = JSON.parse(localStorage.getItem('key'));
+expect(loaded).toEqual(data); // Tests JSON + localStorage
+```
+
+**Example (Correct):**
+```typescript
+// ✅ This tests only our code's behavior
+const setItemSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
+myFunction();
+expect(setItemSpy).toHaveBeenCalledWith('key', JSON.stringify(data)); // Tests our code
 ```
 
 **TDD Workflow:**

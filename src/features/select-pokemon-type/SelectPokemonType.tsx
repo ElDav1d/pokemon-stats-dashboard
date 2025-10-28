@@ -5,7 +5,7 @@ import {
 } from "../../components/select-button-list";
 import PokemonType from "./domain/PokemonType";
 import { usePokemonTypes, useSelectPokemonType } from "./hooks";
-import { LoadingMessage } from "../../ui";
+import { LoadingMessage, ErrorMessage } from "../../ui";
 
 const SelectPokemonType = () => {
   const { typeNames, isLoading, isError } = usePokemonTypes();
@@ -36,11 +36,7 @@ const SelectPokemonType = () => {
 
       {isLoading && <LoadingMessage message="Loading pokemon types..." />}
 
-      {isError && (
-        <h3 className="text-center my-4 text-red-500">
-          Error loading pokemon types
-        </h3>
-      )}
+      {isError && <ErrorMessage message="Error loading pokemon types" />}
 
       {!isLoading && !isError && typeNames?.length > 0 && (
         <SelectButtonList

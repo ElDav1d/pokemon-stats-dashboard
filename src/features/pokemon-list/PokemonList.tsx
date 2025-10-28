@@ -4,7 +4,7 @@ import PokemonListItem from "./PokemonListItem";
 import usePokemonList from "./infrastructure/react/hooks/usePokemonList";
 import { useVirtualGridList } from "../../infrastructure/react/hooks/useVirtualGridList";
 import { pokemonListConfig, responsiveBreakpoints } from "./domain/constants";
-import { LoadingMessage } from "../../ui";
+import { LoadingMessage, ErrorMessage } from "../../ui";
 
 const PokemonList = () => {
   const [searchParams] = useSearchParams();
@@ -45,9 +45,7 @@ const PokemonList = () => {
   if (isError) {
     return (
       <section>
-        <h3 className="text-center my-4 text-red-500">
-          Error loading pokemon list. Please try again.
-        </h3>
+        <ErrorMessage message="Error loading pokemon list. Please try again." />
       </section>
     );
   }

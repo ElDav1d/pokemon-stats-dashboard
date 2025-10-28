@@ -41,7 +41,7 @@ The application implements clean architecture principles with clear separation o
 ┌─────────────────────────────────────┐
 │   DOMAIN LAYER (Ports & Entities)   │  Core business rules, interfaces
 └─────────────────────────────────────┘
-              ↓
+              ↑ (implements)
 ┌─────────────────────────────────────┐
 │   INFRASTRUCTURE (Adapters)         │  HTTP, virtualization, React hooks
 └─────────────────────────────────────┘
@@ -49,7 +49,7 @@ The application implements clean architecture principles with clear separation o
 
 **Key Architectural Patterns:**
 
-- **Ports & Adapters** - Domain defines interfaces; infrastructure provides implementations
+- **Ports & Adapters** - Infrastructure depends on Domain (implements the interfaces); Domain defines interfaces; infrastructure provides implementations
 - **Dependency Injection** - Configuration injected into hooks for testability
 - **Value Objects** - Immutable domain concepts with self-validation
 - **DTO Mapping** - HTTP responses mapped to domain entities in adapter layer

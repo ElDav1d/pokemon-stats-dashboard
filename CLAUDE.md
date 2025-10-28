@@ -64,7 +64,7 @@ The codebase implements **Hexagonal Architecture** (Ports & Adapters) with clear
 ┌─────────────────────────────────────┐
 │   DOMAIN LAYER (Ports & Entities)   │  Core business rules, interfaces
 └─────────────────────────────────────┘
-              ↓
+              ↑ (implements)
 ┌─────────────────────────────────────┐
 │   INFRASTRUCTURE (Adapters)         │  HTTP, virtualization, React hooks
 └─────────────────────────────────────┘
@@ -74,6 +74,7 @@ The codebase implements **Hexagonal Architecture** (Ports & Adapters) with clear
 
 **1. Ports and Adapters**
 
+- Infrastructure depends on Domain (implements the interfaces)
 - Domain defines interfaces (ports) for external dependencies
 - Infrastructure provides concrete implementations (adapters)
 - Example: `PokemonRepository` (port) ← `HttpPokemonRepository` (adapter)
@@ -117,6 +118,7 @@ export class PokemonListItem {
 ```
 
 **Why classes instead of interfaces:**
+
 - Centralizes domain logic (single source of truth for "what is large")
 - Encapsulates validation and business rules
 - Prevents duplication across UI components
@@ -124,6 +126,7 @@ export class PokemonListItem {
 - Future behavior can be added without breaking contracts
 
 **Domain-layer tests don't need React:**
+
 ```typescript
 // Pure domain logic test, no framework needed
 it("should classify large pokemon correctly", () => {
@@ -152,6 +155,7 @@ const PokemonList = () => {
 ```
 
 **Compare with non-humble (before):**
+
 ```typescript
 // ❌ Non-humble: business logic mixed with rendering
 const PokemonListBad = () => {
@@ -170,6 +174,7 @@ const PokemonListBad = () => {
 ```
 
 **Why humble objects matter:**
+
 - Infrastructure complexity is hidden in hooks (HttpClient, Repository, ViewModel)
 - Components become simple "orchestrators" not "doers"
 - Easy to test UI through user behavior (outside-in testing from pages)
@@ -369,6 +374,7 @@ beforeEach(() => {
 ```
 
 **TDD Workflow:**
+
 1. Write unit test first (Red phase)
 2. Implement minimal code to pass test (Green phase)
 3. Refactor while tests remain green (Refactor phase)
@@ -378,36 +384,42 @@ beforeEach(() => {
 ### Testing Patterns by Layer
 
 **Domain Layer** - Pure logic, no mocks needed:
+
 - Test entities, value objects, and domain logic directly
 - No framework imports required
 - Tests run instantly
 - Example: `expect(entity.getSizeCategory()).toBe("large")`
 
 **Application Layer (Use Cases)** - Mock port interfaces:
+
 - Inject mock repository implementations
 - Test orchestration and business logic
 - Mock only the ports defined in domain
 - Example: Mock repository's `findAll()` method, test use case coordinates calls correctly
 
 **Application Layer (ViewModels)** - Mock repository, test preparation:
+
 - Inject mock repository
 - Test input validation and data transformation
 - Test coordination of multiple use cases
 - Example: Mock repository, test ViewModel validates inputs before calling use cases
 
 **Infrastructure Layer (Adapters)** - Mock external dependencies:
+
 - HTTP: Mock `fetch` or HTTP client responses
 - Browser APIs: Mock `window.scrollY`, `window.resize`, etc.
 - Storage: Mock localStorage, sessionStorage
 - Example: `global.fetch = vi.fn().mockResolvedValue({ json: async () => mockData })`
 
 **React Hooks (Thin Adapters)** - Use React Testing Library:
+
 - Test hook with mocked repository
 - Use `renderHook` from React Testing Library
 - Verify hook exposes correct state and callbacks
 - Example: `renderHook(() => useFeature(mockRepository))`
 
 **Pages (UI Components)** - Integration tests from user perspective:
+
 - Mock HTTP responses in `setupTests.ts`
 - Test page composition of multiple hooks
 - Verify user interactions trigger correct behavior
@@ -435,6 +447,7 @@ Vitest uses `jsdom` environment with auto-discovered setup files:
 **How to Organize Mocks:**
 
 - **Feature-level:** `src/features/{feature}/__tests__/mocks.ts`
+
   - All domain entity mocks for the feature
   - Shared across use case, view model, and hook tests
 
@@ -823,7 +836,8 @@ Hooks should each have a **single, well-defined responsibility**. Do NOT combine
 
 ```typescript
 // Hook 1: Data fetching and business logic
-const { pokemonList, isLoading, isError, sortByHeight } = usePokemonList("grass");
+const { pokemonList, isLoading, isError, sortByHeight } =
+  usePokemonList("grass");
 
 // Hook 2: Performance optimization (virtualization)
 const { visibleItems, totalHeight } = useVirtualGridList(pokemonList, {
@@ -847,22 +861,24 @@ const { visibleItems, totalHeight, pokemonList, sortByHeight, isLoading } =
 
 ### Why Separation Matters
 
-| Aspect | Benefit |
-|--------|---------|
-| **Testability** | Test each hook independently with different props |
-| **Reusability** | Use `useVirtualGridList` with any array, not just Pokemon |
-| **Maintainability** | Changes to one concern don't affect others |
-| **Clarity** | Each hook's purpose is obvious from its name |
-| **Composability** | Easy to add/remove concerns (sorting, filtering, etc.) |
+| Aspect              | Benefit                                                   |
+| ------------------- | --------------------------------------------------------- |
+| **Testability**     | Test each hook independently with different props         |
+| **Reusability**     | Use `useVirtualGridList` with any array, not just Pokemon |
+| **Maintainability** | Changes to one concern don't affect others                |
+| **Clarity**         | Each hook's purpose is obvious from its name              |
+| **Composability**   | Easy to add/remove concerns (sorting, filtering, etc.)    |
 
 ### Component Humility: Hook Orchestration
 
 Components may orchestrate **multiple hooks** while remaining "humble" if they don't:
+
 - Instantiate infrastructure (HTTP clients, repositories)
 - Implement business logic (use hooks for that)
 - Import application-layer classes directly
 
 **✅ Humble component:**
+
 ```typescript
 const { pokemonList, sortByHeight } = usePokemonList(type);
 const sortedList = isSortedByHeight ? sortByHeight(pokemonList) : pokemonList;
@@ -871,6 +887,7 @@ const { visibleItems, totalHeight } = useVirtualGridList(sortedList, config);
 ```
 
 **❌ Not humble:**
+
 ```typescript
 const repository = new HttpPokemonRepository(httpClient); // ❌ Infrastructure in component
 const { pokemonList } = usePokemonList(type, repository);

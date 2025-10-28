@@ -1,5 +1,5 @@
 import { SelectPokemonType } from "../../features/select-pokemon-type";
-import { PokemonList } from "../../features/pokemon-list";
+import PokemonListSection from "../../features/pokemon-list/PokemonListSection";
 
 const Home = () => {
   return (
@@ -10,7 +10,7 @@ const Home = () => {
       <main className="max-w-[1240px] mx-6 my-6 xl:mx-auto">
         <article>
           <SelectPokemonType />
-          <PokemonList />
+          <PokemonListSection />
         </article>
       </main>
     </>

@@ -72,7 +72,6 @@ it("sorts pokemon list by height when checkbox is clicked", async () => {
 });
 
 it("unsorts pokemon list when checkbox is unchecked", async () => {
-  // Arrange
   render(
     <MemoryRouter initialEntries={["/?type=normal"]}>
       <Routes>

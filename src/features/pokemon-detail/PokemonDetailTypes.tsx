@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { Type } from "../../pages/Detail/entities";
 import { url } from "../../lib/constants";
-import {
-  SelectButton,
-  SelectButtonList,
-} from "../../components/select-button-list";
+import { SelectButton, SelectButtonList } from "../../ui";
 
 type PokemonItem = {
   name: string;

@@ -33,11 +33,11 @@ it("shows error message when fetch fails", async () => {
 
   await waitFor(
     () => {
-      const errormessage = screen.getByRole("heading", {
+      const errorMessage = screen.getByRole("heading", {
         level: 3,
         name: /error loading pokemon list/i,
       });
-      expect(errormessage).toBeInTheDocument();
+      expect(errorMessage).toBeInTheDocument();
     },
     { timeout: 2000 }
   );
@@ -53,11 +53,11 @@ it("does not show error message when no type is selected", async () => {
   );
 
   await waitFor(() => {
-    const errormessage = screen.queryByRole("heading", {
+    const errorMessage = screen.queryByRole("heading", {
       level: 3,
       name: /error loading pokemon list/i,
     });
 
-    expect(errormessage).not.toBeInTheDocument();
+    expect(errorMessage).not.toBeInTheDocument();
   });
 });

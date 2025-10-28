@@ -14,6 +14,7 @@ export interface VirtualGridConfig {
   columns: number;
   viewportHeight: number;
   scrollTop: number;
+  containerTop?: number; // Optional, defaults to 0 if not provided
 }
 
 export interface VirtualGridItem<T> {
@@ -41,7 +42,7 @@ export class VirtualGridCalculator<T> {
     }
 
     const rowHeight = this.config.itemHeight + this.config.gap;
-    const containerTop = 0; // Assuming list starts at top of page
+    const containerTop = this.config.containerTop ?? 0; // Use config value or default to 0
 
     const visibleStartRow = Math.floor(
       Math.max(0, this.config.scrollTop - containerTop) / rowHeight

@@ -843,6 +843,19 @@ Recent refactoring focused on:
 
 ## Development Guidelines
 
+### Shared UI Components Rule
+
+**Elements in `src/ui` must be instantiated in at least 2 different features.**
+
+- If a component is used in only one feature, extract it into that feature's folder instead
+- This prevents premature abstraction and keeps components close to their usage
+- Only promote to `src/ui` when genuine reuse across features is established
+
+Example:
+
+- ✅ `LoadingMessage` used in `pokemon-list` AND `select-pokemon-type` → stays in `src/ui`
+- ❌ `SpecializedCard` only used in `pokemon-list` → move to `src/features/pokemon-list/`
+
 ### Adding New Features
 
 1. **Start with Domain Layer**:

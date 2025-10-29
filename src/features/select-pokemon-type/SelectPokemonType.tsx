@@ -2,7 +2,9 @@ import { useCallback } from "react";
 import {
   SelectButton,
   SelectButtonList,
-} from "../../components/select-button-list";
+  LoadingMessage,
+  ErrorMessage,
+} from "../../ui";
 import PokemonType from "./domain/PokemonType";
 import { usePokemonTypes, useSelectPokemonType } from "./hooks";
 
@@ -33,17 +35,9 @@ const SelectPokemonType = () => {
         Select a Pokemon Type to get the list
       </h2>
 
-      {isLoading && (
-        <h3 className="text-center my-4 text-gray-500">
-          Loading pokemon types...
-        </h3>
-      )}
+      {isLoading && <LoadingMessage message="Loading pokemon types..." />}
 
-      {isError && (
-        <h3 className="text-center my-4 text-red-500">
-          Error loading pokemon types
-        </h3>
-      )}
+      {isError && <ErrorMessage message="Error loading pokemon types" />}
 
       {!isLoading && !isError && typeNames?.length > 0 && (
         <SelectButtonList

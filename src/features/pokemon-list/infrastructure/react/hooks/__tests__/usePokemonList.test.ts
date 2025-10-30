@@ -1,11 +1,15 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { vi, it, expect } from "vitest";
 import usePokemonList from "../usePokemonList";
-import { PokemonRepository } from "../../../../domain/ports/PokemonRepository";
-
 import { PokemonByType } from "../../../../domain/value-objects/PokemonByType";
 import { PokemonByName } from "../../../../domain/value-objects/PokemonByName";
 import { testData } from "./setupTests";
+import {
+  createMockPokemonRepositoryWithChangingData,
+  createMockPokemonRepositoryWithError,
+  mockPokemonsByTypeForHookTests,
+  mockPokemonsByNameForHookTests,
+} from "../../../../__tests__/mocks";
 
 it("returns a list of Pokemon items with the required values", async () => {
   const { result } = renderHook(() =>
@@ -33,31 +37,19 @@ it("returns empty array when selectedType is empty", async () => {
 });
 
 it("updates pokemon list when selectedType changes", async () => {
-  const newMockPokemonsByType = [
-    new PokemonByType("charmander"),
-  ];
+  const newMockPokemonsByType = [new PokemonByType("charmander")];
   const newMockPokemonByName = new PokemonByName(
     "charmander",
     60,
     "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png"
   );
 
-  const mockFindAllByType = vi
-    .fn()
-    .mockResolvedValueOnce(testData.mockPokemonsByType)
-    .mockResolvedValueOnce(newMockPokemonsByType);
-
-  const mockFindDetailsByName = vi
-    .fn()
-    .mockResolvedValueOnce(testData.mockPokemonsByName[0])
-    .mockResolvedValueOnce(testData.mockPokemonsByName[1])
-    .mockResolvedValueOnce(testData.mockPokemonsByName[2])
-    .mockResolvedValueOnce(newMockPokemonByName);
-
-  const repoWithChangingData: PokemonRepository = {
-    findAllByType: mockFindAllByType,
-    findDetailsByName: mockFindDetailsByName,
-  };
+  const repoWithChangingData = createMockPokemonRepositoryWithChangingData(
+    mockPokemonsByTypeForHookTests,
+    mockPokemonsByNameForHookTests,
+    newMockPokemonsByType,
+    [newMockPokemonByName]
+  );
 
   const { result, rerender } = renderHook(
     ({ selectedType }) => usePokemonList(selectedType, repoWithChangingData),
@@ -77,10 +69,9 @@ it("updates pokemon list when selectedType changes", async () => {
 });
 
 it("clears pokemon list when error occurs", async () => {
-  const errorRepository: PokemonRepository = {
-    findAllByType: vi.fn().mockRejectedValue(new Error("API Error")),
-    findDetailsByName: vi.fn(),
-  };
+  const errorRepository = createMockPokemonRepositoryWithError(
+    new Error("API Error")
+  );
 
   const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 

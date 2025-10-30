@@ -1,31 +1,30 @@
-import { it, expect, vi } from "vitest";
+import { it, expect } from "vitest";
 import { GetPokemonListUseCase } from "../GetPokemonListUseCase";
-import { PokemonRepository } from "../../../../domain/ports/PokemonRepository";
 import { PokemonType } from "../../../../domain/value-objects/PokemonType";
-import { PokemonByType } from "../../../../domain/value-objects/PokemonByType";
-import { PokemonByName } from "../../../../domain/value-objects/PokemonByName";
 import { PokemonListItem } from "../../../../domain/entities/PokemonListItem";
+import {
+  mockPokemonByTypeCharmander,
+  mockPokemonByTypeVulpixForGetUseCase,
+  mockPokemonByNameCharmanderForGetUseCase,
+  mockPokemonByNameVulpixForGetUseCase,
+  createMockPokemonRepository,
+  createMockPokemonRepositoryWithError,
+} from "../../../../__tests__/mocks";
 
 it("returns a list of Pokemon items with the required values", async () => {
   const fakeType = new PokemonType("fire");
 
   const fakePokemons = [
-    new PokemonByType("charmander"),
-    new PokemonByType("vulpix"),
+    mockPokemonByTypeCharmander,
+    mockPokemonByTypeVulpixForGetUseCase,
   ];
 
   const fakeDetails = [
-    new PokemonByName("charmander", 5, "imgUrl1"),
-    new PokemonByName("vulpix", 6, "imgUrl2"),
+    mockPokemonByNameCharmanderForGetUseCase,
+    mockPokemonByNameVulpixForGetUseCase,
   ];
 
-  const repoMock: PokemonRepository = {
-    findAllByType: vi.fn().mockResolvedValue(fakePokemons),
-    findDetailsByName: vi
-      .fn()
-      .mockResolvedValueOnce(fakeDetails[0])
-      .mockResolvedValueOnce(fakeDetails[1]),
-  };
+  const repoMock = createMockPokemonRepository(fakePokemons, fakeDetails);
 
   const expectedPokemons = fakePokemons.map((pokemon, index) => {
     return new PokemonListItem(
@@ -52,10 +51,7 @@ it("propagates errors from the repository", async () => {
   const fakeType = new PokemonType("water");
   const error = new Error("Repository error");
 
-  const repoMock: PokemonRepository = {
-    findAllByType: vi.fn().mockRejectedValue(error),
-    findDetailsByName: vi.fn(),
-  };
+  const repoMock = createMockPokemonRepositoryWithError(error);
 
   const useCase = new GetPokemonListUseCase(repoMock);
 

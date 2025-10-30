@@ -371,28 +371,6 @@ const SLICES_TO_PERSIST = ["testSlice"];
 mockState = { testSlice: { testProp: true } };
 ```
 
-**Blackbox Principle Check:**
-
-- [ ] Am I testing browser APIs (localStorage, fetch, window)? If YES → Mock them completely
-- [ ] Am I testing Redux internals (dispatch, reducers, state updates)? If YES → Mock Redux components
-- [ ] Am I testing my code's logic, not the library's behavior? If NO → Add mocks
-- [ ] Do my tests prove I call external APIs correctly, not that APIs work? If NO → Refactor
-
-**Example Red Flag:**
-
-```typescript
-// ❌ BAD: Testing localStorage's JSON behavior
-localStorage.setItem("key", JSON.stringify(data));
-expect(JSON.parse(localStorage.getItem("key"))).toEqual(data);
-
-// ✅ GOOD: Mocking localStorage, testing MY code
-const setItemSpy = vi
-  .spyOn(Storage.prototype, "setItem")
-  .mockImplementation(() => {});
-myFunction();
-expect(setItemSpy).toHaveBeenCalledWith("key", JSON.stringify(data));
-```
-
 **No Feature-Specific Details Check:**
 
 - [ ] Are action types hard-coded as `'featureName/action'`? If YES → Use generic names
@@ -570,7 +548,21 @@ React State → UI Render
 
 Tests are co-located with source code in `__tests__/` directories.
 
-**Mock Scoping Rule**: Feature-level mocks must be consolidated in a single `__tests__/mocks.ts` file at the feature root. Page-level mocks are scoped to `pages/{page}/__tests__/mocks.ts` for UI-specific test data.
+### Mock Organization and Scoping
+
+**Rule: Mocks are scoped at feature or page level, never scattered across individual test files.**
+
+Feature-level mocks must be consolidated in a single `__tests__/mocks.ts` file at the feature root. Page-level mocks are scoped to `pages/{page}/__tests__/mocks.ts` for UI-specific test data.
+
+**Benefits:**
+
+1. **Single Source of Truth**: All domain entity mocks for a feature in one place
+2. **Consistency**: Tests use the same mock instances, preventing divergence
+3. **Maintainability**: Update mock data in one location
+4. **Discoverability**: New contributors know where to find/add mocks
+5. **Reusability**: Easy to share mocks across multiple test files in the feature
+
+**Directory Structure:**
 
 ```
 feature/
@@ -596,8 +588,6 @@ pages/
 │       ├── setupTests.ts           ← Page-level fetch mocks
 │       └── mocks.ts                ← Page-level UI test data
 ```
-
-### Mock Usage Pattern
 
 **Feature-Level Mocks** (`src/features/{feature}/__tests__/mocks.ts`):
 
@@ -646,7 +636,9 @@ beforeEach(() => {
 });
 ```
 
-### Testing Strategy Overview
+**Important:** When adding new tests, always check if a mock already exists in the appropriate `__tests__/mocks.ts` before creating new ones. Keep mocks centralized in one place per layer to maintain consistency.
+
+### Testing Pyramid
 
 **Test Structure (TDD Foundation + Integration Safeguard):**
 
@@ -781,31 +773,6 @@ Vitest uses `jsdom` environment with auto-discovered setup files:
 
 - Automatically loads all `setupTests.ts` files via glob pattern
 - Global test utilities available (`describe`, `it`, `expect`, `vi`)
-
-### Mock Organization Best Practices
-
-**Rule: Mocks are scoped at feature or page level, never scattered across individual test files.**
-
-**Benefits:**
-
-1. **Single Source of Truth**: All domain entity mocks for a feature in one place
-2. **Consistency**: Tests use the same mock instances, preventing divergence
-3. **Maintainability**: Update mock data in one location
-4. **Discoverability**: New contributors know where to find/add mocks
-5. **Reusability**: Easy to share mocks across multiple test files in the feature
-
-**How to Organize Mocks:**
-
-- **Feature-level:** `src/features/{feature}/__tests__/mocks.ts`
-
-  - All domain entity mocks for the feature
-  - Shared across use case, view model, and hook tests
-
-- **Page-level:** `src/pages/{page}/__tests__/mocks.ts`
-  - HTTP response mocks specific to the page
-  - UI-specific test data
-
-When adding new tests, always check if a mock already exists in the appropriate `__tests__/mocks.ts` before creating new ones. Keep mocks centralized in one place per layer to maintain consistency.
 
 ## Test Writing Style Guide
 

@@ -40,7 +40,10 @@ const PokemonDetailTypes = ({ types }: PokemonTypesProps) => {
   };
 
   return (
-    <section className="bg-stone-600  rounded-lg p-4 mb-4">
+    <section
+      className="bg-stone-600  rounded-lg p-4 mb-4"
+      aria-labelledby="pokemon-type-list-heading"
+    >
       <h2
         className="mb-2 text-lg l:text-xl xl:text-2xl font-semibold"
         id="pokemon-type-list-heading"

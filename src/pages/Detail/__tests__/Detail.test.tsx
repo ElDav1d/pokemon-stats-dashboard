@@ -4,7 +4,7 @@ import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import Detail from "../Detail";
 import { clickTypeButton, clickEvolutionLink } from "./helpers";
 
-const renderDetailPage = (pokemonName: string) => {
+const renderDetailPageWithRoute = (pokemonName: string) => {
   const router = createMemoryRouter(
     [
       {
@@ -22,7 +22,7 @@ const renderDetailPage = (pokemonName: string) => {
 };
 
 it("renders the initial elements", async () => {
-  renderDetailPage("bulbasaur");
+  renderDetailPageWithRoute("bulbasaur");
 
   const header = screen.getByRole("banner");
   const heading = within(header).getByRole("heading", {
@@ -88,7 +88,7 @@ it("renders the initial elements", async () => {
 });
 
 it("displays evolution links excluding current pokemon", async () => {
-  renderDetailPage("bulbasaur");
+  renderDetailPageWithRoute("bulbasaur");
 
   const main = screen.getByRole("main");
   const article = within(main).getByRole("article");
@@ -124,7 +124,7 @@ it("displays evolution links excluding current pokemon", async () => {
 });
 
 it("navigates to evolution pokemon when clicking evolution link", async () => {
-  renderDetailPage("bulbasaur");
+  renderDetailPageWithRoute("bulbasaur");
 
   // Wait for page to load
   await waitFor(async () => {
@@ -167,7 +167,7 @@ it("navigates to evolution pokemon when clicking evolution link", async () => {
 });
 
 it("displays list of pokemon when type button is clicked", async () => {
-  renderDetailPage("bulbasaur");
+  renderDetailPageWithRoute("bulbasaur");
 
   const main = screen.getByRole("main");
   const article = within(main).getByRole("article");
@@ -210,7 +210,7 @@ it("displays list of pokemon when type button is clicked", async () => {
 });
 
 it("displays different list when different type button is clicked", async () => {
-  renderDetailPage("bulbasaur");
+  renderDetailPageWithRoute("bulbasaur");
 
   const main = screen.getByRole("main");
   const article = within(main).getByRole("article");
@@ -253,7 +253,7 @@ it("displays different list when different type button is clicked", async () => 
 });
 
 it("renders pokemon stats in SVG graph", async () => {
-  renderDetailPage("bulbasaur");
+  renderDetailPageWithRoute("bulbasaur");
 
   const main = screen.getByRole("main");
   const article = within(main).getByRole("article");

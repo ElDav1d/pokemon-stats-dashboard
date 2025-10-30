@@ -4,6 +4,7 @@ import { PokemonRepository } from "../../../domain/ports/PokemonRepository";
 import { PokemonListViewModel } from "../../../application/view-models/PokemonListViewModel";
 import { HttpPokemonRepository } from "../../http/HttpPokemonRepository";
 import { FetchHttpClient } from "../../../../../infrastructure/client/fetch/FetchHttpClient";
+import { url } from "../../../../../lib/constants";
 
 interface UsePokemonListResult {
   pokemonList: PokemonListItem[];
@@ -35,7 +36,9 @@ function usePokemonList(
 
   // Determine if second param is a repository (for testing) or a boolean flag (for component)
   const isRepositoryInjected =
-    secondParam && typeof secondParam === "object" && "findAllByType" in secondParam;
+    secondParam &&
+    typeof secondParam === "object" &&
+    "findAllByType" in secondParam;
 
   // Infrastructure setup (only if not injected for testing)
   const httpClient = useMemo(
@@ -47,7 +50,10 @@ function usePokemonList(
     if (isRepositoryInjected) {
       return secondParam as PokemonRepository;
     }
-    return new HttpPokemonRepository(httpClient);
+    return new HttpPokemonRepository(httpClient, {
+      typeEndpoint: url.TYPE,
+      pokemonEndpoint: url.POKEMON,
+    });
   }, [httpClient, isRepositoryInjected, secondParam]);
 
   const viewModel = useMemo(
@@ -95,6 +101,6 @@ function usePokemonList(
     isError,
     sortByHeight,
   };
-};
+}
 
 export default usePokemonList;

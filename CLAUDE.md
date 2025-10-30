@@ -935,12 +935,62 @@ When adding new tests, always check if a mock already exists in the appropriate 
     expect(heading).toBeInTheDocument(); // DOM
     ```
 
-11. **Avoid Test Nesting**
+11. **Flat Test Structure Without `describe()` Blocks**
 
-    - Use top-level `it()` statements
-    - Don't nest tests in `describe()` blocks, just break into scoped, self describingly named files when the initial one becomes too large
-    - Keep test file structure flat and searchable
+    - Write all tests at the top level using only `it()` statements
+    - **Never use `describe()` blocks** for grouping tests
+    - When a test file grows too large, split it into multiple files with descriptive names
+    - Use file names to communicate test grouping, not `describe()` blocks
     - For UI layer: apply outside-in user-centered behavior driven strategy from pages' views
+
+    ✅ **GOOD - Flat structure with descriptive file name:**
+
+    ```typescript
+    // pokemon-list-sorting.test.ts
+    it("sorts pokemon by height in ascending order when sort is enabled", () => {
+      // test code
+    });
+
+    it("returns original order when sort is disabled", () => {
+      // test code
+    });
+
+    it("handles empty list when sorting", () => {
+      // test code
+    });
+    ```
+
+    ❌ **BAD - Using describe() blocks:**
+
+    ```typescript
+    // pokemon-list.test.ts
+    describe("sorting behavior", () => {
+      // ❌ Don't use describe()
+      it("sorts by height ascending", () => {});
+      it("returns original order", () => {});
+    });
+
+    describe("error handling", () => {
+      // ❌ Don't use describe()
+      it("handles empty list", () => {});
+    });
+    ```
+
+    **When to split files:**
+
+    - Original file: `pokemon-list.test.ts` becomes too large (20+ tests)
+    - Split into:
+      - `pokemon-list-sorting.test.ts`
+      - `pokemon-list-error-handling.test.ts`
+      - `pokemon-list-loading-states.test.ts`
+
+    **Benefits:**
+
+    - File structure becomes the test organization system
+    - Better IDE navigation (jump to specific test file)
+    - Easier to find tests by file name search
+    - Clearer test scope from file names
+    - Simpler test runner output (no nested hierarchies)
 
 12. **Mock Spy and Restoration**
 

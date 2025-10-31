@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { services } from "../domain/services";
-import { IPokemonTypeItem } from "../domain/entities";
-import PokemonType from "../domain/PokemonType";
+import { PokemonTypesRepository } from "../domain/ports/PokemonTypesRepository";
+import { GetPokemonTypesUseCase } from "../application/use-cases/get-pokemon-types/GetPokemonTypesUseCase";
 
 interface IUsePokemonTypesReturn {
   typeNames: string[];
@@ -9,14 +8,12 @@ interface IUsePokemonTypesReturn {
   isError: boolean;
 }
 
-const usePokemonTypes = (): IUsePokemonTypesReturn => {
+export const usePokemonTypes = (
+  repository: PokemonTypesRepository
+): IUsePokemonTypesReturn => {
   const [typeNames, setTypeNames] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
-
-  const getTypeNames = (types: IPokemonTypeItem[]) => {
-    return types.map((type) => new PokemonType(type).name);
-  };
 
   useEffect(() => {
     let isMounted = true;
@@ -25,11 +22,11 @@ const usePokemonTypes = (): IUsePokemonTypesReturn => {
 
     const getTypes = async () => {
       try {
-        const typesResponse: IPokemonTypeItem[] =
-          await services.fetchPokemonTypes();
+        const useCase = new GetPokemonTypesUseCase(repository);
+        const types = await useCase.execute();
 
         if (isMounted) {
-          setTypeNames(getTypeNames(typesResponse));
+          setTypeNames(types.map((type) => type.name));
           setIsLoading(false);
         }
       } catch (error) {
@@ -47,7 +44,7 @@ const usePokemonTypes = (): IUsePokemonTypesReturn => {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [repository]);
 
   return { typeNames, isLoading, isError };
 };

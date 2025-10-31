@@ -865,33 +865,39 @@ When refactoring an existing feature to Hexagonal Architecture, follow this **la
 Use this checklist to ensure you don't skip any layer:
 
 #### 🔴 Phase 1: Domain Layer (RED → GREEN → REFACTOR)
+
 - [ ] Write entity test (behavior + validation)
 - [ ] Implement entity (minimal code to pass)
 - [ ] Refactor entity (add more behavior if needed)
 - [ ] Define repository port (interface)
 
 #### 🔴 Phase 2: Infrastructure (Repository) (RED → GREEN → REFACTOR)
+
 - [ ] Write repository test with mocked HTTP client
 - [ ] Implement repository (map DTOs to entities)
 - [ ] Refactor repository (error handling, edge cases)
 
 #### 🔴 Phase 3: Application Layer (Use Case) (RED → GREEN → REFACTOR)
+
 - [ ] Write use case test with mocked repository
 - [ ] Implement use case (orchestrate repository calls)
 - [ ] Refactor use case (add error handling)
 
 #### 🔴 Phase 4: Application Layer (ViewModel - Optional)
+
 - [ ] Write view model test (if needed for data transformation)
 - [ ] Implement view model
 - [ ] Refactor view model
 
 #### 🔴 Phase 5: Infrastructure (Hook) (RED → GREEN → REFACTOR)
+
 - [ ] Write hook test with mocked repository
 - [ ] Extract logic from view to hook
 - [ ] **VERIFY PAGE TEST STILL PASSES** ⚠️ (critical!)
 - [ ] Refactor hook (simplify, add error handling)
 
 #### ✅ Post-Refactoring Verification:
+
 - [ ] All unit tests pass (entity, repository, use case, hook)
 - [ ] Page integration test STILL passes
 - [ ] No regression in user-facing behavior
@@ -902,22 +908,27 @@ Use this checklist to ensure you don't skip any layer:
 See `src/features/pokemon-list/` for a complete example of Hexagonal Architecture with TDD at EVERY layer:
 
 **Domain Layer:**
+
 - ✅ `domain/entities/__tests__/PokemonListItem.test.ts` - Entity tests (behavior)
 - ✅ `domain/value-objects/__tests__/PokemonType.test.ts` - Value object tests (validation)
 
 **Infrastructure Layer (Repository):**
+
 - ✅ `infrastructure/http/__tests__/HttpPokemonRepository.test.ts` - Repository tests (HTTP adapter, DTO mapping)
 
 **Application Layer:**
+
 - ✅ `application/use-cases/get-pokemon-list/__tests__/GetPokemonListUseCase.test.ts` - Use case tests (orchestration)
 - ✅ `application/view-models/__tests__/PokemonListViewModel.test.ts` - View model tests (data preparation)
 
 **Infrastructure Layer (React):**
+
 - ✅ `infrastructure/react/hooks/__tests__/usePokemonList.test.ts` - Hook tests (React integration)
 - ✅ `infrastructure/react/hooks/__tests__/usePokemonList.isLoading.test.ts` - Hook tests (loading states)
 - ✅ `infrastructure/react/hooks/__tests__/usePokemonList.isError.test.ts` - Hook tests (error states)
 
 **UI Layer:**
+
 - ✅ `src/pages/Home/__tests__/Home.test.tsx` - Integration tests (user perspective)
 
 **Each file shows the RED-GREEN-REFACTOR cycle applied to that specific layer.**
@@ -943,7 +954,7 @@ Hook Test (RED) → Extract to Hook (GREEN) → View uses Hook → Refactor
 ```
 Prerequisites (Already Complete):
 ✅ Domain entities exist with tests
-✅ Repository exists with tests  
+✅ Repository exists with tests
 ✅ Use case exists with tests
 ✅ Page test passes with logic in view
 
@@ -955,7 +966,7 @@ Prerequisites (Already Complete):
 2. GREEN: Extract logic from view into hook
    └─> Hook test passes
    └─> Hook uses repository and use case (dependency injection)
-   
+
 3. Update view to use hook
    └─> Page test STAYS GREEN (no regression)
    └─> Logic now reusable and testable in isolation
@@ -973,10 +984,14 @@ Prerequisites (Already Complete):
 ```typescript
 // ✅ Phase 1: Entity exists
 class PokemonListItem {
-  constructor(public id: string, public name: string, public height: number) {}
+  constructor(
+    public id: string,
+    public name: string,
+    public height: number
+  ) {}
 }
 
-// ✅ Phase 2: Repository exists  
+// ✅ Phase 2: Repository exists
 interface PokemonRepository {
   findAllByType(type: PokemonType): Promise<PokemonListItem[]>;
 }
@@ -984,7 +999,9 @@ interface PokemonRepository {
 // ✅ Phase 3: Use case exists
 class GetPokemonListUseCase {
   constructor(private repository: PokemonRepository) {}
-  async execute(type: string): Promise<PokemonListItem[]> { /* ... */ }
+  async execute(type: string): Promise<PokemonListItem[]> {
+    /* ... */
+  }
 }
 
 // ✅ Page test passes with logic in view

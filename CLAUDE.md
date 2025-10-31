@@ -768,43 +768,229 @@ expect(setItemSpy).toHaveBeenCalledWith("key", JSON.stringify(data)); // Tests o
 4. Repeat for all layers
 5. Integration tests from pages verify composition
 
-### Refactoring-Driven Development: Hook Extraction Workflow
+## Complete TDD Workflow for Hexagonal Architecture Refactoring
 
-**Critical: Hooks are extracted AFTER satisfying user stories, not before.**
+When refactoring an existing feature to Hexagonal Architecture, follow this **layer-by-layer TDD approach**. Each layer must be tested BEFORE implementation.
 
-We follow a **refactoring-driven approach** where logic is first implemented in views to satisfy user requirements, then extracted into hooks for reusability and testability.
+### Prerequisites (Must Be True):
 
-**The Workflow:**
+- ✅ Page integration test exists and passes
+- ✅ Feature works in production (logic in view/component)
+- ✅ You understand what logic needs extraction
+
+### The Complete Refactoring Sequence:
 
 ```
-User Story → Page Test (RED) → View Implementation (GREEN) → Extract Hook → Hook Test
+┌─────────────────────────────────────────────────────────────┐
+│ EXISTING STATE: Feature works but violates architecture    │
+│ ✅ Page Test: PASSES                                        │
+│ ✅ View: Has all logic inline (services, fetch calls)      │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│ PHASE 1: DOMAIN LAYER (Entities & Value Objects)           │
+│                                                             │
+│ Step 1: RED - Write entity test                            │
+│ Step 2: GREEN - Create entity class                        │
+│ Step 3: REFACTOR - Add behavior to entity                  │
+│ Step 4: Define repository port (interface only)            │
+│                                                             │
+│ ✅ Entity tests: PASS                                       │
+│ ✅ Page test: STILL PASSES (no changes to view yet)        │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│ PHASE 2: INFRASTRUCTURE LAYER (Repository Adapter)         │
+│                                                             │
+│ Step 5: RED - Write repository test (mock HTTP client)     │
+│ Step 6: GREEN - Implement repository                       │
+│ Step 7: REFACTOR - Add error handling, edge cases          │
+│                                                             │
+│ ✅ Repository tests: PASS                                   │
+│ ✅ Page test: STILL PASSES (view not using repo yet)       │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│ PHASE 3: APPLICATION LAYER (Use Case)                      │
+│                                                             │
+│ Step 8: RED - Write use case test (mock repository)        │
+│ Step 9: GREEN - Implement use case                         │
+│ Step 10: REFACTOR - Add orchestration logic                │
+│                                                             │
+│ ✅ Use case tests: PASS                                     │
+│ ✅ Page test: STILL PASSES (view not using use case yet)   │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│ PHASE 4: APPLICATION LAYER (ViewModel - Optional)          │
+│                                                             │
+│ Step 11: RED - Write view model test (if needed)           │
+│ Step 12: GREEN - Implement view model                      │
+│ Step 13: REFACTOR - Add data transformation logic          │
+│                                                             │
+│ ✅ ViewModel tests: PASS (if created)                      │
+│ ✅ Page test: STILL PASSES                                 │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│ PHASE 5: INFRASTRUCTURE LAYER (React Hook)                 │
+│                                                             │
+│ Step 14: RED - Write hook test (mock repository)           │
+│ Step 15: GREEN - Extract logic from view to hook           │
+│ Step 16: Update view to use hook                           │
+│ Step 17: REFACTOR - Simplify hook                          │
+│                                                             │
+│ ✅ Hook tests: PASS                                         │
+│ ✅ Page test: STILL PASSES ⚠️ (CRITICAL - verify!)         │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│ FINAL STATE: Feature refactored to Hexagonal Architecture  │
+│ ✅ Page Test: STILL PASSES (no regression)                 │
+│ ✅ All Unit Tests: PASS (each layer tested)                │
+│ ✅ Architecture: Clean separation of concerns               │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Critical Rules:
+
+1. **Page test MUST stay green** throughout the entire refactoring
+2. **Test each layer BEFORE implementing** that layer (RED-GREEN-REFACTOR)
+3. **Don't skip layers** - every layer needs its own tests
+4. **Start from domain** (innermost) and work outward to infrastructure
+5. **Hook is LAST** - only after domain, repository, and use case exist
+
+### TDD Checklist: Before Refactoring to Hexagonal Architecture
+
+Use this checklist to ensure you don't skip any layer:
+
+#### 🔴 Phase 1: Domain Layer (RED → GREEN → REFACTOR)
+- [ ] Write entity test (behavior + validation)
+- [ ] Implement entity (minimal code to pass)
+- [ ] Refactor entity (add more behavior if needed)
+- [ ] Define repository port (interface)
+
+#### 🔴 Phase 2: Infrastructure (Repository) (RED → GREEN → REFACTOR)
+- [ ] Write repository test with mocked HTTP client
+- [ ] Implement repository (map DTOs to entities)
+- [ ] Refactor repository (error handling, edge cases)
+
+#### 🔴 Phase 3: Application Layer (Use Case) (RED → GREEN → REFACTOR)
+- [ ] Write use case test with mocked repository
+- [ ] Implement use case (orchestrate repository calls)
+- [ ] Refactor use case (add error handling)
+
+#### 🔴 Phase 4: Application Layer (ViewModel - Optional)
+- [ ] Write view model test (if needed for data transformation)
+- [ ] Implement view model
+- [ ] Refactor view model
+
+#### 🔴 Phase 5: Infrastructure (Hook) (RED → GREEN → REFACTOR)
+- [ ] Write hook test with mocked repository
+- [ ] Extract logic from view to hook
+- [ ] **VERIFY PAGE TEST STILL PASSES** ⚠️ (critical!)
+- [ ] Refactor hook (simplify, add error handling)
+
+#### ✅ Post-Refactoring Verification:
+- [ ] All unit tests pass (entity, repository, use case, hook)
+- [ ] Page integration test STILL passes
+- [ ] No regression in user-facing behavior
+- [ ] Code coverage maintained or improved
+
+### Real-World Example: pokemon-list Feature
+
+See `src/features/pokemon-list/` for a complete example of Hexagonal Architecture with TDD at EVERY layer:
+
+**Domain Layer:**
+- ✅ `domain/entities/__tests__/PokemonListItem.test.ts` - Entity tests (behavior)
+- ✅ `domain/value-objects/__tests__/PokemonType.test.ts` - Value object tests (validation)
+
+**Infrastructure Layer (Repository):**
+- ✅ `infrastructure/http/__tests__/HttpPokemonRepository.test.ts` - Repository tests (HTTP adapter, DTO mapping)
+
+**Application Layer:**
+- ✅ `application/use-cases/get-pokemon-list/__tests__/GetPokemonListUseCase.test.ts` - Use case tests (orchestration)
+- ✅ `application/view-models/__tests__/PokemonListViewModel.test.ts` - View model tests (data preparation)
+
+**Infrastructure Layer (React):**
+- ✅ `infrastructure/react/hooks/__tests__/usePokemonList.test.ts` - Hook tests (React integration)
+- ✅ `infrastructure/react/hooks/__tests__/usePokemonList.isLoading.test.ts` - Hook tests (loading states)
+- ✅ `infrastructure/react/hooks/__tests__/usePokemonList.isError.test.ts` - Hook tests (error states)
+
+**UI Layer:**
+- ✅ `src/pages/Home/__tests__/Home.test.tsx` - Integration tests (user perspective)
+
+**Each file shows the RED-GREEN-REFACTOR cycle applied to that specific layer.**
+
+### Refactoring-Driven Development: Hook Extraction Workflow (Phase 5)
+
+**Important: This section describes ONLY Phase 5 (hook extraction). You must complete Phases 1-4 first.**
+
+**Critical: Hooks are extracted AFTER satisfying user stories AND after creating domain/repository/use-case layers.**
+
+We follow a **refactoring-driven approach** where logic is first implemented in views to satisfy user requirements, then extracted layer-by-layer (domain → repository → use case → hook).
+
+**The Hook Extraction Workflow (Assumes Phases 1-4 Complete):**
+
+```
+Prerequisites: Entity exists, Repository exists, Use Case exists
+↓
+Hook Test (RED) → Extract to Hook (GREEN) → View uses Hook → Refactor
 ```
 
 **Step-by-Step Process:**
 
 ```
-1. RED: Write page-level integration test (user story)
-   └─> Test fails because feature doesn't exist yet
+Prerequisites (Already Complete):
+✅ Domain entities exist with tests
+✅ Repository exists with tests  
+✅ Use case exists with tests
+✅ Page test passes with logic in view
 
-2. GREEN: Implement logic directly in the view/component
-   └─> Page test passes
-   └─> Feature works for users
-
-3. RED: Write hook unit test for the logic you want to extract
+1. RED: Write hook unit test for extraction
    └─> Test fails because hook doesn't exist yet
    └─> Test describes the hook API and behavior
+   └─> Test uses mocked repository (from Phase 2)
 
-4. GREEN: Extract logic from view into hook
+2. GREEN: Extract logic from view into hook
    └─> Hook test passes
+   └─> Hook uses repository and use case (dependency injection)
+   
+3. Update view to use hook
    └─> Page test STAYS GREEN (no regression)
    └─> Logic now reusable and testable in isolation
+
+4. REFACTOR: Simplify hook and view
+   └─> All tests stay green
 ```
 
 **Key Principle:** The page test must NEVER go RED during hook extraction. If it does, you've broken the feature.
 
-**Example: Extracting usePokemonList Hook**
+**Complete Example: Extracting usePokemonList Hook (Phase 5 Only)**
 
-**Step 1: RED - Write page-level test (user story)**
+**Prerequisites (Phases 1-4 Already Complete):**
+
+```typescript
+// ✅ Phase 1: Entity exists
+class PokemonListItem {
+  constructor(public id: string, public name: string, public height: number) {}
+}
+
+// ✅ Phase 2: Repository exists  
+interface PokemonRepository {
+  findAllByType(type: PokemonType): Promise<PokemonListItem[]>;
+}
+
+// ✅ Phase 3: Use case exists
+class GetPokemonListUseCase {
+  constructor(private repository: PokemonRepository) {}
+  async execute(type: string): Promise<PokemonListItem[]> { /* ... */ }
+}
+
+// ✅ Page test passes with logic in view
+```
+
+**Step 1: RED - Write page-level test (already exists and passes)**
 
 ```typescript
 // src/pages/Home/__tests__/Home.test.tsx
@@ -815,7 +1001,7 @@ it("displays pokemon list when user selects a type", async () => {
   const typeSelector = screen.getByRole('combobox', { name: /type/i });
   await userEvent.selectOptions(typeSelector, 'grass');
 
-  // ❌ FAILS - feature doesn't exist yet
+  // ✅ PASSES - feature already works in view
   await waitFor(() => {
     expect(screen.getByText('Bulbasaur')).toBeInTheDocument();
     expect(screen.getByText('Ivysaur')).toBeInTheDocument();
@@ -823,7 +1009,7 @@ it("displays pokemon list when user selects a type", async () => {
 });
 ```
 
-**Step 2: GREEN - Implement in view directly**
+**Step 2: View has logic inline (current state)**
 
 ```typescript
 // src/pages/Home/Home.tsx
@@ -833,7 +1019,7 @@ export function Home() {
   const [pokemonList, setPokemonList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Logic implemented directly in component
+  // ✅ Logic implemented directly in component (works but violates architecture)
   useEffect(() => {
     const fetchPokemon = async () => {
       setIsLoading(true);
@@ -863,7 +1049,7 @@ export function Home() {
   );
 }
 
-// ✅ Page test now PASSES - feature works for users
+// ✅ Page test PASSES - feature works for users
 ```
 
 **Step 3: RED - Write hook unit test**

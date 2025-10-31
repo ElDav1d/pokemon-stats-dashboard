@@ -110,10 +110,12 @@ The codebase implements **Hexagonal Architecture** (Ports & Adapters) with clear
 
 **4. Rich Domain Entities (Classes, not Interfaces)**
 
-Entities are **classes** (not interfaces) to encapsulate behavior alongside data:
+Entities are **classes** (not interfaces) to encapsulate behavior alongside data.
+
+**Example of a rich entity (with behavior):**
 
 ```typescript
-// ✅ Entity encapsulates behavior
+// ✅ Rich entity encapsulates behavior
 export class PokemonListItem {
   constructor(
     public readonly id: string,
@@ -135,6 +137,8 @@ export class PokemonListItem {
 }
 ```
 
+**⚠️ Note**: This is an **example** of what a rich entity LOOKS like, **not the current project state**. In this project, entities are currently simple data containers without behavior (no `getSizeCategory()` or `isBossTier()` methods exist). If these methods are needed in the future, they would be added using TDD (test first).
+
 **Why classes instead of interfaces:**
 
 - Centralizes domain logic (single source of truth for "what is large")
@@ -143,10 +147,11 @@ export class PokemonListItem {
 - Testeable without rendering components
 - Future behavior can be added without breaking contracts
 
-**Domain-layer tests don't need React:**
+**Domain-layer tests don't need React (when entities have behavior):**
 
 ```typescript
 // Pure domain logic test, no framework needed
+// (This example shows testing a rich entity - only write if entity HAS behavior)
 it("should classify large pokemon correctly", () => {
   const onix = new PokemonListItem("3", "onix", 88, "img.png");
 
@@ -154,6 +159,8 @@ it("should classify large pokemon correctly", () => {
   expect(onix.isBossTier()).toBe(true);
 });
 ```
+
+**⚠️ Important**: This test only exists if `getSizeCategory()` and `isBossTier()` methods exist on the entity. Currently, project entities are simple data containers with no such methods, so no domain tests exist.
 
 **5. View as a Humble Object**
 
@@ -870,14 +877,14 @@ export class PokemonListItem {
     public readonly height: number,
     public readonly imageUrl: string
   ) {}
-  
+
   // ← BEHAVIOR: Conditional logic
   getSizeCategory(): "small" | "medium" | "large" {
     if (this.height < 10) return "small";
     if (this.height <= 20) return "medium";
     return "large";
   }
-  
+
   // ← BEHAVIOR: Business rule
   isBossTier(): boolean {
     return this.height > 30;
@@ -889,7 +896,7 @@ it("classifies pokemon by size category based on height", () => {
   const small = new PokemonListItem("1", "pikachu", 4, "url");
   const medium = new PokemonListItem("2", "charizard", 17, "url");
   const large = new PokemonListItem("3", "onix", 88, "url");
-  
+
   expect(small.getSizeCategory()).toBe("small");
   expect(medium.getSizeCategory()).toBe("medium");
   expect(large.getSizeCategory()).toBe("large");
@@ -954,16 +961,16 @@ export class PokemonListItem {
 
 #### 📋 Decision Table: Should I Test This Entity?
 
-| Entity Characteristic | Has Tests? | Why? |
-|----------------------|-----------|------|
-| Only constructor + readonly fields | ❌ No | No behavior to test (YAGNI) |
-| Has validation in constructor | ❌ No* | TypeScript already enforces types |
-| Has methods with conditionals | ✅ Yes | Behavior needs verification (TDD) |
-| Has business rule methods | ✅ Yes | Logic correctness is critical (TDD) |
-| Has calculations | ✅ Yes | Math needs edge case testing (TDD) |
-| Has derived properties (getters) | ✅ Yes | Transformation logic needs tests (TDD) |
+| Entity Characteristic              | Has Tests? | Why?                                   |
+| ---------------------------------- | ---------- | -------------------------------------- |
+| Only constructor + readonly fields | ❌ No      | No behavior to test (YAGNI)            |
+| Has validation in constructor      | ❌ No\*    | TypeScript already enforces types      |
+| Has methods with conditionals      | ✅ Yes     | Behavior needs verification (TDD)      |
+| Has business rule methods          | ✅ Yes     | Logic correctness is critical (TDD)    |
+| Has calculations                   | ✅ Yes     | Math needs edge case testing (TDD)     |
+| Has derived properties (getters)   | ✅ Yes     | Transformation logic needs tests (TDD) |
 
-*Exception: Complex validation (e.g., DNI check digit, email format with normalization) DOES need tests.
+\*Exception: Complex validation (e.g., DNI check digit, email format with normalization) DOES need tests.
 
 ---
 
@@ -992,7 +999,7 @@ export class PokemonListItem {
     public readonly height: number,
     public readonly imageUrl: string
   ) {}
-  
+
   // NEW: Added behavior → Write test FIRST (TDD)
   getSizeCategory(): "small" | "medium" | "large" {
     if (this.height < 10) return "small";
@@ -1347,12 +1354,13 @@ export function Home() {
 
 ### Testing Patterns by Layer
 
-**Domain Layer** - Pure logic, no mocks needed:
+**Domain Layer** - Test behavior only (if it exists):
 
-- Test entities, value objects, and domain logic directly
-- No framework imports required
-- Tests run instantly
-- Example: `expect(entity.getSizeCategory()).toBe("large")`
+- ✅ **IF entity has behavior**: Test methods with logic directly (no mocks, no framework)
+- ❌ **IF entity is simple data container**: Skip tests (YAGNI)
+- Tests run instantly (pure functions)
+- Example (when entity HAS behavior): `expect(entity.getSizeCategory()).toBe("large")`
+- **Current project**: Domain entities are simple containers → No domain tests
 
 **Application Layer (Use Cases)** - Mock port interfaces:
 
@@ -2139,8 +2147,11 @@ Example:
 
 1. **Start with Domain Layer**:
 
-   - Define entities, value objects, and ports (interfaces)
+   - Define entities as simple data containers (classes with readonly properties)
+   - Define ports (repository interfaces)
    - Add domain constants if needed
+   - ⚠️ **Skip tests if entities have no behavior** (YAGNI - tests start at Repository layer)
+   - ✅ **Write tests FIRST if entities need behavior** (methods with logic - use TDD)
 
 2. **Create Use Cases**:
 

@@ -790,10 +790,10 @@ When refactoring an existing feature to Hexagonal Architecture, follow this **la
 ┌─────────────────────────────────────────────────────────────┐
 │ PHASE 1: DOMAIN LAYER (Entities & Value Objects)           │
 │                                                             │
-│ Step 1: Create simple entity class (no tests - YAGNI)      │
+│ Step 1: Create entity class      │
 │ Step 2: Define repository port (interface only)            │
 │                                                             │
-│ ⚠️  NO TESTS - Entities are too simple (data containers)   │
+│ ⚠️  NO TESTS - If entities are still too simple (data containers)   │
 │ ✅ Page test: STILL PASSES (no changes to view yet)        │
 └─────────────────────────────────────────────────────────────┘
                             ↓

@@ -770,7 +770,7 @@ expect(setItemSpy).toHaveBeenCalledWith("key", JSON.stringify(data)); // Tests o
 
 ## Complete TDD Workflow for Hexagonal Architecture Refactoring
 
-When refactoring an existing feature to Hexagonal Architecture, follow this **layer-by-layer TDD approach**. Each layer must be tested BEFORE implementation.
+When refactoring an existing feature to Hexagonal Architecture, follow this **layer-by-layer approach**. Apply TDD selectively based on complexity (YAGNI principle).
 
 ### Prerequisites (Must Be True):
 
@@ -790,32 +790,30 @@ When refactoring an existing feature to Hexagonal Architecture, follow this **la
 ┌─────────────────────────────────────────────────────────────┐
 │ PHASE 1: DOMAIN LAYER (Entities & Value Objects)           │
 │                                                             │
-│ Step 1: RED - Write entity test                            │
-│ Step 2: GREEN - Create entity class                        │
-│ Step 3: REFACTOR - Add behavior to entity                  │
-│ Step 4: Define repository port (interface only)            │
+│ Step 1: Create simple entity class (no tests - YAGNI)      │
+│ Step 2: Define repository port (interface only)            │
 │                                                             │
-│ ✅ Entity tests: PASS                                       │
+│ ⚠️  NO TESTS - Entities are too simple (data containers)   │
 │ ✅ Page test: STILL PASSES (no changes to view yet)        │
 └─────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
 │ PHASE 2: INFRASTRUCTURE LAYER (Repository Adapter)         │
 │                                                             │
-│ Step 5: RED - Write repository test (mock HTTP client)     │
-│ Step 6: GREEN - Implement repository                       │
-│ Step 7: REFACTOR - Add error handling, edge cases          │
+│ Step 3: RED - Write repository test (mock HTTP client)     │
+│ Step 4: GREEN - Implement repository                       │
+│ Step 5: REFACTOR - Add error handling, edge cases          │
 │                                                             │
-│ ✅ Repository tests: PASS                                   │
+│ ✅ Repository tests: PASS (TDD starts here)                │
 │ ✅ Page test: STILL PASSES (view not using repo yet)       │
 └─────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
 │ PHASE 3: APPLICATION LAYER (Use Case)                      │
 │                                                             │
-│ Step 8: RED - Write use case test (mock repository)        │
-│ Step 9: GREEN - Implement use case                         │
-│ Step 10: REFACTOR - Add orchestration logic                │
+│ Step 6: RED - Write use case test (mock repository)        │
+│ Step 7: GREEN - Implement use case                         │
+│ Step 8: REFACTOR - Add orchestration logic                 │
 │                                                             │
 │ ✅ Use case tests: PASS                                     │
 │ ✅ Page test: STILL PASSES (view not using use case yet)   │
@@ -824,9 +822,9 @@ When refactoring an existing feature to Hexagonal Architecture, follow this **la
 ┌─────────────────────────────────────────────────────────────┐
 │ PHASE 4: APPLICATION LAYER (ViewModel - Optional)          │
 │                                                             │
-│ Step 11: RED - Write view model test (if needed)           │
-│ Step 12: GREEN - Implement view model                      │
-│ Step 13: REFACTOR - Add data transformation logic          │
+│ Step 9: RED - Write view model test (if needed)            │
+│ Step 10: GREEN - Implement view model                      │
+│ Step 11: REFACTOR - Add data transformation logic          │
 │                                                             │
 │ ✅ ViewModel tests: PASS (if created)                      │
 │ ✅ Page test: STILL PASSES                                 │
@@ -835,10 +833,10 @@ When refactoring an existing feature to Hexagonal Architecture, follow this **la
 ┌─────────────────────────────────────────────────────────────┐
 │ PHASE 5: INFRASTRUCTURE LAYER (React Hook)                 │
 │                                                             │
-│ Step 14: RED - Write hook test (mock repository)           │
-│ Step 15: GREEN - Extract logic from view to hook           │
-│ Step 16: Update view to use hook                           │
-│ Step 17: REFACTOR - Simplify hook                          │
+│ Step 12: RED - Write hook test (mock repository)           │
+│ Step 13: GREEN - Extract logic from view to hook           │
+│ Step 14: Update view to use hook                           │
+│ Step 15: REFACTOR - Simplify hook                          │
 │                                                             │
 │ ✅ Hook tests: PASS                                         │
 │ ✅ Page test: STILL PASSES ⚠️ (CRITICAL - verify!)         │
@@ -847,70 +845,106 @@ When refactoring an existing feature to Hexagonal Architecture, follow this **la
 ┌─────────────────────────────────────────────────────────────┐
 │ FINAL STATE: Feature refactored to Hexagonal Architecture  │
 │ ✅ Page Test: STILL PASSES (no regression)                 │
-│ ✅ All Unit Tests: PASS (each layer tested)                │
+│ ✅ Unit Tests: PASS (Repository, Use Case, ViewModel, Hook)│
 │ ✅ Architecture: Clean separation of concerns               │
+│ ⚠️  Domain entities: No tests (YAGNI - too simple)         │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+### When to Test Domain Layer:
+
+**Domain entities in this project are simple data containers** without behavior, validation, or business rules. Therefore, they don't require tests.
+
+**If an entity needs behavior (methods with logic):**
+
+- ✅ Write tests FIRST (TDD)
+- ✅ Add the behavior to satisfy the test
+- ✅ Test the behavior, not just data properties
+
+**Current state (pokemon-list example):**
+
+- `PokemonListItem` - Simple data container, NO tests
+- `PokemonType` - Simple data container, NO tests
+- `PokemonByType` - Simple data container, NO tests
+- `PokemonByName` - Simple data container, NO tests
+
+**Why no domain tests:**
+
+- Entities are plain data containers (no methods, no validation)
+- No business logic to test
+- Constructors only assign properties
+- Tests would only verify TypeScript's type system
+
+**When to add tests:**
+
+- When adding behavior methods to entities (write test FIRST)
+- When adding validation logic (write test FIRST)
+- When adding business rules (write test FIRST)
+
+**Tests START at Repository layer** - first place with actual logic (HTTP calls, DTO mapping, error handling)
 
 ### Critical Rules:
 
 1. **Page test MUST stay green** throughout the entire refactoring
-2. **Test each layer BEFORE implementing** that layer (RED-GREEN-REFACTOR)
-3. **Don't skip layers** - every layer needs its own tests
+2. **Apply TDD selectively** - Test complex logic, skip simple data containers (YAGNI)
+3. **Don't skip tested layers** - Repository, Use Case, ViewModel, and Hook need tests
 4. **Start from domain** (innermost) and work outward to infrastructure
-5. **Hook is LAST** - only after domain, repository, and use case exist
+5. **Hook is LAST** - only after repository and use case exist
 
-### TDD Checklist: Before Refactoring to Hexagonal Architecture
+### Lean TDD Checklist: Refactoring to Hexagonal Architecture
 
-Use this checklist to ensure you don't skip any layer:
+Use this checklist for a lean, practical refactoring approach:
 
-#### 🔴 Phase 1: Domain Layer (RED → GREEN → REFACTOR)
+#### Phase 1: Domain Layer (No Tests - YAGNI)
 
-- [ ] Write entity test (behavior + validation)
-- [ ] Implement entity (minimal code to pass)
-- [ ] Refactor entity (add more behavior if needed)
+- [ ] Create simple entity class (data container only)
 - [ ] Define repository port (interface)
+- [ ] ⚠️ **Skip tests** - Entities are too simple
 
-#### 🔴 Phase 2: Infrastructure (Repository) (RED → GREEN → REFACTOR)
+#### Phase 2: Infrastructure (Repository) (RED → GREEN → REFACTOR)
 
-- [ ] Write repository test with mocked HTTP client
-- [ ] Implement repository (map DTOs to entities)
-- [ ] Refactor repository (error handling, edge cases)
+- [ ] RED: Write repository test with mocked HTTP client
+- [ ] GREEN: Implement repository (map DTOs to entities)
+- [ ] REFACTOR: Add error handling, edge cases
 
-#### 🔴 Phase 3: Application Layer (Use Case) (RED → GREEN → REFACTOR)
+#### Phase 3: Application Layer (Use Case) (RED → GREEN → REFACTOR)
 
-- [ ] Write use case test with mocked repository
-- [ ] Implement use case (orchestrate repository calls)
-- [ ] Refactor use case (add error handling)
+- [ ] RED: Write use case test with mocked repository
+- [ ] GREEN: Implement use case (orchestrate repository calls)
+- [ ] REFACTOR: Add error handling
 
-#### 🔴 Phase 4: Application Layer (ViewModel - Optional)
+#### Phase 4: Application Layer (ViewModel - Optional)
 
-- [ ] Write view model test (if needed for data transformation)
-- [ ] Implement view model
-- [ ] Refactor view model
+- [ ] RED: Write view model test (if needed for data transformation)
+- [ ] GREEN: Implement view model
+- [ ] REFACTOR: Simplify transformations
 
-#### 🔴 Phase 5: Infrastructure (Hook) (RED → GREEN → REFACTOR)
+#### Phase 5: Infrastructure (Hook) (RED → GREEN → REFACTOR)
 
-- [ ] Write hook test with mocked repository
-- [ ] Extract logic from view to hook
+- [ ] RED: Write hook test with mocked repository
+- [ ] GREEN: Extract logic from view to hook
+- [ ] Update view to use hook
 - [ ] **VERIFY PAGE TEST STILL PASSES** ⚠️ (critical!)
-- [ ] Refactor hook (simplify, add error handling)
+- [ ] REFACTOR: Simplify hook
 
 #### ✅ Post-Refactoring Verification:
 
-- [ ] All unit tests pass (entity, repository, use case, hook)
+- [ ] Repository tests pass
+- [ ] Use case tests pass
+- [ ] ViewModel tests pass (if created)
+- [ ] Hook tests pass
 - [ ] Page integration test STILL passes
 - [ ] No regression in user-facing behavior
-- [ ] Code coverage maintained or improved
 
 ### Real-World Example: pokemon-list Feature
 
-See `src/features/pokemon-list/` for a complete example of Hexagonal Architecture with TDD at EVERY layer:
+See `src/features/pokemon-list/` for a complete example of Hexagonal Architecture with selective TDD:
 
 **Domain Layer:**
 
-- ✅ `domain/entities/__tests__/PokemonListItem.test.ts` - Entity tests (behavior)
-- ✅ `domain/value-objects/__tests__/PokemonType.test.ts` - Value object tests (validation)
+- ⚠️ **NO TESTS** - Entities are simple data containers (YAGNI)
+- `domain/entities/PokemonListItem.ts` - Simple class, no tests
+- `domain/value-objects/PokemonType.ts` - Simple validation, no tests
 
 **Infrastructure Layer (Repository):**
 

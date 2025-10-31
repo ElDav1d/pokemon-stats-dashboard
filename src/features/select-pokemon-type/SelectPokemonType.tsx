@@ -5,7 +5,7 @@ import {
   LoadingMessage,
   ErrorMessage,
 } from "../../ui";
-import PokemonType from "./domain/PokemonType";
+import { DEFAULT_POKEMON_TYPE } from "./domain/constants";
 import {
   usePokemonTypes,
   useSelectPokemonType,
@@ -20,9 +20,8 @@ const SelectPokemonType = () => {
   );
 
   const { typeNames, isLoading, isError } = usePokemonTypes(repository);
-  const { selectedTypeParam, selectType } = useSelectPokemonType(
-    PokemonType.defaultType
-  );
+  const { selectedTypeParam, selectType } =
+    useSelectPokemonType(DEFAULT_POKEMON_TYPE);
 
   const handleButtonClick = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {

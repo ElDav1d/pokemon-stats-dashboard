@@ -6,7 +6,10 @@ import {
   ErrorMessage,
 } from "../../ui";
 import PokemonType from "./domain/PokemonType";
-import { usePokemonTypes, useSelectPokemonType } from "./hooks";
+import {
+  usePokemonTypes,
+  useSelectPokemonType,
+} from "./infrastructure/react/hooks";
 import { HttpPokemonTypesRepository } from "./infrastructure/http/HttpPokemonTypesRepository";
 import { url } from "../../lib/constants";
 

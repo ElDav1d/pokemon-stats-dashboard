@@ -1,8 +1,8 @@
 import { it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { usePokemonTypes } from "../usePokemonTypes";
-import { PokemonTypesRepository } from "../../../domain/ports/PokemonTypesRepository";
-import { PokemonTypeItem } from "../../../domain/entities/PokemonTypeItem";
+import { PokemonTypesRepository } from "../../../../domain/ports/PokemonTypesRepository";
+import { PokemonTypeItem } from "../../../../domain/entities/PokemonTypeItem";
 
 const mockTypes = [
   new PokemonTypeItem("normal", "https://pokeapi.co/api/v2/type/1/"),

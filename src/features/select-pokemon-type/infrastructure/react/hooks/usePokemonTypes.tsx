@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { PokemonTypesRepository } from "../domain/ports/PokemonTypesRepository";
-import { GetPokemonTypesUseCase } from "../application/use-cases/get-pokemon-types/GetPokemonTypesUseCase";
+import { PokemonTypesRepository } from "../../../domain/ports/PokemonTypesRepository";
+import { GetPokemonTypesUseCase } from "../../../application/use-cases/get-pokemon-types/GetPokemonTypesUseCase";
 
 interface IUsePokemonTypesReturn {
   typeNames: string[];

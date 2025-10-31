@@ -770,7 +770,7 @@ expect(setItemSpy).toHaveBeenCalledWith("key", JSON.stringify(data)); // Tests o
 
 ## Complete TDD Workflow for Hexagonal Architecture Refactoring
 
-When refactoring an existing feature to Hexagonal Architecture, follow this **layer-by-layer approach**. Apply TDD selectively based on complexity (YAGNI principle).
+When refactoring an existing feature to Hexagonal Architecture, follow this **layer-by-layer approach**. Apply TDD selectively based on complexity.
 
 ### Prerequisites (Must Be True):
 
@@ -822,7 +822,7 @@ When refactoring an existing feature to Hexagonal Architecture, follow this **la
 ┌─────────────────────────────────────────────────────────────┐
 │ PHASE 4: APPLICATION LAYER (ViewModel - Optional)          │
 │                                                             │
-│ Step 9: RED - Write view model test (if needed)            │
+│ Step 9: RED - Write view model test           │
 │ Step 10: GREEN - Implement view model                      │
 │ Step 11: REFACTOR - Add data transformation logic          │
 │                                                             │
@@ -853,35 +853,171 @@ When refactoring an existing feature to Hexagonal Architecture, follow this **la
 
 ### When to Test Domain Layer:
 
-**Domain entities in this project are simple data containers** without behavior, validation, or business rules. Therefore, they don't require tests.
+**TDD Rule: Test behavior, not data containers.**
 
-**If an entity needs behavior (methods with logic):**
+#### ✅ WRITE TESTS (TDD) When Domain Entities Have Behavior:
 
-- ✅ Write tests FIRST (TDD)
-- ✅ Add the behavior to satisfy the test
-- ✅ Test the behavior, not just data properties
+Domain entities or value objects with **methods containing logic** require TDD:
+
+**Examples requiring tests:**
+
+```typescript
+// ✅ HAS BEHAVIOR → WRITE TESTS FIRST (TDD)
+export class PokemonListItem {
+  constructor(
+    public readonly id: string,
+    public readonly name: string,
+    public readonly height: number,
+    public readonly imageUrl: string
+  ) {}
+  
+  // ← BEHAVIOR: Conditional logic
+  getSizeCategory(): "small" | "medium" | "large" {
+    if (this.height < 10) return "small";
+    if (this.height <= 20) return "medium";
+    return "large";
+  }
+  
+  // ← BEHAVIOR: Business rule
+  isBossTier(): boolean {
+    return this.height > 30;
+  }
+}
+
+// Test FIRST (RED-GREEN-REFACTOR)
+it("classifies pokemon by size category based on height", () => {
+  const small = new PokemonListItem("1", "pikachu", 4, "url");
+  const medium = new PokemonListItem("2", "charizard", 17, "url");
+  const large = new PokemonListItem("3", "onix", 88, "url");
+  
+  expect(small.getSizeCategory()).toBe("small");
+  expect(medium.getSizeCategory()).toBe("medium");
+  expect(large.getSizeCategory()).toBe("large");
+});
+```
+
+**When to write domain tests:**
+
+- Methods with conditionals (`if/else`, `switch`)
+- Business rules (validation beyond type checking)
+- Calculations or transformations
+- Derived properties
+- Comparisons (`equals()`, `isSameAs()`)
+
+**TDD Workflow:**
+
+1. RED: Write test for entity behavior first
+2. GREEN: Implement minimal code to pass test
+3. REFACTOR: Clean up while tests stay green
+
+---
+
+#### ❌ SKIP TESTS When Domain Entities Are Simple Data Containers:
 
 **Current state (pokemon-list example):**
 
-- `PokemonListItem` - Simple data container, NO tests
-- `PokemonType` - Simple data container, NO tests
-- `PokemonByType` - Simple data container, NO tests
-- `PokemonByName` - Simple data container, NO tests
+```typescript
+// ❌ NO BEHAVIOR → NO TESTS (YAGNI)
+export class PokemonListItem {
+  constructor(
+    public readonly id: string,
+    public readonly name: string,
+    public readonly height: number,
+    public readonly imageUrl: string
+  ) {}
+  // No methods, no logic, just data storage
+}
+```
+
+**Entities without tests:**
+
+- `PokemonListItem` - Plain data container (no methods)
+- `PokemonType` - Simple validation only (no behavior methods)
+- `PokemonByType` - Plain data container (no methods)
+- `PokemonByName` - Plain data container (no methods)
 
 **Why no domain tests:**
 
-- Entities are plain data containers (no methods, no validation)
+- Entities are plain data containers (only constructor + readonly fields)
+- No methods beyond constructor
 - No business logic to test
 - Constructors only assign properties
 - Tests would only verify TypeScript's type system
+- YAGNI applies: don't test what doesn't exist
 
-**When to add tests:**
+**When entities are this simple:**
 
-- When adding behavior methods to entities (write test FIRST)
-- When adding validation logic (write test FIRST)
-- When adding business rules (write test FIRST)
+- Skip domain tests entirely
+- Tests START at Repository layer (first place with actual logic: HTTP calls, DTO mapping, error handling)
 
-**Tests START at Repository layer** - first place with actual logic (HTTP calls, DTO mapping, error handling)
+---
+
+#### 📋 Decision Table: Should I Test This Entity?
+
+| Entity Characteristic | Has Tests? | Why? |
+|----------------------|-----------|------|
+| Only constructor + readonly fields | ❌ No | No behavior to test (YAGNI) |
+| Has validation in constructor | ❌ No* | TypeScript already enforces types |
+| Has methods with conditionals | ✅ Yes | Behavior needs verification (TDD) |
+| Has business rule methods | ✅ Yes | Logic correctness is critical (TDD) |
+| Has calculations | ✅ Yes | Math needs edge case testing (TDD) |
+| Has derived properties (getters) | ✅ Yes | Transformation logic needs tests (TDD) |
+
+*Exception: Complex validation (e.g., DNI check digit, email format with normalization) DOES need tests.
+
+---
+
+#### 🔄 Evolution Path: From Simple to Rich Entities
+
+Entities can evolve from simple to rich as features grow:
+
+```typescript
+// PHASE 1: Simple entity (NO tests)
+export class PokemonListItem {
+  constructor(
+    public readonly id: string,
+    public readonly name: string,
+    public readonly height: number,
+    public readonly imageUrl: string
+  ) {}
+}
+
+// ⬇️ NEW FEATURE REQUEST: "Show size badge on each Pokemon card"
+
+// PHASE 2: Rich entity (NOW needs tests - write FIRST)
+export class PokemonListItem {
+  constructor(
+    public readonly id: string,
+    public readonly name: string,
+    public readonly height: number,
+    public readonly imageUrl: string
+  ) {}
+  
+  // NEW: Added behavior → Write test FIRST (TDD)
+  getSizeCategory(): "small" | "medium" | "large" {
+    if (this.height < 10) return "small";
+    if (this.height <= 20) return "medium";
+    return "large";
+  }
+}
+
+// Test written FIRST (RED), then implementation (GREEN)
+it("returns correct size category for small pokemon", () => {
+  const pikachu = new PokemonListItem("1", "pikachu", 4, "url");
+  expect(pikachu.getSizeCategory()).toBe("small");
+});
+```
+
+**Key Principle:** Start simple (no tests), add behavior with TDD when needed (test first).
+
+---
+
+**Summary:**
+
+- ✅ Domain entities with **behavior** (methods with logic) → Write tests FIRST (TDD)
+- ❌ Domain entities as **data containers** (no methods) → Skip tests (YAGNI)
+- 🔄 When adding behavior to simple entity → Write test FIRST, then add method (TDD)
+- 📍 Tests always START at Repository layer for simple entities (first actual logic layer)
 
 ### Critical Rules:
 

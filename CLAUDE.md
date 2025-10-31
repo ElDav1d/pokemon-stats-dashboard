@@ -2,6 +2,17 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 🚨 CRITICAL RULE: Git Workflow
+
+**NEVER commit changes automatically. The user will commit manually.**
+
+- ❌ Do NOT use `git commit` commands
+- ❌ Do NOT use `git add` followed by `git commit`
+- ✅ Make file changes as requested
+- ✅ Let the user review and commit manually when they approve
+
+**Why:** The user wants full control over commit messages and timing.
+
 ## Project Overview
 
 A React-based Pokemon dashboard application implementing advanced performance optimizations and hexagonal architecture patterns. The project uses the PokeAPI to provide Pokemon data visualization with a custom virtual scrolling system for large datasets.

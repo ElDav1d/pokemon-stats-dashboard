@@ -3,7 +3,7 @@ import { PokemonListItem } from "../../../domain/entities/PokemonListItem";
 import { PokemonRepository } from "../../../domain/ports/PokemonRepository";
 import { PokemonListViewModel } from "../../../application/view-models/PokemonListViewModel";
 import { HttpPokemonRepository } from "../../http/HttpPokemonRepository";
-import { FetchHttpClient } from "../../../../../infrastructure/client/fetch/FetchHttpClient";
+import { FetchHttpClient } from "../../../../../shared/infrastructure/client/fetch/FetchHttpClient";
 import { url } from "../../../../../lib/constants";
 
 interface UsePokemonListResult {

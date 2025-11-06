@@ -2,7 +2,7 @@ import { it, expect, vi, beforeEach } from "vitest";
 import { HttpPokemonRepository } from "../HttpPokemonRepository";
 import { PokemonType } from "../../../domain/value-objects/PokemonType";
 import { pokemonByNameResponseMock, pokemonByTypeResponseMock } from "./mocks";
-import { FetchHttpClient } from "../../../../../infrastructure/client/fetch/FetchHttpClient";
+import { FetchHttpClient } from "../../../../../shared/infrastructure/client/fetch/FetchHttpClient";
 import { PokemonByType } from "../../../domain/value-objects/PokemonByType";
 import { PokemonByName } from "../../../domain/value-objects/PokemonByName";
 

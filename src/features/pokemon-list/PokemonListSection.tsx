@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import usePokemonList from "./infrastructure/react/hooks/usePokemonList";
-import { useVirtualGridList } from "../../infrastructure/react/hooks/useVirtualGridList";
+import { useVirtualGridList } from "../../shared/infrastructure/react/hooks/useVirtualGridList";
 import { pokemonListConfig, responsiveBreakpoints } from "./domain/constants";
 import { LoadingMessage, ErrorMessage } from "../../ui";
 import PokemonListControls from "./PokemonListControls";

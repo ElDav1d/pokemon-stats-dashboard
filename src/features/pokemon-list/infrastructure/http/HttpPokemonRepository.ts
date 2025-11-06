@@ -1,7 +1,7 @@
 import { PokemonByType } from "../../domain/value-objects/PokemonByType";
 import { PokemonRepository } from "../../domain/ports/PokemonRepository";
 import { PokemonType } from "../../domain/value-objects/PokemonType";
-import { HttpClient } from "../../../../infrastructure/client/http/HttpClient";
+import { HttpClient } from "../../../../shared/infrastructure/client/http/HttpClient";
 import {
   RawPokemonByType,
   RawPokemonTypeResponse,

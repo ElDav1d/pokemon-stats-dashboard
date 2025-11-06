@@ -1,6 +1,6 @@
 import { it, expect, vi, beforeEach } from "vitest";
 import { HttpPokemonTypesRepository } from "../HttpPokemonTypesRepository";
-import { PokemonTypeItem } from "../../../domain/entities/PokemonTypeItem";
+import { PokemonTypeItem } from "../../../domain/value-objects/PokemonTypeItem";
 
 beforeEach(() => {
   // @ts-ignore
@@ -9,11 +9,7 @@ beforeEach(() => {
 
 it("should return a list of pokemon types", async () => {
   const mockResponse = {
-    results: [
-      { name: "normal", url: "https://pokeapi.co/api/v2/type/1/" },
-      { name: "fighting", url: "https://pokeapi.co/api/v2/type/2/" },
-      { name: "flying", url: "https://pokeapi.co/api/v2/type/3/" },
-    ],
+    results: [{ name: "normal" }, { name: "fighting" }, { name: "flying" }],
   };
 
   (globalThis.fetch as any).mockResolvedValue({
@@ -28,7 +24,6 @@ it("should return a list of pokemon types", async () => {
   expect(types).toHaveLength(3);
   expect(types[0]).toBeInstanceOf(PokemonTypeItem);
   expect(types[0].name).toBe("normal");
-  expect(types[0].url).toBe("https://pokeapi.co/api/v2/type/1/");
   expect(types[1].name).toBe("fighting");
   expect(types[2].name).toBe("flying");
 });

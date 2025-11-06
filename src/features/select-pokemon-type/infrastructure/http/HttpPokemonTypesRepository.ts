@@ -1,5 +1,5 @@
 import { PokemonTypesRepository } from "../../domain/ports/PokemonTypesRepository";
-import { PokemonTypeItem } from "../../domain/entities/PokemonTypeItem";
+import { PokemonTypeItem } from "../../domain/value-objects/PokemonTypeItem";
 
 interface TypeResponse {
   results: Array<{ name: string; url: string }>;
@@ -17,6 +17,6 @@ export class HttpPokemonTypesRepository implements PokemonTypesRepository {
 
     const data: TypeResponse = await response.json();
 
-    return data.results.map((item) => new PokemonTypeItem(item.name, item.url));
+    return data.results.map((item) => new PokemonTypeItem(item.name));
   }
 }

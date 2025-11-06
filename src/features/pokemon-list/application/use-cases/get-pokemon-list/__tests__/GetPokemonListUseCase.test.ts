@@ -1,6 +1,6 @@
 import { it, expect } from "vitest";
 import { GetPokemonListUseCase } from "../GetPokemonListUseCase";
-import { PokemonType } from "../../../../domain/value-objects/PokemonType";
+import { PokemonType } from "../../../../../../shared/domain/value-objects/PokemonType";
 import { PokemonListItem } from "../../../../domain/entities/PokemonListItem";
 import {
   mockPokemonByTypeCharmander,

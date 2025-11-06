@@ -1,5 +1,5 @@
 import type { PokemonRepository } from "./ports/PokemonRepository.ts";
-import { PokemonType } from "./value-objects/PokemonType.ts";
+import { PokemonType } from "../../../shared/domain/value-objects/PokemonType";
 import { PokemonByType } from "./value-objects/PokemonByType.ts";
 import { PokemonByName } from "./value-objects/PokemonByName.ts";
 

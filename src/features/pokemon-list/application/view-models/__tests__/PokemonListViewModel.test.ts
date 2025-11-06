@@ -1,5 +1,5 @@
 import { it, expect } from "vitest";
-import { PokemonType } from "../../../domain/value-objects/PokemonType";
+import { PokemonType } from "../../../../../shared/domain/value-objects/PokemonType";
 import { PokemonListViewModel } from "../PokemonListViewModel";
 import {
   createMockPokemonRepository,

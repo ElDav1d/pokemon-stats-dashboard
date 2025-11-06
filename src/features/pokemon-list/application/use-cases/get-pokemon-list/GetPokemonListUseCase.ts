@@ -2,7 +2,7 @@ import { UuidGenerator } from "../../../../../lib/IdGenerator";
 import { mapToDomainList } from "../../mappers/PokemonListMapper";
 import { PokemonListItem } from "../../../domain/entities/PokemonListItem";
 import { PokemonRepository } from "../../../domain/ports/PokemonRepository";
-import { PokemonType } from "../../../domain/value-objects/PokemonType";
+import { PokemonType } from "../../../../../shared/domain/value-objects/PokemonType";
 
 export class GetPokemonListUseCase {
   constructor(private readonly repository: PokemonRepository) {}

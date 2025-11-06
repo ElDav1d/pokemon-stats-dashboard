@@ -1,12 +1,12 @@
 import { it, expect, vi } from "vitest";
 import { GetPokemonTypesUseCase } from "../GetPokemonTypesUseCase";
 import { PokemonTypesRepository } from "../../../../domain/ports/PokemonTypesRepository";
-import { PokemonTypeItem } from "../../../../domain/entities/PokemonTypeItem";
+import { PokemonType } from "../../../../../../shared/domain/value-objects/PokemonType";
 
 it("should return a list of pokemon types from repository", async () => {
   const mockTypes = [
-    new PokemonTypeItem("normal", "https://pokeapi.co/api/v2/type/1/"),
-    new PokemonTypeItem("fighting", "https://pokeapi.co/api/v2/type/2/"),
+    new PokemonType("normal"),
+    new PokemonType("fighting"),
   ];
 
   const mockRepository: PokemonTypesRepository = {

@@ -26,7 +26,7 @@ export const usePokemonTypes = (
         const types = await useCase.execute();
 
         if (isMounted) {
-          setTypeNames(types.map((type) => type.name));
+          setTypeNames(types.map((type) => type.value));
           setIsLoading(false);
         }
       } catch (error) {

@@ -1,6 +1,6 @@
 import { it, expect, vi, beforeEach } from "vitest";
 import { HttpPokemonTypesRepository } from "../HttpPokemonTypesRepository";
-import { PokemonTypeItem } from "../../../domain/value-objects/PokemonTypeItem";
+import { PokemonType } from "../../../../../shared/domain/value-objects/PokemonType";
 
 beforeEach(() => {
   // @ts-ignore
@@ -22,10 +22,10 @@ it("should return a list of pokemon types", async () => {
   const types = await repo.findAll();
 
   expect(types).toHaveLength(3);
-  expect(types[0]).toBeInstanceOf(PokemonTypeItem);
-  expect(types[0].name).toBe("normal");
-  expect(types[1].name).toBe("fighting");
-  expect(types[2].name).toBe("flying");
+  expect(types[0]).toBeInstanceOf(PokemonType);
+  expect(types[0].value).toBe("normal");
+  expect(types[1].value).toBe("fighting");
+  expect(types[2].value).toBe("flying");
 });
 
 it("should call fetch with the correct URL", async () => {

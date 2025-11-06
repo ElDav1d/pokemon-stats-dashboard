@@ -1,5 +1,5 @@
 import { PokemonTypesRepository } from "../../domain/ports/PokemonTypesRepository";
-import { PokemonTypeItem } from "../../domain/value-objects/PokemonTypeItem";
+import { PokemonType } from "../../../../shared/domain/value-objects/PokemonType";
 
 interface TypeResponse {
   results: Array<{ name: string; url: string }>;
@@ -8,7 +8,7 @@ interface TypeResponse {
 export class HttpPokemonTypesRepository implements PokemonTypesRepository {
   constructor(private readonly baseUrl: string) {}
 
-  async findAll(): Promise<PokemonTypeItem[]> {
+  async findAll(): Promise<PokemonType[]> {
     const response = await fetch(`${this.baseUrl}type`);
 
     if (!response.ok) {
@@ -17,6 +17,6 @@ export class HttpPokemonTypesRepository implements PokemonTypesRepository {
 
     const data: TypeResponse = await response.json();
 
-    return data.results.map((item) => new PokemonTypeItem(item.name));
+    return data.results.map((item) => new PokemonType(item.name));
   }
 }

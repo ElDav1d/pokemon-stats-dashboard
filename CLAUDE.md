@@ -2259,6 +2259,179 @@ const { pokemonList } = usePokemonList(type, repository);
 const sorted = viewModel.sortPokemonList(pokemonList); // ❌ Business logic in component
 ```
 
+## React Hook Architecture: Dependency Injection Pattern
+
+### Hook Design: Overloads for Production and Testing
+
+**CRITICAL PATTERN:** All hooks that create infrastructure (repositories, clients, services) MUST support dependency injection for testing while remaining simple for production use.
+
+### Correct Pattern: Function Overloads
+
+```typescript
+// ✅ CORRECT: Overloaded hook with dependency injection
+
+interface UseFeatureResult {
+  data: DataType[];
+  isLoading: boolean;
+  isError: boolean;
+}
+
+// Overload 1: Production use (no parameters or simple flags)
+function useFeature(): UseFeatureResult;
+function useFeature(flag?: boolean): UseFeatureResult;
+
+// Overload 2: Testing use (inject repository)
+function useFeature(repository: FeatureRepository): UseFeatureResult;
+
+// Implementation
+function useFeature(
+  secondParam?: boolean | FeatureRepository
+): UseFeatureResult {
+  const [data, setData] = useState<DataType[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+
+  // Determine if repository was injected
+  const isRepositoryInjected =
+    secondParam && typeof secondParam === "object" && "findAll" in secondParam; // Check repository interface method
+
+  // Setup infrastructure (only if not injected)
+  const httpClient = useMemo(() => new FetchHttpClient(url.BASE), []);
+
+  const repository = useMemo(() => {
+    if (isRepositoryInjected) {
+      return secondParam as FeatureRepository;
+    }
+    return new HttpFeatureRepository(httpClient);
+  }, [httpClient, isRepositoryInjected, secondParam]);
+
+  const viewModel = useMemo(
+    () => new FeatureViewModel(repository),
+    [repository]
+  );
+
+  // Rest of hook logic...
+  useEffect(() => {
+    // Use viewModel to fetch data
+  }, [viewModel]);
+
+  return { data, isLoading, isError };
+}
+
+export default useFeature;
+```
+
+### Wrong Pattern: Force Injection from Component
+
+```typescript
+// ❌ WRONG: Component must create infrastructure
+
+// Hook forces repository injection
+export function useFeature(repository: FeatureRepository): UseFeatureResult {
+  // ...
+}
+
+// Component must create infrastructure
+const Component = () => {
+  // ❌ Component creates infrastructure (violates separation)
+  const repository = useMemo(() => new HttpFeatureRepository(url.BASE), []);
+
+  const { data } = useFeature(repository);
+  // ...
+};
+```
+
+### Benefits of Overload Pattern
+
+| Aspect          | With Overloads                                 | Without Overloads                          |
+| --------------- | ---------------------------------------------- | ------------------------------------------ |
+| **Production**  | Component calls `useFeature()` - simple        | Component must create repository - complex |
+| **Testing**     | Test calls `useFeature(mockRepo)` - injectable | Cannot inject, must mock fetch globally    |
+| **Separation**  | Infrastructure stays in hook                   | Infrastructure leaks to component          |
+| **Reusability** | Hook self-contained                            | Component must know infrastructure details |
+
+### When to Use This Pattern
+
+✅ **USE overloads when:**
+
+- Hook creates HTTP clients, repositories, or services
+- Hook needs different behavior in production vs testing
+- Hook orchestrates multiple infrastructure pieces
+
+❌ **DON'T USE overloads when:**
+
+- Hook only manages local state (useState, useReducer)
+- Hook has no external dependencies
+- Hook is pure UI logic (animations, refs, etc.)
+
+### Examples in Project
+
+**Correct implementations:**
+
+- `src/features/pokemon-list/infrastructure/react/hooks/usePokemonList.ts` (lines 14-26)
+- Pattern: Production accepts `selectedType` string, testing accepts `repository`
+
+**Reference implementation to copy:**
+
+```typescript
+// Overload for component usage (no repository)
+function usePokemonList(selectedType: string): UsePokemonListResult;
+
+// Overload for testing (with repository injection)
+function usePokemonList(
+  selectedType: string,
+  repository: PokemonRepository
+): UsePokemonListResult;
+
+// Implementation combines both
+function usePokemonList(
+  selectedType: string,
+  secondParam?: PokemonRepository
+): UsePokemonListResult {
+  const isRepositoryInjected =
+    secondParam &&
+    typeof secondParam === "object" &&
+    "findAllByType" in secondParam;
+
+  const httpClient = useMemo(() => new FetchHttpClient(url.BASE), []);
+
+  const repository = useMemo(() => {
+    if (isRepositoryInjected) {
+      return secondParam;
+    }
+    return new HttpPokemonRepository(httpClient, {
+      typeEndpoint: url.TYPE,
+      pokemonEndpoint: url.POKEMON,
+    });
+  }, [httpClient, isRepositoryInjected, secondParam]);
+
+  // Use repository...
+}
+```
+
+### Pre-Flight Checklist for New Hooks
+
+Before implementing a new hook that uses infrastructure:
+
+- [ ] Does this hook create repositories, clients, or services?
+- [ ] Will I need to test this hook in isolation?
+- [ ] Am I following the overload pattern from `usePokemonList`?
+- [ ] Does the component call the hook WITHOUT creating infrastructure?
+- [ ] Can I inject a mock repository in tests?
+
+If you answered YES to questions 1-2 and NO to questions 3-5, you're implementing the wrong pattern.
+
+### Quick Decision Tree
+
+```
+Does hook create infrastructure (repositories, clients)?
+├─ NO → Simple hook, no overloads needed
+└─ YES → Must use overload pattern
+    ├─ Production: Hook creates infrastructure internally
+    ├─ Testing: Inject mock repository
+    └─ Component: Calls hook with no infrastructure params
+```
+
 ### Modifying Virtual Scrolling
 
 - Core logic in `VirtualGridCalculator` (framework-agnostic)

@@ -1,104 +1,104 @@
-# Entidad vs ViewModel: Responsabilidades Complementarias
+# Entity vs ViewModel: Complementary Responsibilities
 
 ## 📋 TL;DR
 
-**Entidad (Domain):** "¿Qué ES este concepto?" → Reglas de negocio universales  
-**ViewModel (Application):** "¿Cómo PRESENTO esto?" → Preparación para vista específica
+**Entity (Domain):** "What IS this concept?" → Universal business rules
+**ViewModel (Application):** "How do I PRESENT this?" → Preparation for specific view
 
-**No hay conflicto. Son complementarios.**
+**There is no conflict. They are complementary.**
 
 ---
 
-## 🎯 Responsabilidades distintas
+## 🎯 Distinct Responsibilities
 
-### **Entidad (Domain Layer)**
+### **Entity (Domain Layer)**
 
-**Responsabilidad:** Lógica de negocio **intrínseca** al concepto.
+**Responsibility:** Logic **intrinsic** to the concept.
 
 ```typescript
-// ✅ Pregunta: "¿Qué ES un Pokemon?"
+// ✅ Question: "What IS a Pokemon?"
 class PokemonListItem {
   getSizeCategory(): "small" | "medium" | "large" {
-    // Regla de negocio: clasificación de tamaño
+    // Business rule: size classification
     if (this.height < 10) return "small";
     if (this.height <= 20) return "medium";
     return "large";
   }
-  
+
   isBossTier(): boolean {
-    // Regla de negocio: qué es "boss-tier"
+    // Business rule: what is "boss-tier"
     return this.height > 30;
   }
 }
 ```
 
-**Pregunta clave:** ¿Esta lógica es **inherente al concepto de Pokemon** independientemente de cómo/dónde se muestre?
-- ✅ Sí → Va en la Entidad
-- ❌ No → Va en el ViewModel
+**Key question:** Is this logic **inherent to the concept of Pokemon** regardless of how/where it's displayed?
+- ✅ Yes → Goes in the Entity
+- ❌ No → Goes in the ViewModel
 
 ---
 
 ### **ViewModel (Application Layer)**
 
-**Responsabilidad:** Preparar datos **para una vista específica**.
+**Responsibility:** Prepare data **for a specific view**.
 
 ```typescript
-// ✅ Pregunta: "¿Cómo presento estos Pokemon en ESTA vista?"
+// ✅ Question: "How do I present these Pokemon in THIS view?"
 class PokemonListViewModel {
-  // Coordina Use Cases
+  // Coordinates Use Cases
   async loadPokemonList(type: string): Promise<PokemonListItem[]> {
     const useCase = new GetPokemonListUseCase(this.repository);
     return await useCase.execute(new PokemonType(type));
   }
 
-  // Orquesta ordenamiento
+  // Orchestrates sorting
   sortPokemonListByHeight(list: PokemonListItem[]): PokemonListItem[] {
     return SortPokemonsByHeightUseCase.execute(list);
   }
 
-  // ✅ ESTO SÍ ES RESPONSABILIDAD DEL VIEWMODEL
-  // Prepara datos específicos para la vista de lista
+  // ✅ THIS IS VIEWMODEL RESPONSIBILITY
+  // Prepares data specific to the list view
   getPokemonListDisplayData(list: PokemonListItem[]): PokemonDisplayData[] {
     return list.map(pokemon => ({
       id: pokemon.id,
-      displayName: pokemon.getDisplayName(), // ← Usa método de la entidad
-      heightLabel: `${pokemon.getHeightInMeters()}m`, // ← Usa método de la entidad
-      sizeCategory: pokemon.getSizeCategory(), // ← Usa método de la entidad
-      showBossBadge: pokemon.isBossTier(), // ← Usa método de la entidad
+      displayName: pokemon.getDisplayName(), // ← Uses entity method
+      heightLabel: `${pokemon.getHeightInMeters()}m`, // ← Uses entity method
+      sizeCategory: pokemon.getSizeCategory(), // ← Uses entity method
+      showBossBadge: pokemon.isBossTier(), // ← Uses entity method
       imageUrl: pokemon.imageUrl,
     }));
   }
 }
 ```
 
-**Pregunta clave:** ¿Esta lógica es sobre **cómo presentar** datos en una vista específica?
-- ✅ Sí → Va en el ViewModel
-- ❌ No → Probablemente va en la Entidad o Use Case
+**Key question:** Is this logic about **how to present** data in a specific view?
+- ✅ Yes → Goes in the ViewModel
+- ❌ No → Probably goes in the Entity or Use Case
 
 ---
 
-## 📊 Comparación lado a lado
+## 📊 Side-by-Side Comparison
 
-| Aspecto | Entidad | ViewModel |
-|---------|---------|-----------|
-| **Capa** | Domain | Application |
-| **Pregunta** | "¿Qué ES?" | "¿Cómo se MUESTRA?" |
-| **Ejemplo** | `getSizeCategory()` | `getPokemonListDisplayData()` |
-| **Propósito** | Reglas de negocio universales | Preparar datos para vista específica |
-| **Reutilizable en** | Toda la aplicación | Solo en vistas similares |
-| **Independiente de** | Framework, UI | Framework (pero conoce el domain) |
-| **Testeable sin** | UI, HTTP, React | UI, HTTP (pero necesita domain) |
-| **Cambia cuando** | Cambian reglas de negocio | Cambian requisitos de UI |
-
----
-
-## 💡 Ejemplo Completo: Flujo de responsabilidades
-
-### **Caso real:** Mostrar lista con badges de tamaño y etiquetas formateadas
+| Aspect | Entity | ViewModel |
+|--------|--------|-----------|
+| **Layer** | Domain | Application |
+| **Question** | "What IS?" | "How is it SHOWN?" |
+| **Example** | `getSizeCategory()` | `getPokemonListDisplayData()` |
+| **Purpose** | Universal business rules | Prepare data for specific view |
+| **Reusable in** | Entire application | Only in similar views |
+| **Independent of** | Framework, UI | Framework (but knows domain) |
+| **Testable without** | UI, HTTP, React | UI, HTTP (but needs domain) |
+| **Changes when** | Business rules change | UI requirements change |
 
 ---
 
-### **1. Entidad (Domain) - Reglas de negocio**
+## 💡 Complete Example: Flow of Responsibilities
+
+### **Real case:** Display list with size badges and formatted labels
+
+---
+
+### **1. Entity (Domain) - Business Rules**
 
 ```typescript
 // domain/entities/PokemonListItem.ts
@@ -110,38 +110,38 @@ export class PokemonListItem {
     public imageUrl: string
   ) {}
 
-  // ✅ Regla de negocio: ¿Qué tamaño es?
+  // ✅ Business rule: What size is it?
   getSizeCategory(): "small" | "medium" | "large" {
     if (this.height < 10) return "small";
     if (this.height <= 20) return "medium";
     return "large";
   }
 
-  // ✅ Regla de negocio: ¿Es boss-tier?
+  // ✅ Business rule: Is it boss-tier?
   isBossTier(): boolean {
     return this.height > 30;
   }
 
-  // ✅ Regla de negocio: Conversión de unidades
+  // ✅ Business rule: Unit conversion
   getHeightInMeters(): number {
     return this.height / 10;
   }
 
-  // ✅ Regla de negocio: Nombre capitalizado
+  // ✅ Business rule: Capitalized name
   getDisplayName(): string {
     return this.name.charAt(0).toUpperCase() + this.name.slice(1);
   }
 }
 ```
 
-**Tests (sin UI, sin HTTP):**
+**Tests (no UI, no HTTP):**
 
 ```typescript
 // domain/entities/__tests__/PokemonListItem.test.ts
 describe("PokemonListItem", () => {
   it("should classify small pokemon correctly", () => {
     const pikachu = new PokemonListItem("1", "pikachu", 4, "img.png");
-    
+
     expect(pikachu.getSizeCategory()).toBe("small");
     expect(pikachu.isConsideredLarge()).toBe(false);
     expect(pikachu.isBossTier()).toBe(false);
@@ -149,7 +149,7 @@ describe("PokemonListItem", () => {
 
   it("should classify large pokemon correctly", () => {
     const onix = new PokemonListItem("3", "onix", 88, "img.png");
-    
+
     expect(onix.getSizeCategory()).toBe("large");
     expect(onix.isConsideredLarge()).toBe(true);
     expect(onix.isBossTier()).toBe(true);
@@ -157,13 +157,13 @@ describe("PokemonListItem", () => {
 
   it("should convert height to meters", () => {
     const charizard = new PokemonListItem("2", "charizard", 17, "img.png");
-    
+
     expect(charizard.getHeightInMeters()).toBe(1.7);
   });
 
   it("should capitalize display name", () => {
     const bulbasaur = new PokemonListItem("4", "bulbasaur", 7, "img.png");
-    
+
     expect(bulbasaur.getDisplayName()).toBe("Bulbasaur");
   });
 });
@@ -171,18 +171,18 @@ describe("PokemonListItem", () => {
 
 ---
 
-### **2. ViewModel (Application) - Preparación para vista**
+### **2. ViewModel (Application) - Preparation for View**
 
 ```typescript
 // application/view-models/PokemonListViewModel.ts
 
-// DTO para la vista específica
+// DTO for specific view
 export interface PokemonListItemDisplay {
   id: string;
   displayName: string;
   heightLabel: string;
   sizeCategory: "small" | "medium" | "large";
-  sizeBadgeColor: string; // ← Decisión de presentación
+  sizeBadgeColor: string; // ← Presentation decision
   showBossCrown: boolean;
   imageUrl: string;
 }
@@ -204,24 +204,24 @@ export class PokemonListViewModel {
     return SortPokemonsByHeightUseCase.execute(list);
   }
 
-  // ✅ RESPONSABILIDAD DEL VIEWMODEL
-  // Transforma entidades de domain en datos listos para la vista
+  // ✅ VIEWMODEL RESPONSIBILITY
+  // Transforms domain entities into data ready for the view
   prepareForDisplay(list: PokemonListItem[]): PokemonListItemDisplay[] {
     return list.map(pokemon => ({
       id: pokemon.id,
-      displayName: pokemon.getDisplayName(), // ← Usa entidad
-      heightLabel: `${pokemon.getHeightInMeters()}m`, // ← Usa entidad
-      sizeCategory: pokemon.getSizeCategory(), // ← Usa entidad
-      
-      // ✅ Decisión de PRESENTACIÓN (no es regla de negocio)
+      displayName: pokemon.getDisplayName(), // ← Uses entity
+      heightLabel: `${pokemon.getHeightInMeters()}m`, // ← Uses entity
+      sizeCategory: pokemon.getSizeCategory(), // ← Uses entity
+
+      // ✅ PRESENTATION decision (not a business rule)
       sizeBadgeColor: this.getBadgeColorForSize(pokemon.getSizeCategory()),
-      
-      showBossCrown: pokemon.isBossTier(), // ← Usa entidad
+
+      showBossCrown: pokemon.isBossTier(), // ← Uses entity
       imageUrl: pokemon.imageUrl,
     }));
   }
 
-  // ✅ Lógica de presentación específica de esta vista
+  // ✅ Presentation logic specific to this view
   private getBadgeColorForSize(size: "small" | "medium" | "large"): string {
     const colorMap = {
       small: "#10B981",  // green-500 (Tailwind)
@@ -233,7 +233,7 @@ export class PokemonListViewModel {
 }
 ```
 
-**Tests (sin UI, con mock del repository):**
+**Tests (no UI, with mocked repository):**
 
 ```typescript
 // application/view-models/__tests__/PokemonListViewModel.test.ts
@@ -241,7 +241,7 @@ describe("PokemonListViewModel", () => {
   it("should prepare pokemon list for display", () => {
     const mockRepository = createMockRepository();
     const viewModel = new PokemonListViewModel(mockRepository);
-    
+
     const pokemonList = [
       new PokemonListItem("1", "pikachu", 4, "img1.png"),
       new PokemonListItem("2", "charizard", 17, "img2.png"),
@@ -283,8 +283,8 @@ describe("PokemonListViewModel", () => {
 
   it("should return correct badge color for each size", () => {
     const viewModel = new PokemonListViewModel(mockRepository);
-    
-    // Acceder al método privado para testing (o hacer público si es necesario)
+
+    // Access private method for testing (or make public if needed)
     expect(viewModel['getBadgeColorForSize']("small")).toBe("#10B981");
     expect(viewModel['getBadgeColorForSize']("medium")).toBe("#F59E0B");
     expect(viewModel['getBadgeColorForSize']("large")).toBe("#EF4444");
@@ -294,7 +294,7 @@ describe("PokemonListViewModel", () => {
 
 ---
 
-### **3. Hook (Infrastructure) - Adaptador React**
+### **3. Hook (Infrastructure) - React Adapter**
 
 ```typescript
 // infrastructure/react/hooks/usePokemonList.ts
@@ -338,12 +338,12 @@ function usePokemonList(selectedType: string): UsePokemonListResult {
       setIsError(false);
 
       try {
-        // 1. Cargar entidades de domain
+        // 1. Load entities from domain
         const pokemonList = await viewModel.loadPokemonList(selectedType);
-        
-        // 2. Transformar para vista
+
+        // 2. Transform for view
         const prepared = viewModel.prepareForDisplay(pokemonList);
-        
+
         setDisplayData(prepared);
       } catch (error) {
         console.error("Error fetching pokemon list:", error);
@@ -363,7 +363,7 @@ function usePokemonList(selectedType: string): UsePokemonListResult {
 
 ---
 
-### **4. UI (Presentación) - Humble Component**
+### **4. UI (Presentation) - Humble Component**
 
 ```typescript
 // ui/PokemonList.tsx
@@ -371,7 +371,7 @@ const PokemonList = () => {
   const [searchParams] = useSearchParams();
   const selectedType = searchParams.get("type");
 
-  // Hook expone datos preparados por el ViewModel
+  // Hook exposes data prepared by the ViewModel
   const { displayData, isLoading, isError } = usePokemonList(selectedType ?? "");
 
   if (isLoading) {
@@ -395,17 +395,17 @@ const PokemonList = () => {
       <ul aria-label="Pokemon List">
         {displayData.map(pokemon => (
           <li key={pokemon.id}>
-            {/* ✅ Componente solo renderiza, no calcula */}
-            <Badge 
-              type={pokemon.sizeCategory} 
-              color={pokemon.sizeBadgeColor} // ← Del ViewModel
+            {/* ✅ Component only renders, doesn't calculate */}
+            <Badge
+              type={pokemon.sizeCategory}
+              color={pokemon.sizeBadgeColor} // ← From ViewModel
             />
-            
+
             {pokemon.showBossCrown && <Crown />}
-            
+
             <img src={pokemon.imageUrl} alt={pokemon.displayName} />
-            <h3>{pokemon.displayName}</h3> {/* ← De la Entidad vía ViewModel */}
-            <p>{pokemon.heightLabel}</p> {/* ← De la Entidad vía ViewModel */}
+            <h3>{pokemon.displayName}</h3> {/* ← From Entity via ViewModel */}
+            <p>{pokemon.heightLabel}</p> {/* ← From Entity via ViewModel */}
           </li>
         ))}
       </ul>
@@ -416,133 +416,133 @@ const PokemonList = () => {
 
 ---
 
-## 🎯 Reglas de decisión: ¿Dónde va cada cosa?
+## 🎯 Decision Rules: Where does each thing go?
 
-### **Va en la ENTIDAD si:**
+### **Goes in the ENTITY if:**
 
-- ✅ Es una regla de negocio universal (válida en todo contexto)
-- ✅ Es inherente al concepto (ej: "un Pokemon grande es > 20")
-- ✅ Se reutiliza en múltiples vistas/contextos
-- ✅ Es testeable sin saber cómo se muestra
-- ✅ No depende de tecnología de presentación (colores, formatos UI)
-- ✅ Es parte del "lenguaje ubiquo" del dominio
+- ✅ It's a universal business rule (valid in any context)
+- ✅ It's inherent to the concept (e.g., "a large Pokemon is > 20")
+- ✅ It's reused in multiple views/contexts
+- ✅ It's testable without knowing how it's displayed
+- ✅ It doesn't depend on presentation technology (colors, UI formats)
+- ✅ It's part of the domain's "ubiquitous language"
 
-**Ejemplos correctos:**
+**Correct examples:**
 
 ```typescript
-// ✅ Reglas universales del dominio
-pokemon.getSizeCategory()           // "¿Qué tamaño tiene?"
-pokemon.isBossTier()                // "¿Es boss-tier?"
-pokemon.getHeightInMeters()         // "¿Cuánto mide en metros?"
-pokemon.getDisplayName()            // "¿Cómo se capitaliza su nombre?"
-pokemon.isConsideredLarge()         // "¿Se considera grande?"
-pokemon.isTallerThan(otherPokemon)  // "¿Es más alto que otro?"
+// ✅ Universal domain rules
+pokemon.getSizeCategory()           // "What size is it?"
+pokemon.isBossTier()                // "Is it boss-tier?"
+pokemon.getHeightInMeters()         // "How tall in meters?"
+pokemon.getDisplayName()            // "How is its name capitalized?"
+pokemon.isConsideredLarge()         // "Is it considered large?"
+pokemon.isTallerThan(otherPokemon)  // "Is it taller than another?"
 ```
 
-**Ejemplos INCORRECTOS (no van en Entidad):**
+**INCORRECT examples (don't go in Entity):**
 
 ```typescript
-// ❌ Decisiones de UI/presentación
-pokemon.getBadgeColor()             // Color es decisión de UI
-pokemon.getFormattedHeight()        // Formato depende de la vista
-pokemon.shouldShowWarning()         // "Warning" es concepto de UI
-pokemon.getCssClass()               // CSS es detalle de implementación
-```
-
----
-
-### **Va en el VIEWMODEL si:**
-
-- ✅ Es lógica de **preparación** para una vista específica
-- ✅ Decide **qué mostrar** o **cómo formatear** para la UI
-- ✅ Combina/orquesta múltiples entidades o use cases
-- ✅ Depende del **contexto de presentación**
-- ✅ Transforma entidades de dominio en DTOs de vista
-- ✅ Decide colores, iconos, etiquetas visuales
-
-**Ejemplos correctos:**
-
-```typescript
-// ✅ Preparación para vista específica
-viewModel.prepareForDisplay(list)              // Transforma para vista
-viewModel.getBadgeColorForSize("large")        // Decisión de UI
-viewModel.loadPokemonList(type)                // Orquesta use cases
-viewModel.sortPokemonListByHeight(list)        // Orquesta use cases
-viewModel.getFilteredAndSortedList(...)        // Combina operaciones
-viewModel.getPaginatedResults(page, pageSize)  // Lógica de paginación
-```
-
-**Ejemplos INCORRECTOS (no van en ViewModel):**
-
-```typescript
-// ❌ Reglas de negocio universales
-viewModel.calculatePokemonSize(height)  // Va en Entidad
-viewModel.isPokemonBoss(height)         // Va en Entidad
-viewModel.convertToMeters(height)       // Va en Entidad
+// ❌ UI/presentation decisions
+pokemon.getBadgeColor()             // Color is UI decision
+pokemon.getFormattedHeight()        // Format depends on the view
+pokemon.shouldShowWarning()         // "Warning" is UI concept
+pokemon.getCssClass()               // CSS is implementation detail
 ```
 
 ---
 
-## 📐 Diagrama de flujo de responsabilidades
+### **Goes in the VIEWMODEL if:**
+
+- ✅ It's **preparation** logic for a specific view
+- ✅ It decides **what to show** or **how to format** for the UI
+- ✅ It combines/orchestrates multiple entities or use cases
+- ✅ It depends on the **presentation context**
+- ✅ It transforms domain entities into view DTOs
+- ✅ It decides colors, icons, visual labels
+
+**Correct examples:**
+
+```typescript
+// ✅ Preparation for specific view
+viewModel.prepareForDisplay(list)              // Transform for view
+viewModel.getBadgeColorForSize("large")        // UI decision
+viewModel.loadPokemonList(type)                // Orchestrate use cases
+viewModel.sortPokemonListByHeight(list)        // Orchestrate use cases
+viewModel.getFilteredAndSortedList(...)        // Combine operations
+viewModel.getPaginatedResults(page, pageSize)  // Pagination logic
+```
+
+**INCORRECT examples (don't go in ViewModel):**
+
+```typescript
+// ❌ Universal business rules
+viewModel.calculatePokemonSize(height)  // Goes in Entity
+viewModel.isPokemonBoss(height)         // Goes in Entity
+viewModel.convertToMeters(height)       // Goes in Entity
+```
+
+---
+
+## 📐 Responsibility Flow Diagram
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ 1. ENTIDAD (Domain)                                         │
-│ "¿QUÉ ES un Pokemon?"                                       │
+│ 1. ENTITY (Domain)                                          │
+│ "WHAT IS a Pokemon?"                                        │
 │                                                              │
 │ ✅ getSizeCategory() → "small" | "medium" | "large"         │
 │ ✅ isBossTier() → boolean                                   │
 │ ✅ getHeightInMeters() → number                             │
 │ ✅ getDisplayName() → string                                │
 │                                                              │
-│ Tests: 100% sin UI, sin HTTP, sin React                     │
+│ Tests: 100% without UI, without HTTP, without React         │
 └─────────────────────────────────────────────────────────────┘
-                            ↓ usa
+                            ↓ uses
 ┌─────────────────────────────────────────────────────────────┐
 │ 2. VIEWMODEL (Application)                                  │
-│ "¿CÓMO presento Pokemon en esta vista?"                     │
+│ "HOW do I present Pokemon in this view?"                    │
 │                                                              │
 │ ✅ prepareForDisplay(list) → PokemonDisplayData[]           │
-│    - Llama a pokemon.getDisplayName()                       │
-│    - Llama a pokemon.getSizeCategory()                      │
-│    - Decide sizeBadgeColor según categoria                  │
-│    - Llama a pokemon.isBossTier()                           │
+│    - Calls pokemon.getDisplayName()                         │
+│    - Calls pokemon.getSizeCategory()                        │
+│    - Decides sizeBadgeColor based on category               │
+│    - Calls pokemon.isBossTier()                             │
 │                                                              │
-│ ✅ loadPokemonList(type) → orquesta GetPokemonListUseCase   │
-│ ✅ sortPokemonListByHeight(list) → orquesta SortUseCase     │
+│ ✅ loadPokemonList(type) → orchestrates GetPokemonListUseCase│
+│ ✅ sortPokemonListByHeight(list) → orchestrates SortUseCase │
 │                                                              │
-│ Tests: Sin UI, con mock repository                          │
+│ Tests: Without UI, with mocked repository                   │
 └─────────────────────────────────────────────────────────────┘
-                            ↓ expone
+                            ↓ exposes
 ┌─────────────────────────────────────────────────────────────┐
 │ 3. HOOK (Infrastructure)                                    │
-│ "Adaptador entre React y ViewModel"                         │
+│ "Adapter between React and ViewModel"                       │
 │                                                              │
-│ ✅ Gestiona estado React (useState)                         │
-│ ✅ Gestiona efectos (useEffect)                             │
-│ ✅ Instancia dependencias (HttpClient, Repository)          │
-│ ✅ Llama a viewModel.loadPokemonList()                      │
-│ ✅ Llama a viewModel.prepareForDisplay()                    │
-│ ✅ Expone displayData al componente                         │
+│ ✅ Manages React state (useState)                           │
+│ ✅ Manages effects (useEffect)                              │
+│ ✅ Instantiates dependencies (HttpClient, Repository)       │
+│ ✅ Calls viewModel.loadPokemonList()                        │
+│ ✅ Calls viewModel.prepareForDisplay()                      │
+│ ✅ Exposes displayData to component                         │
 └─────────────────────────────────────────────────────────────┘
-                            ↓ consume
+                            ↓ consumes
 ┌─────────────────────────────────────────────────────────────┐
 │ 4. UI (React Component)                                     │
-│ "Renderizo lo que el ViewModel preparó"                     │
+│ "I render what the ViewModel prepared"                      │
 │                                                              │
 │ ✅ <Badge color={pokemon.sizeBadgeColor} />                 │
 │ ✅ <h3>{pokemon.displayName}</h3>                           │
 │ ✅ <p>{pokemon.heightLabel}</p>                             │
 │                                                              │
-│ NO calcula, NO decide, solo renderiza                       │
+│ Does NOT calculate, does NOT decide, only renders           │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🔄 Flujo de datos completo
+## 🔄 Complete Data Flow
 
-### **Escenario:** Usuario selecciona tipo "fire"
+### **Scenario:** User selects "fire" type
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -568,15 +568,15 @@ viewModel.convertToMeters(height)       // Va en Entidad
 │   ├─ new PokemonType("fire")                                 │
 │   ├─ new GetPokemonListUseCase(repository)                   │
 │   └─ useCase.execute(pokemonType)                            │
-│       └─ Returns: PokemonListItem[] (entidades de domain)    │
+│       └─ Returns: PokemonListItem[] (domain entities)        │
 │                                                               │
 │ prepareForDisplay(pokemonList):                              │
-│   ├─ pokemon.getDisplayName() ← Entidad                      │
-│   ├─ pokemon.getSizeCategory() ← Entidad                     │
-│   ├─ pokemon.getHeightInMeters() ← Entidad                   │
+│   ├─ pokemon.getDisplayName() ← Entity                       │
+│   ├─ pokemon.getSizeCategory() ← Entity                      │
+│   ├─ pokemon.getHeightInMeters() ← Entity                    │
 │   ├─ getBadgeColorForSize(...) ← ViewModel                   │
-│   └─ pokemon.isBossTier() ← Entidad                          │
-│       └─ Returns: PokemonDisplayData[] (DTO para vista)      │
+│   └─ pokemon.isBossTier() ← Entity                           │
+│       └─ Returns: PokemonDisplayData[] (DTO for view)        │
 └──────────────────────────────────────────────────────────────┘
                           ↓
 ┌──────────────────────────────────────────────────────────────┐
@@ -606,12 +606,12 @@ viewModel.convertToMeters(height)       // Va en Entidad
 
 ---
 
-## 🧪 Testing Strategy: Cada capa por separado
+## 🧪 Testing Strategy: Each Layer Separately
 
-### **1. Tests de Entidad (Domain)**
+### **1. Entity Tests (Domain)**
 
 ```typescript
-// ✅ Tests rápidos, sin dependencias
+// ✅ Fast tests, no dependencies
 describe("PokemonListItem", () => {
   it("should classify pokemon by size", () => {
     const pikachu = new PokemonListItem("1", "pikachu", 4, "img.png");
@@ -633,39 +633,39 @@ describe("PokemonListItem", () => {
 });
 ```
 
-**Características:**
-- ⚡ Super rápidos (sin I/O)
-- 🎯 Prueban reglas de negocio puras
-- 🔒 No dependen de React, HTTP, UI
+**Characteristics:**
+- ⚡ Super fast (no I/O)
+- 🎯 Test pure business rules
+- 🔒 Don't depend on React, HTTP, UI
 
 ---
 
-### **2. Tests de ViewModel (Application)**
+### **2. ViewModel Tests (Application)**
 
 ```typescript
-// ✅ Tests con mock del repository
+// ✅ Tests with mocked repository
 describe("PokemonListViewModel", () => {
   it("should prepare pokemon for display with correct formatting", () => {
     const mockRepo = createMockRepository();
     const viewModel = new PokemonListViewModel(mockRepo);
-    
+
     const pokemon = new PokemonListItem("1", "charizard", 17, "img.png");
     const display = viewModel.prepareForDisplay([pokemon]);
 
     expect(display[0]).toEqual({
       id: "1",
-      displayName: "Charizard",  // ← Capitalizado por entidad
-      heightLabel: "1.7m",        // ← Formateado por ViewModel
-      sizeCategory: "medium",     // ← Calculado por entidad
-      sizeBadgeColor: "#F59E0B",  // ← Decidido por ViewModel
-      showBossCrown: false,       // ← Calculado por entidad
+      displayName: "Charizard",  // ← Capitalized by entity
+      heightLabel: "1.7m",        // ← Formatted by ViewModel
+      sizeCategory: "medium",     // ← Calculated by entity
+      sizeBadgeColor: "#F59E0B",  // ← Decided by ViewModel
+      showBossCrown: false,       // ← Calculated by entity
       imageUrl: "img.png",
     });
   });
 
   it("should assign correct badge colors based on size", () => {
     const viewModel = new PokemonListViewModel(mockRepo);
-    
+
     const small = new PokemonListItem("1", "pikachu", 4, "img.png");
     const medium = new PokemonListItem("2", "charizard", 17, "img.png");
     const large = new PokemonListItem("3", "onix", 88, "img.png");
@@ -679,22 +679,22 @@ describe("PokemonListViewModel", () => {
 });
 ```
 
-**Características:**
-- 🔌 Mock del repository (no HTTP real)
-- 🎨 Prueban transformación de datos para UI
-- 📦 Prueban orquestación de use cases
+**Characteristics:**
+- 🔌 Mocked repository (no real HTTP)
+- 🎨 Test data transformation for UI
+- 📦 Test orchestration of use cases
 
 ---
 
-### **3. Tests de Hook (Infrastructure)**
+### **3. Hook Tests (Infrastructure)**
 
 ```typescript
-// ✅ Tests con renderHook de @testing-library/react
+// ✅ Tests with renderHook from @testing-library/react
 describe("usePokemonList", () => {
   it("should return display data ready for rendering", async () => {
     const mockRepo = createMockRepository();
-    
-    const { result } = renderHook(() => 
+
+    const { result } = renderHook(() =>
       usePokemonList("fire", mockRepo)
     );
 
@@ -712,21 +712,21 @@ describe("usePokemonList", () => {
 });
 ```
 
-**Características:**
-- ⚛️ Prueban integración con React
-- 🔄 Prueban estados (loading, error, success)
-- 🎭 Mock del repository, no API real
+**Characteristics:**
+- ⚛️ Test integration with React
+- 🔄 Test states (loading, error, success)
+- 🎭 Mock repository, no real API
 
 ---
 
-### **4. Tests de UI (Presentación)**
+### **4. UI Tests (Presentation)**
 
 ```typescript
-// ✅ Tests end-to-end con mocks de API
+// ✅ End-to-end tests with mocked API
 describe("PokemonList", () => {
   it("should render pokemon with badges and crowns", async () => {
     setupMockAPI(); // Mock fetch responses
-    
+
     render(
       <MemoryRouter initialEntries={["/?type=fire"]}>
         <PokemonList />
@@ -743,104 +743,104 @@ describe("PokemonList", () => {
 });
 ```
 
-**Características:**
-- 🎬 Prueban flujo completo
-- 🖥️ Verifican renderizado correcto
-- 🎭 Mock de API, no llamadas reales
+**Characteristics:**
+- 🎬 Test complete flow
+- 🖥️ Verify correct rendering
+- 🎭 Mock API, no real calls
 
 ---
 
-## ✅ Conclusión: Colaboración, no conflicto
+## ✅ Conclusion: Collaboration, Not Conflict
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│ ENTIDAD (Domain)                                        │
-│ "¿QUÉ ES un Pokemon?"                                   │
-│                                                          │
-│ ✅ Encapsula reglas de negocio universales              │
-│ ✅ Es testeable sin frameworks                          │
-│ ✅ Se reutiliza en toda la aplicación                   │
-│                                                          │
-│ Ejemplo: getSizeCategory(), isBossTier()                │
-└─────────────────────────────────────────────────────────┘
-                          ↓ usa
-┌─────────────────────────────────────────────────────────┐
-│ VIEWMODEL (Application)                                 │
-│ "¿CÓMO presento Pokemon en esta vista?"                 │
-│                                                          │
-│ ✅ Orquesta use cases                                   │
-│ ✅ Transforma entidades para UI                         │
-│ ✅ Decide aspectos de presentación                      │
-│                                                          │
-│ Ejemplo: prepareForDisplay(), getBadgeColorForSize()    │
-└─────────────────────────────────────────────────────────┘
-                          ↓ expone
-┌─────────────────────────────────────────────────────────┐
-│ UI (React)                                              │
-│ "Renderizo lo que el ViewModel preparó"                 │
-│                                                          │
-│ ✅ Componente "humble"                                  │
-│ ✅ Solo renderiza, no calcula                           │
-│ ✅ No contiene lógica de negocio                        │
-│                                                          │
-│ Ejemplo: <Badge color={pokemon.sizeBadgeColor} />       │
-└─────────────────────────────────────────────────────────┘
-```
-
----
-
-## 🎯 Beneficios de esta separación
-
-### **1. Testabilidad**
-```typescript
-// ✅ Cada capa se testea independientemente
-domain:         tests sin UI, sin HTTP, sin React
-application:    tests sin UI, con mock repository
-infrastructure: tests con React, con mock repository
-ui:             tests end-to-end con mocks de API
-```
-
-### **2. Reusabilidad**
-```typescript
-// ✅ Entidad reutilizable en toda la app
-pokemon.getSizeCategory()  // En PokemonList
-pokemon.getSizeCategory()  // En PokemonDetail
-pokemon.getSizeCategory()  // En PokemonCard
-pokemon.getSizeCategory()  // En PokemonComparison
-```
-
-### **3. Mantenibilidad**
-```typescript
-// ✅ Cambios localizados
-Cambia regla de negocio      → Solo modificas Entidad
-Cambia color de badge        → Solo modificas ViewModel
-Cambia framework (Vue, etc.) → Solo modificas UI
-```
-
-### **4. Claridad**
-```typescript
-// ✅ Cada clase tiene responsabilidad única
-PokemonListItem    → "¿Qué ES un Pokemon?"
-PokemonListViewModel → "¿Cómo PRESENTO Pokemon?"
-PokemonList          → "¿Cómo RENDERIZO Pokemon?"
+┌─────────────────────────────────────────────────────────────┐
+│ ENTITY (Domain)                                             │
+│ "WHAT IS a Pokemon?"                                        │
+│                                                              │
+│ ✅ Encapsulates universal business rules                    │
+│ ✅ Testable without frameworks                              │
+│ ✅ Reused throughout the application                        │
+│                                                              │
+│ Example: getSizeCategory(), isBossTier()                    │
+└─────────────────────────────────────────────────────────────┘
+                          ↓ uses
+┌─────────────────────────────────────────────────────────────┐
+│ VIEWMODEL (Application)                                     │
+│ "HOW do I present Pokemon in this view?"                    │
+│                                                              │
+│ ✅ Orchestrates use cases                                   │
+│ ✅ Transforms entities for UI                               │
+│ ✅ Decides presentation aspects                             │
+│                                                              │
+│ Example: prepareForDisplay(), getBadgeColorForSize()        │
+└─────────────────────────────────────────────────────────────┘
+                          ↓ exposes
+┌─────────────────────────────────────────────────────────────┐
+│ UI (React)                                                  │
+│ "I render what the ViewModel prepared"                      │
+│                                                              │
+│ ✅ "Humble" component                                       │
+│ ✅ Only renders, doesn't calculate                          │
+│ ✅ Contains no business logic                               │
+│                                                              │
+│ Example: <Badge color={pokemon.sizeBadgeColor} />           │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🚀 Resumen Final
+## 🎯 Benefits of This Separation
 
-**No hay conflicto entre Entidad y ViewModel.**
+### **1. Testability**
+```typescript
+// ✅ Each layer tested independently
+domain:         tests without UI, without HTTP, without React
+application:    tests without UI, with mocked repository
+infrastructure: tests with React, with mocked repository
+ui:             end-to-end tests with mocked API
+```
 
-Son **complementarios** y trabajan juntos:
+### **2. Reusability**
+```typescript
+// ✅ Entity reusable throughout the app
+pokemon.getSizeCategory()  // In PokemonList
+pokemon.getSizeCategory()  // In PokemonDetail
+pokemon.getSizeCategory()  // In PokemonCard
+pokemon.getSizeCategory()  // In PokemonComparison
+```
 
-1. **Entidad** define y encapsula reglas de negocio
-2. **ViewModel** usa esas reglas para preparar datos
-3. **UI** renderiza los datos preparados
+### **3. Maintainability**
+```typescript
+// ✅ Changes are localized
+Business rule changes      → Only modify Entity
+Badge color changes        → Only modify ViewModel
+Framework change (Vue)     → Only modify UI
+```
 
-**Es colaboración en capas, cada una con su responsabilidad clara.**
+### **4. Clarity**
+```typescript
+// ✅ Each class has single responsibility
+PokemonListItem    → "What IS a Pokemon?"
+PokemonListViewModel → "How do I PRESENT Pokemon?"
+PokemonList          → "How do I RENDER Pokemon?"
+```
 
 ---
 
-**Autor:** Ricardo (Claude Sonnet 4.5)  
-**Contexto:** Refactor Hexagonal - Feature pokemon-list  
+## 🚀 Final Summary
+
+**There is no conflict between Entity and ViewModel.**
+
+They are **complementary** and work together:
+
+1. **Entity** defines and encapsulates business rules
+2. **ViewModel** uses those rules to prepare data
+3. **UI** renders the prepared data
+
+**It's collaboration across layers, each with its clear responsibility.**
+
+---
+
+**Author:** Ricardo (Claude Sonnet 4.5)
+**Context:** Hexagonal Refactor - Feature pokemon-list
 **Branch:** `refactor-list-to-hexagonal`

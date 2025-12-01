@@ -1,6 +1,8 @@
 import { vi, it, expect, beforeEach, afterEach } from 'vitest';
 import { clearPersistedState } from '../localStorageMiddleware';
 
+const STORAGE_KEY = '__pokemon-dashboard__';
+
 beforeEach(() => {
   vi.clearAllMocks();
 });
@@ -12,9 +14,9 @@ afterEach(() => {
 it('should call localStorage.removeItem with correct key', () => {
   const removeItemSpy = vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {});
 
-  clearPersistedState();
+  clearPersistedState(STORAGE_KEY);
 
-  expect(removeItemSpy).toHaveBeenCalledWith('__pokemon-dashboard__');
+  expect(removeItemSpy).toHaveBeenCalledWith(STORAGE_KEY);
 
   removeItemSpy.mockRestore();
 });
@@ -23,7 +25,7 @@ it('should not throw error when localStorage.removeItem succeeds', () => {
   const removeItemSpy = vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {});
 
   expect(() => {
-    clearPersistedState();
+    clearPersistedState(STORAGE_KEY);
   }).not.toThrow();
 
   removeItemSpy.mockRestore();
@@ -32,9 +34,9 @@ it('should not throw error when localStorage.removeItem succeeds', () => {
 it('should call localStorage.removeItem even when called on empty storage', () => {
   const removeItemSpy = vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {});
 
-  clearPersistedState();
+  clearPersistedState(STORAGE_KEY);
 
-  expect(removeItemSpy).toHaveBeenCalledWith('__pokemon-dashboard__');
+  expect(removeItemSpy).toHaveBeenCalledWith(STORAGE_KEY);
 
   removeItemSpy.mockRestore();
 });
@@ -43,7 +45,7 @@ it('should log message when state is cleared', () => {
   const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
   const removeItemSpy = vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {});
 
-  clearPersistedState();
+  clearPersistedState(STORAGE_KEY);
 
   expect(consoleSpy).toHaveBeenCalled();
 
@@ -58,11 +60,11 @@ it('should handle error gracefully when localStorage.removeItem throws', () => {
   const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
   expect(() => {
-    clearPersistedState();
+    clearPersistedState(STORAGE_KEY);
   }).not.toThrow();
 
   expect(consoleSpy).toHaveBeenCalled();
-  expect(removeItemSpy).toHaveBeenCalledWith('__pokemon-dashboard__');
+  expect(removeItemSpy).toHaveBeenCalledWith(STORAGE_KEY);
 
   removeItemSpy.mockRestore();
   consoleSpy.mockRestore();

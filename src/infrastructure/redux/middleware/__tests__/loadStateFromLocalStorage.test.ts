@@ -1,6 +1,8 @@
 import { vi, it, expect, beforeEach, afterEach } from 'vitest';
 import { loadStateFromLocalStorage } from '../localStorageMiddleware';
 
+const STORAGE_KEY = '__pokemon-dashboard__';
+
 beforeEach(() => {
   vi.clearAllMocks();
 });
@@ -12,10 +14,10 @@ afterEach(() => {
 it('should return undefined when localStorage.getItem returns null', () => {
   const getItemSpy = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => null);
 
-  const loaded = loadStateFromLocalStorage();
+  const loaded = loadStateFromLocalStorage(STORAGE_KEY);
 
   expect(loaded).toBeUndefined();
-  expect(getItemSpy).toHaveBeenCalledWith('__pokemon-dashboard__');
+  expect(getItemSpy).toHaveBeenCalledWith(STORAGE_KEY);
 
   getItemSpy.mockRestore();
 });
@@ -28,12 +30,12 @@ it('should return parsed state when localStorage.getItem returns valid JSON', ()
     () => mockStateString
   );
 
-  const loaded = loadStateFromLocalStorage();
+  const loaded = loadStateFromLocalStorage(STORAGE_KEY);
 
   expect(loaded).toEqual({
     listPreferences: { someValue: true },
   });
-  expect(getItemSpy).toHaveBeenCalledWith('__pokemon-dashboard__');
+  expect(getItemSpy).toHaveBeenCalledWith(STORAGE_KEY);
 
   getItemSpy.mockRestore();
 });
@@ -46,7 +48,7 @@ it('should return state with false value when localStorage contains it', () => {
     () => mockStateString
   );
 
-  const loaded = loadStateFromLocalStorage();
+  const loaded = loadStateFromLocalStorage(STORAGE_KEY);
 
   expect(loaded).toEqual({
     listPreferences: { someValue: false },
@@ -61,7 +63,7 @@ it('should return undefined when localStorage.getItem returns invalid JSON', () 
   );
   const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-  const loaded = loadStateFromLocalStorage();
+  const loaded = loadStateFromLocalStorage(STORAGE_KEY);
 
   expect(loaded).toBeUndefined();
   expect(consoleSpy).toHaveBeenCalled();
@@ -76,11 +78,11 @@ it('should return undefined and log error when localStorage.getItem throws', () 
   });
   const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-  const loaded = loadStateFromLocalStorage();
+  const loaded = loadStateFromLocalStorage(STORAGE_KEY);
 
   expect(loaded).toBeUndefined();
   expect(consoleSpy).toHaveBeenCalled();
-  expect(getItemSpy).toHaveBeenCalledWith('__pokemon-dashboard__');
+  expect(getItemSpy).toHaveBeenCalledWith(STORAGE_KEY);
 
   getItemSpy.mockRestore();
   consoleSpy.mockRestore();

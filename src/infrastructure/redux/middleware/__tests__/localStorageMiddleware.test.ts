@@ -1,5 +1,9 @@
 import { vi, it, expect, beforeEach, afterEach } from 'vitest';
-import { localStorageMiddleware } from '../localStorageMiddleware';
+import { createPersistenceMiddleware } from '../localStorageMiddleware';
+
+const STORAGE_KEY = 'test-storage-key';
+const TEST_SLICE_NAME = 'testSlice';
+const SLICES_TO_PERSIST = [TEST_SLICE_NAME];
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -13,54 +17,63 @@ it('should call next(action) to pass action to reducer', () => {
   const mockNext = vi.fn();
   const mockStore = {
     getState: () => ({
-      listPreferences: { someValue: true },
+      testSlice: { testProp: true },
     }),
   };
   const setItemSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
-  const action = { type: 'listPreferences/someAction' };
+  const action = { type: `${TEST_SLICE_NAME}/someAction` };
 
-  const middleware = localStorageMiddleware(mockStore as any)(mockNext);
-  middleware(action);
+  const middleware = createPersistenceMiddleware({
+    storageKey: STORAGE_KEY,
+    slicesToPersist: SLICES_TO_PERSIST,
+  });
+
+  middleware(mockStore as any)(mockNext)(action);
 
   expect(mockNext).toHaveBeenCalledWith(action);
 
   setItemSpy.mockRestore();
 });
 
-it('should call localStorage.setItem when action type matches listPreferences/*', () => {
+it('should call localStorage.setItem when action type matches configured slice', () => {
   const mockNext = vi.fn();
   const mockState = {
-    listPreferences: { someValue: true },
+    testSlice: { testProp: true },
   };
   const mockStore = {
     getState: () => mockState,
   };
   const setItemSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
-  const action = { type: 'listPreferences/someAction' };
+  const action = { type: `${TEST_SLICE_NAME}/someAction` };
 
-  const middleware = localStorageMiddleware(mockStore as any)(mockNext);
-  middleware(action);
+  const middleware = createPersistenceMiddleware({
+    storageKey: STORAGE_KEY,
+    slicesToPersist: SLICES_TO_PERSIST,
+  });
 
-  expect(setItemSpy).toHaveBeenCalledWith(
-    '__pokemon-dashboard__',
-    JSON.stringify(mockState)
-  );
+  middleware(mockStore as any)(mockNext)(action);
+
+  expect(setItemSpy).toHaveBeenCalledWith(STORAGE_KEY, JSON.stringify(mockState));
 
   setItemSpy.mockRestore();
 });
 
-it('should not call localStorage.setItem when action type does not match listPreferences/*', () => {
+it('should not call localStorage.setItem when action type does not match configured slice', () => {
   const mockNext = vi.fn();
   const mockStore = {
     getState: () => ({
-      listPreferences: { someValue: false },
+      testSlice: { testProp: false },
     }),
   };
   const setItemSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
-  const action = { type: 'someOtherSlice/someAction' };
+  const action = { type: 'otherSlice/someAction' };
 
-  const middleware = localStorageMiddleware(mockStore as any)(mockNext);
-  middleware(action);
+  const middleware = createPersistenceMiddleware({
+    storageKey: STORAGE_KEY,
+    slicesToPersist: SLICES_TO_PERSIST,
+  });
+
+  middleware(mockStore as any)(mockNext)(action);
 
   expect(setItemSpy).not.toHaveBeenCalled();
 
@@ -69,25 +82,28 @@ it('should not call localStorage.setItem when action type does not match listPre
 
 it('should call localStorage.setItem with updated state after action is processed', () => {
   const mockNext = vi.fn();
-  let currentState = { listPreferences: { someValue: false } };
+  let currentState = { testSlice: { testProp: false } };
   const mockStore = {
     getState: () => currentState,
   };
   const setItemSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
-  const action = { type: 'listPreferences/updateValue', payload: true };
+  const action = { type: `${TEST_SLICE_NAME}/updateValue`, payload: true };
 
-  const middleware = localStorageMiddleware(mockStore as any)(mockNext);
+  const middleware = createPersistenceMiddleware({
+    storageKey: STORAGE_KEY,
+    slicesToPersist: SLICES_TO_PERSIST,
+  });
 
   // Simulate state change after action is processed
   mockNext.mockImplementation(() => {
-    currentState = { listPreferences: { someValue: true } };
+    currentState = { testSlice: { testProp: true } };
   });
 
-  middleware(action);
+  middleware(mockStore as any)(mockNext)(action);
 
   expect(setItemSpy).toHaveBeenCalledWith(
-    '__pokemon-dashboard__',
-    JSON.stringify({ listPreferences: { someValue: true } })
+    STORAGE_KEY,
+    JSON.stringify({ testSlice: { testProp: true } })
   );
 
   setItemSpy.mockRestore();
@@ -97,19 +113,22 @@ it('should handle localStorage.setItem errors gracefully without throwing', () =
   const mockNext = vi.fn();
   const mockStore = {
     getState: () => ({
-      listPreferences: { someValue: true },
+      testSlice: { testProp: true },
     }),
   };
   const setItemSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
     throw new Error('Storage full');
   });
   const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-  const action = { type: 'listPreferences/someAction' };
+  const action = { type: `${TEST_SLICE_NAME}/someAction` };
 
-  const middleware = localStorageMiddleware(mockStore as any)(mockNext);
+  const middleware = createPersistenceMiddleware({
+    storageKey: STORAGE_KEY,
+    slicesToPersist: SLICES_TO_PERSIST,
+  });
 
   expect(() => {
-    middleware(action);
+    middleware(mockStore as any)(mockNext)(action);
   }).not.toThrow();
 
   expect(consoleSpy).toHaveBeenCalled();
@@ -122,17 +141,21 @@ it('should still call next(action) even if localStorage.setItem fails', () => {
   const mockNext = vi.fn();
   const mockStore = {
     getState: () => ({
-      listPreferences: { someValue: true },
+      testSlice: { testProp: true },
     }),
   };
   const setItemSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
     throw new Error('Storage error');
   });
   const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-  const action = { type: 'listPreferences/someAction' };
+  const action = { type: `${TEST_SLICE_NAME}/someAction` };
 
-  const middleware = localStorageMiddleware(mockStore as any)(mockNext);
-  middleware(action);
+  const middleware = createPersistenceMiddleware({
+    storageKey: STORAGE_KEY,
+    slicesToPersist: SLICES_TO_PERSIST,
+  });
+
+  middleware(mockStore as any)(mockNext)(action);
 
   expect(mockNext).toHaveBeenCalledWith(action);
 

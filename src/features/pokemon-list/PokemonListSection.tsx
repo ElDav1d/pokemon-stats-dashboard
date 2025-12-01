@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import usePokemonList from "./infrastructure/react/hooks/usePokemonList";
+import { useListControls } from "./infrastructure/react/hooks/useListControls";
 import { useVirtualGridList } from "../../infrastructure/react/hooks/useVirtualGridList";
 import { pokemonListConfig, responsiveBreakpoints } from "./domain/constants";
 import { LoadingMessage, ErrorMessage } from "../../ui";
@@ -10,33 +10,19 @@ import PokemonListGrid from "./PokemonListGrid";
 const PokemonListSection = () => {
   const [searchParams] = useSearchParams();
   const selectedTypeParam = searchParams.get("type");
-  const [isSortedByHeight, setIsSortedByHeight] = useState(false);
+  const { sortByHeight: isSortedByHeight, handleToggleSortByHeight } = useListControls();
 
-  // Hook 1: Data fetching and sorting logic
-  const { pokemonList, isLoading, isError, sortByHeight } = usePokemonList(
+  const { pokemonList, isLoading, isError } = usePokemonList(
     selectedTypeParam ?? ""
   );
 
-  // Component composition: Apply sorting if enabled
-  const sortablePokemonList = useMemo(() => {
-    if (isSortedByHeight && pokemonList.length > 0) {
-      return sortByHeight(pokemonList);
-    }
-    return pokemonList;
-  }, [isSortedByHeight, pokemonList, sortByHeight]);
-
-  // Hook 2: Virtualization for performance
   const { visibleItems, totalHeight } = useVirtualGridList(
-    sortablePokemonList,
+    pokemonList,
     {
       config: pokemonListConfig,
       breakpoints: responsiveBreakpoints,
     }
   );
-
-  const handleSortChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setIsSortedByHeight(event.target.checked);
-  };
 
   if (isLoading) {
     return (
@@ -58,7 +44,7 @@ const PokemonListSection = () => {
     <section>
       <PokemonListControls
         isSortedByHeight={isSortedByHeight}
-        onSortChange={handleSortChange}
+        onSortChange={handleToggleSortByHeight}
       />
       <PokemonListGrid visibleItems={visibleItems} totalHeight={totalHeight} />
     </section>

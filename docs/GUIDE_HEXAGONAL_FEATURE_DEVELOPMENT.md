@@ -1,113 +1,113 @@
-# Guía: Desarrollo de Features con Arquitectura Hexagonal
+# Guide: Feature Development with Hexagonal Architecture
 
-## 📋 Objetivo
+## 📋 Objective
 
-Esta guía te enseña a desarrollar **cualquier nueva feature** en el proyecto siguiendo los principios de **Arquitectura Hexagonal** y **Clean Architecture**, usando como referencia la feature `pokemon-list`.
+This guide teaches you how to develop **any new feature** in the project following the principles of **Hexagonal Architecture** and **Clean Architecture**, using the `pokemon-list` feature as a reference.
 
 ---
 
-## 🎯 Principios Fundamentales
+## 🎯 Fundamental Principles
 
-### **1. Dependency Rule (Regla de Dependencia)**
+### **1. Dependency Rule (The Golden Rule)**
 
 ```
 UI → Infrastructure → Application → Domain
 ```
 
-**Regla de oro:** Las dependencias SIEMPRE apuntan hacia adentro.
+**Golden rule:** Dependencies ALWAYS point inward.
 
 ```typescript
-// ✅ CORRECTO
-Domain/Entity.ts  // No importa nada
-Application/UseCase.ts  // Importa Domain
-Infrastructure/Repository.ts  // Importa Domain
-UI/Component.tsx  // Importa Infrastructure
+// ✅ CORRECT
+Domain/Entity.ts  // Imports nothing
+Application/UseCase.ts  // Imports Domain
+Infrastructure/Repository.ts  // Imports Domain
+UI/Component.tsx  // Imports Infrastructure
 
-// ❌ INCORRECTO
-Domain/Entity.ts  // Importa fetch, React, Redux ← ¡NO!
+// ❌ INCORRECT
+Domain/Entity.ts  // Imports fetch, React, Redux ← NO!
 ```
 
 ---
 
-### **2. Separation of Concerns (Separación de Responsabilidades)**
+### **2. Separation of Concerns**
 
-Cada capa tiene UNA responsabilidad clara:
+Each layer has ONE clear responsibility:
 
-| Capa | Responsabilidad | Qué contiene | Qué NO contiene |
-|------|----------------|--------------|-----------------|
-| **Domain** | Reglas de negocio puras | Entidades, Value Objects, Ports | React, HTTP, Redux |
-| **Application** | Orquestar domain | Use Cases, ViewModels | React, HTTP, Redux |
-| **Infrastructure** | Adaptadores técnicos | HTTP, React hooks, Redux | Lógica de negocio |
-| **UI** | Presentación | Componentes React | Lógica de negocio, HTTP |
+| Layer | Responsibility | Contains | Does NOT contain |
+|-------|----------------|----------|------------------|
+| **Domain** | Pure business rules | Entities, Value Objects, Ports | React, HTTP, Redux |
+| **Application** | Orchestrate domain | Use Cases, ViewModels | React, HTTP, Redux |
+| **Infrastructure** | Technical adapters | HTTP, React hooks, Redux | Business logic |
+| **UI** | Presentation | React Components | Business logic, HTTP |
 
 ---
 
-### **3. Ports & Adapters (Puertos y Adaptadores)**
+### **3. Ports & Adapters**
 
 ```
 ┌─────────────────────────────────────────┐
-│ DOMAIN define PORTS (interfaces)        │
-│ "Necesito un repositorio que me dé X"   │
+│ DOMAIN defines PORTS (interfaces)       │
+│ "I need a repository that gives me X"   │
 └─────────────────────────────────────────┘
                   ↓
 ┌─────────────────────────────────────────┐
-│ INFRASTRUCTURE implementa ADAPTERS      │
-│ "Yo implemento ese port con HTTP"       │
+│ INFRASTRUCTURE implements ADAPTERS      │
+│ "I implement that port with HTTP"       │
 └─────────────────────────────────────────┘
 ```
 
-**Ejemplo:**
+**Example:**
 ```typescript
-// Domain define el PORT
+// Domain defines the PORT
 export interface PokemonRepository {
   findAllByType(type: PokemonType): Promise<PokemonListItem[]>;
 }
 
-// Infrastructure implementa el ADAPTER
+// Infrastructure implements the ADAPTER
 export class HttpPokemonRepository implements PokemonRepository {
   async findAllByType(type: PokemonType): Promise<PokemonListItem[]> {
-    // Implementación con HTTP
+    // Implementation with HTTP
   }
 }
 ```
 
 ---
 
-## 📂 Estructura de Carpetas por Feature
+## 📂 Folder Structure by Feature
 
 ```
 src/
 ├── features/
 │   └── [feature-name]/
-│       ├── domain/                    # 🔵 CAPA 1: Reglas de negocio
-│       │   ├── entities/              # Objetos ricos con comportamiento
-│       │   ├── value-objects/         # Objetos inmutables con validación
-│       │   ├── ports/                 # Interfaces (contratos)
-│       │   └── constants/             # Constantes del dominio
+│       ├── domain/                    # 🔵 LAYER 1: Business rules
+│       │   ├── entities/              # Rich objects with behavior
+│       │   ├── value-objects/         # Immutable objects with validation
+│       │   ├── ports/                 # Interfaces (contracts)
+│       │   └── constants/             # Domain constants
 │       │
-│       ├── application/               # 🟢 CAPA 2: Casos de uso
-│       │   ├── use-cases/             # Lógica de aplicación
+│       ├── application/               # 🟢 LAYER 2: Use cases
+│       │   ├── use-cases/             # Application logic
 │       │   │   └── [use-case-name]/
 │       │   │       ├── [UseCase].ts
 │       │   │       └── [UseCase].test.ts
-│       │   └── view-models/           # Coordinadores de UI
+│       │   └── view-models/           # UI coordinators
 │       │       └── [ViewModel].ts
 │       │
-│       ├── infrastructure/            # 🟡 CAPA 3: Adaptadores
-│       │   ├── http/                  # Adaptador HTTP
+│       ├── infrastructure/            # 🟡 LAYER 3: Adapters
+│       │   ├── http/                  # HTTP adapter
 │       │   │   └── Http[Name]Repository.ts
-│       │   ├── react/                 # Adaptador React
+│       │   ├── react/                 # React adapter
 │       │   │   └── hooks/
 │       │   │       └── use[Name].ts
-│       │   └── redux/                 # Adaptador Redux (opcional)
+│       │   └── redux/                 # Redux adapter (optional)
 │       │       ├── slices/
 │       │       └── selectors/
 │       │
-│       └── ui/                        # 🔴 CAPA 4: Presentación
-│           ├── [FeatureName].tsx      # Componente principal
-│           └── [ComponentName].tsx    # Subcomponentes
+│       └── ui/                        # 🔴 LAYER 4: Presentation
+│           ├── [FeatureName].tsx      # Main component
+│           └── [ComponentName].tsx    # Subcomponents
 │
-└── infrastructure/                    # 🟡 SHARED (toda la app)
+└── infrastructure/                    # 🟡 SHARED (entire app)
     ├── client/
     │   └── fetch/
     │       └── FetchHttpClient.ts
@@ -120,70 +120,70 @@ src/
 
 ---
 
-## 🚀 Paso a Paso: Desarrollar una Nueva Feature
+## 🚀 Step by Step: Developing a New Feature
 
-Vamos a desarrollar una feature hipotética: **"Pokemon Favorites"** (marcar Pokemon como favoritos).
-
----
+Let's develop a hypothetical feature: **"Pokemon Favorites"** (marking Pokemon as favorites).
 
 ---
 
-## ❓ **Aclaración Importante: ¿Por qué Value Objects tienen métodos?**
+---
 
-### **Confusión común:**
+## ❓ **Important Clarification: Why do Value Objects have methods?**
 
-> "Si `FavoritePokemonId` tiene métodos (`equals()`, `toString()`), ¿no debería ser una Entity?"
+### **Common confusion:**
 
-**Respuesta corta:** NO. Los Value Objects SÍ tienen métodos. La diferencia con Entities NO es "tener métodos", sino **cómo se identifican**.
+> "If `FavoritePokemonId` has methods (`equals()`, `toString()`), shouldn't it be an Entity?"
+
+**Short answer:** NO. Value Objects DO have methods. The difference with Entities is NOT "having methods", but **how they are identified**.
 
 ---
 
-### **Diferencias clave:**
+### **Key differences:**
 
-| Aspecto | Value Object | Entity |
-|---------|-------------|--------|
-| **Se identifica por** | Su valor | Su ID único |
-| **Comparación** | `value === other.value` | `id.equals(other.id)` |
-| **Inmutabilidad** | ✅ Inmutable | Puede mutar |
-| **Intercambiable** | ✅ Sí (mismo valor = mismo objeto) | ❌ No (mismo ID = misma entidad) |
-| **Tiene métodos** | ✅ SÍ (sobre su valor) | ✅ SÍ (lógica de negocio) |
+| Aspect | Value Object | Entity |
+|--------|-------------|--------|
+| **Identified by** | Its value | Its unique ID |
+| **Comparison** | `value === other.value` | `id.equals(other.id)` |
+| **Immutability** | ✅ Immutable | Can mutate |
+| **Interchangeable** | ✅ Yes (same value = same object) | ❌ No (same ID = same entity) |
+| **Has methods** | ✅ YES (about its value) | ✅ YES (business logic) |
 
 ---
 
-### **En nuestro proyecto:**
+### **In our project:**
 
 #### **FavoritePokemonId → Value Object**
 
 ```typescript
 class FavoritePokemonId {
   readonly value: string; // "25"
-  
+
   constructor(id: string) {
     if (!this.isValid(id)) throw new Error('Invalid ID');
     this.value = id;
   }
-  
-  // ✅ Métodos que operan sobre el VALOR
+
+  // ✅ Methods that operate on the VALUE
   equals(other: FavoritePokemonId): boolean {
-    return this.value === other.value; // Compara por VALOR
+    return this.value === other.value; // Compares by VALUE
   }
-  
+
   toString(): string {
     return this.value;
   }
 }
 
-// Dos IDs con el mismo número son INTERCAMBIABLES
+// Two IDs with the same number are INTERCHANGEABLE
 const id1 = new FavoritePokemonId('25');
 const id2 = new FavoritePokemonId('25');
-id1.equals(id2); // true → Son "lo mismo"
+id1.equals(id2); // true → They are "the same"
 ```
 
-**¿Por qué es Value Object?**
-- Se compara por **valor** (el número "25")
-- Es **inmutable** (no puedes cambiar el valor)
-- Dos instancias con el mismo valor son **intercambiables**
-- Tiene métodos para trabajar con el valor (`equals()`, `toString()`)
+**Why is it a Value Object?**
+- Compared by **value** (the number "25")
+- Is **immutable** (you can't change the value)
+- Two instances with the same value are **interchangeable**
+- Has methods to work with the value (`equals()`, `toString()`)
 
 ---
 
@@ -191,125 +191,125 @@ id1.equals(id2); // true → Son "lo mismo"
 
 ```typescript
 class FavoritePokemon {
-  readonly id: FavoritePokemonId; // ← Identificador único
+  readonly id: FavoritePokemonId; // ← Unique identifier
   readonly name: string;
   readonly imageUrl: string;
   readonly addedAt: Date;
-  
+
   constructor(id: FavoritePokemonId, name: string, imageUrl: string, addedAt: Date) {
     this.id = id;
     this.name = name;
     this.imageUrl = imageUrl;
     this.addedAt = addedAt;
   }
-  
-  // ✅ Métodos de LÓGICA DE NEGOCIO
+
+  // ✅ Methods of BUSINESS LOGIC
   isRecentlyAdded(): boolean {
     const now = new Date();
     const dayInMs = 24 * 60 * 60 * 1000;
     const diff = now.getTime() - this.addedAt.getTime();
     return diff < dayInMs;
   }
-  
+
   equals(other: FavoritePokemon): boolean {
-    return this.id.equals(other.id); // Compara por IDENTIDAD (ID)
+    return this.id.equals(other.id); // Compares by IDENTITY (ID)
   }
 }
 
-// Dos favoritos con el mismo ID son LA MISMA ENTIDAD (NO intercambiables)
+// Two favorites with the same ID are THE SAME ENTITY (NOT interchangeable)
 const fav1 = new FavoritePokemon(id1, 'pikachu', 'url1', date1);
 const fav2 = new FavoritePokemon(id2, 'pikachu-shiny', 'url2', date2);
 
-fav1.equals(fav2); // true → Mismo favorito (mismo ID)
-// Pero NO son intercambiables (diferentes datos, diferentes instancias)
+fav1.equals(fav2); // true → Same favorite (same ID)
+// But they are NOT interchangeable (different data, different instances)
 ```
 
-**¿Por qué es Entity?**
-- Se compara por **identidad** (su ID)
-- Puede tener lógica de negocio compleja (`isRecentlyAdded()`)
-- Dos instancias con el mismo ID representan **la misma entidad**
-- Tiene métodos de dominio, no solo sobre valores
+**Why is it an Entity?**
+- Compared by **identity** (its ID)
+- Can have complex business logic (`isRecentlyAdded()`)
+- Two instances with the same ID represent **the same entity**
+- Has domain methods, not just about values
 
 ---
 
-### **Regla de oro:**
+### **Golden rule:**
 
-**Pregunta:** ¿Dos instancias con los mismos valores son intercambiables?
+**Question:** Are two instances with the same values interchangeable?
 
-- **SÍ** → Value Object
-  - `FavoritePokemonId('25')` y `FavoritePokemonId('25')` son **lo mismo**
-  - Puedo usar cualquiera de los dos indistintamente
+- **YES** → Value Object
+  - `FavoritePokemonId('25')` and `FavoritePokemonId('25')` are **the same**
+  - I can use any of them interchangeably
 
 - **NO** → Entity
-  - Dos `FavoritePokemon` con ID "25" son **la misma entidad**
-  - Pero NO son intercambiables (son instancias diferentes en memoria)
+  - Two `FavoritePokemon` with ID "25" are **the same entity**
+  - But they are NOT interchangeable (different instances in memory)
 
 ---
 
-### **¿Por qué `FavoritePokemonId` tiene métodos?**
+### **Why does `FavoritePokemonId` have methods?**
 
-**1. `equals()` - Para comparar por valor:**
+**1. `equals()` - To compare by value:**
 ```typescript
 const id1 = new FavoritePokemonId('25');
 const id2 = new FavoritePokemonId('25');
 
-// ✅ Más expresivo que comparar strings
+// ✅ More expressive than comparing strings
 id1.equals(id2); // true
 
 // vs
 
-// ❌ Menos expresivo, expone implementación
+// ❌ Less expressive, exposes implementation
 id1.value === id2.value;
 ```
 
-**2. `toString()` - Para representación:**
+**2. `toString()` - For representation:**
 ```typescript
 const id = new FavoritePokemonId('25');
 
 console.log(`Pokemon ID: ${id}`); // "Pokemon ID: 25"
-// Puede cambiar formato sin romper código
+// Can change format without breaking code
 ```
 
-**3. Validación - Para garantizar invariantes:**
+**3. Validation - To guarantee invariants:**
 ```typescript
-// ✅ Validación centralizada en constructor
+// ✅ Centralized validation in constructor
 const id = new FavoritePokemonId('25'); // OK
 const invalid = new FavoritePokemonId('abc'); // ❌ Throw error
 
-// Garantía: si existe un FavoritePokemonId, es VÁLIDO
+// Guarantee: if a FavoritePokemonId exists, it's VALID
 function addToFavorites(id: FavoritePokemonId) {
-  // No necesito validar aquí, ya viene validado
+  // No need to validate here, it already comes validated
 }
 ```
 
 ---
 
-### **📚 Para más detalles conceptuales:**
+### **📚 For more conceptual details:**
 
-Si necesitas entender mejor la diferencia entre Value Objects y Entities con ejemplos más tangibles (DNI, Email, Persona), consulta: **`VALUE_OBJECTS_VS_ENTITIES_EXPLAINED.md`**
+If you need to better understand the difference between Value Objects and Entities with more tangible examples (ID, Email, Person), check: **`VALUE_OBJECTS_VS_ENTITIES_EXPLAINED.md`**
 
 ---
 
-## 🔵 PASO 1: DOMAIN LAYER (Reglas de Negocio)
+## 🔵 STEP 1: DOMAIN LAYER (Business Rules)
 
-### **1.1 Crear Value Object: FavoritePokemonId**
+### **1.1 Create Value Object: FavoritePokemonId**
 
-**Ubicación:** `src/features/pokemon-favorites/domain/value-objects/FavoritePokemonId.ts`
+**Location:** `src/features/pokemon-favorites/domain/value-objects/FavoritePokemonId.ts`
 
 ```typescript
 /**
- * Value Object que representa el ID de un Pokemon favorito
- * 
- * Responsabilidad:
- * - Validar que el ID es válido
- * - Encapsular la lógica de validación
- * - Inmutable (readonly)
+ * Value Object that represents a favorite Pokemon's ID
+ *
+ * Responsibility:
+ * - Validate that the ID is valid
+ * - Encapsulate validation logic
+ * - Immutable (readonly)
  */
 export class FavoritePokemonId {
   public readonly value: string;
 
   constructor(id: string) {
-    // ✅ Validación en el constructor
+    // ✅ Validation in constructor
     if (!id || id.trim().length === 0) {
       throw new Error('Pokemon ID cannot be empty');
     }
@@ -322,8 +322,8 @@ export class FavoritePokemonId {
   }
 
   /**
-   * Valida que el ID tenga formato correcto
-   * En Pokemon, los IDs son números positivos
+   * Validates that the ID has correct format
+   * In Pokemon, IDs are positive numbers
    */
   private isValidId(id: string): boolean {
     const numericId = parseInt(id, 10);
@@ -331,14 +331,14 @@ export class FavoritePokemonId {
   }
 
   /**
-   * Comparar dos IDs
+   * Compare two IDs
    */
   equals(other: FavoritePokemonId): boolean {
     return this.value === other.value;
   }
 
   /**
-   * Representación como string
+   * Representation as string
    */
   toString(): string {
     return this.value;
@@ -346,11 +346,11 @@ export class FavoritePokemonId {
 }
 ```
 
-**✅ Por qué Value Object:**
-- Encapsula validación
-- Previene IDs inválidos en toda la app
-- Es inmutable (seguridad)
-- Es reutilizable
+**✅ Why Value Object:**
+- Encapsulates validation
+- Prevents invalid IDs throughout the app
+- Is immutable (security)
+- Is reusable
 
 **✅ Tests:**
 
@@ -382,20 +382,20 @@ it('should compare two IDs correctly', () => {
 
 ---
 
-### **1.2 Crear Entity: FavoritePokemon**
+### **1.2 Create Entity: FavoritePokemon**
 
-**Ubicación:** `src/features/pokemon-favorites/domain/entities/FavoritePokemon.ts`
+**Location:** `src/features/pokemon-favorites/domain/entities/FavoritePokemon.ts`
 
 ```typescript
 import { FavoritePokemonId } from '../value-objects/FavoritePokemonId';
 
 /**
- * Entidad que representa un Pokemon favorito
- * 
- * Responsabilidad:
- * - Encapsular datos de un favorito
- * - Proveer métodos de dominio (comportamiento)
- * - Mantener invariantes del negocio
+ * Entity that represents a favorite Pokemon
+ *
+ * Responsibility:
+ * - Encapsulate favorite Pokemon data
+ * - Provide domain methods (behavior)
+ * - Maintain business invariants
  */
 export class FavoritePokemon {
   public readonly id: FavoritePokemonId;
@@ -409,7 +409,7 @@ export class FavoritePokemon {
     imageUrl: string,
     addedAt: Date = new Date()
   ) {
-    // ✅ Validaciones de negocio
+    // ✅ Business validations
     if (!name || name.trim().length === 0) {
       throw new Error('Pokemon name cannot be empty');
     }
@@ -425,8 +425,8 @@ export class FavoritePokemon {
   }
 
   /**
-   * Regla de negocio: ¿Es un favorito reciente?
-   * (agregado en las últimas 24 horas)
+   * Business rule: Is it a recent favorite?
+   * (added in the last 24 hours)
    */
   isRecentlyAdded(): boolean {
     const now = new Date();
@@ -436,14 +436,14 @@ export class FavoritePokemon {
   }
 
   /**
-   * Regla de negocio: Obtener nombre capitalizado
+   * Business rule: Get capitalized name
    */
   getDisplayName(): string {
     return this.name.charAt(0).toUpperCase() + this.name.slice(1);
   }
 
   /**
-   * Serializar para persistencia
+   * Serialize for persistence
    */
   toJSON(): Record<string, unknown> {
     return {
@@ -455,7 +455,7 @@ export class FavoritePokemon {
   }
 
   /**
-   * Deserializar desde JSON
+   * Deserialize from JSON
    */
   static fromJSON(data: any): FavoritePokemon {
     return new FavoritePokemon(
@@ -477,83 +477,83 @@ export class FavoritePokemon {
 }
 ```
 
-**✅ Por qué Entity (no interfaz):**
-- Encapsula comportamiento (`isRecentlyAdded()`, `getDisplayName()`)
-- Valida invariantes del negocio
-- Métodos de serialización
-- Reutilizable en toda la app
+**✅ Why Entity (not interface):**
+- Encapsulates behavior (`isRecentlyAdded()`, `getDisplayName()`)
+- Validates business invariants
+- Serialization methods
+- Reusable throughout the app
 
 ---
 
-### **1.3 Crear Port: FavoritesRepository**
+### **1.3 Create Port: FavoritesRepository**
 
-**Ubicación:** `src/features/pokemon-favorites/domain/ports/FavoritesRepository.ts`
+**Location:** `src/features/pokemon-favorites/domain/ports/FavoritesRepository.ts`
 
 ```typescript
 import { FavoritePokemon } from '../entities/FavoritePokemon';
 import { FavoritePokemonId } from '../value-objects/FavoritePokemonId';
 
 /**
- * Port (interfaz) que define el contrato del repositorio
- * 
- * Responsabilidad:
- * - Definir QUÉ operaciones necesita el dominio
- * - NO define CÓMO se implementan (eso es responsabilidad del adaptador)
- * 
- * El dominio NO sabe si los datos vienen de:
+ * Port (interface) that defines the repository contract
+ *
+ * Responsibility:
+ * - Define WHAT operations the domain needs
+ * - Does NOT define HOW they are implemented (that's the adapter's job)
+ *
+ * The domain does NOT know if data comes from:
  * - localStorage
  * - IndexedDB
- * - API REST
+ * - REST API
  * - Firebase
- * 
- * Eso lo decide la infrastructure layer.
+ *
+ * That's decided by the infrastructure layer.
  */
 export interface FavoritesRepository {
   /**
-   * Obtener todos los favoritos
+   * Get all favorites
    */
   findAll(): Promise<FavoritePokemon[]>;
 
   /**
-   * Obtener un favorito por ID
+   * Get a favorite by ID
    */
   findById(id: FavoritePokemonId): Promise<FavoritePokemon | null>;
 
   /**
-   * Agregar un favorito
+   * Add a favorite
    */
   add(favorite: FavoritePokemon): Promise<void>;
 
   /**
-   * Eliminar un favorito
+   * Remove a favorite
    */
   remove(id: FavoritePokemonId): Promise<void>;
 
   /**
-   * Verificar si un Pokemon es favorito
+   * Check if a Pokemon is favorite
    */
   isFavorite(id: FavoritePokemonId): Promise<boolean>;
 
   /**
-   * Obtener cantidad de favoritos
+   * Get count of favorites
    */
   count(): Promise<number>;
 }
 ```
 
-**✅ Por qué Port (interfaz):**
-- Define el contrato
-- Domain no depende de implementación
-- Facilita testing (mocks)
-- Permite múltiples adaptadores
+**✅ Why Port (interface):**
+- Defines the contract
+- Domain doesn't depend on implementation
+- Facilitates testing (mocks)
+- Allows multiple adapters
 
 ---
 
-## 🟢 PASO 2: APPLICATION LAYER (Casos de Uso)
+## 🟢 STEP 2: APPLICATION LAYER (Use Cases)
 
-### **2.1 Crear Use Case: AddToFavoritesUseCase**
+### **2.1 Create Use Case: AddToFavoritesUseCase**
 
-**Ubicación:** `src/features/pokemon-favorites/application/use-cases/add-to-favorites/AddToFavoritesUseCase.ts`
+**Location:** `src/features/pokemon-favorites/application/use-cases/add-to-favorites/AddToFavoritesUseCase.ts`
 
 ```typescript
 import { FavoritePokemon } from '../../../domain/entities/FavoritePokemon';
@@ -561,7 +561,7 @@ import { FavoritePokemonId } from '../../../domain/value-objects/FavoritePokemon
 import { FavoritesRepository } from '../../../domain/ports/FavoritesRepository';
 
 /**
- * DTO para el caso de uso
+ * DTO for the use case
  */
 export interface AddToFavoritesInput {
   id: string;
@@ -570,36 +570,36 @@ export interface AddToFavoritesInput {
 }
 
 /**
- * Caso de uso: Agregar Pokemon a favoritos
- * 
- * Responsabilidad:
- * - Orquestar la lógica de aplicación
- * - Validar que no sea duplicado
- * - Delegar al repositorio
- * - NO contiene lógica de negocio (eso va en Domain)
- * - NO contiene detalles de implementación (eso va en Infrastructure)
+ * Use case: Add Pokemon to favorites
+ *
+ * Responsibility:
+ * - Orchestrate application logic
+ * - Validate that it's not a duplicate
+ * - Delegate to repository
+ * - Does NOT contain business logic (that goes in Domain)
+ * - Does NOT contain implementation details (that goes in Infrastructure)
  */
 export class AddToFavoritesUseCase {
   constructor(private readonly repository: FavoritesRepository) {}
 
   async execute(input: AddToFavoritesInput): Promise<void> {
-    // 1. Crear Value Object (con validación)
+    // 1. Create Value Object (with validation)
     const pokemonId = new FavoritePokemonId(input.id);
 
-    // 2. Verificar si ya es favorito
+    // 2. Check if already favorite
     const alreadyFavorite = await this.repository.isFavorite(pokemonId);
     if (alreadyFavorite) {
       throw new Error(`Pokemon ${input.name} is already in favorites`);
     }
 
-    // 3. Crear entidad (con validación)
+    // 3. Create entity (with validation)
     const favorite = new FavoritePokemon(
       pokemonId,
       input.name,
       input.imageUrl
     );
 
-    // 4. Persistir
+    // 4. Persist
     await this.repository.add(favorite);
   }
 }
@@ -667,9 +667,9 @@ it('should throw error for invalid ID', async () => {
 
 ---
 
-### **2.2 Crear Use Case: RemoveFromFavoritesUseCase**
+### **2.2 Create Use Case: RemoveFromFavoritesUseCase**
 
-**Ubicación:** `src/features/pokemon-favorites/application/use-cases/remove-from-favorites/RemoveFromFavoritesUseCase.ts`
+**Location:** `src/features/pokemon-favorites/application/use-cases/remove-from-favorites/RemoveFromFavoritesUseCase.ts`
 
 ```typescript
 import { FavoritePokemonId } from '../../../domain/value-objects/FavoritePokemonId';
@@ -680,8 +680,8 @@ export class RemoveFromFavoritesUseCase {
 
   async execute(pokemonId: string): Promise<void> {
     const id = new FavoritePokemonId(pokemonId);
-    
-    // Verificar que existe
+
+    // Verify it exists
     const favorite = await this.repository.findById(id);
     if (!favorite) {
       throw new Error('Pokemon is not in favorites');
@@ -694,9 +694,9 @@ export class RemoveFromFavoritesUseCase {
 
 ---
 
-### **2.3 Crear ViewModel: FavoritesViewModel**
+### **2.3 Create ViewModel: FavoritesViewModel**
 
-**Ubicación:** `src/features/pokemon-favorites/application/view-models/FavoritesViewModel.ts`
+**Location:** `src/features/pokemon-favorites/application/view-models/FavoritesViewModel.ts`
 
 ```typescript
 import { FavoritePokemon } from '../../domain/entities/FavoritePokemon';
@@ -705,13 +705,13 @@ import { AddToFavoritesUseCase } from '../use-cases/add-to-favorites/AddToFavori
 import { RemoveFromFavoritesUseCase } from '../use-cases/remove-from-favorites/RemoveFromFavoritesUseCase';
 
 /**
- * ViewModel: Coordina casos de uso para la vista
- * 
- * Responsabilidad:
- * - Exponer métodos simples para la UI
- * - Orquestar múltiples use cases
- * - Transformar datos para la vista (opcional)
- * - NO contiene lógica de React
+ * ViewModel: Coordinates use cases for the view
+ *
+ * Responsibility:
+ * - Expose simple methods for the UI
+ * - Orchestrate multiple use cases
+ * - Transform data for the view (optional)
+ * - Does NOT contain React logic
  */
 export class FavoritesViewModel {
   private addUseCase: AddToFavoritesUseCase;
@@ -723,28 +723,28 @@ export class FavoritesViewModel {
   }
 
   /**
-   * Obtener todos los favoritos
+   * Get all favorites
    */
   async getFavorites(): Promise<FavoritePokemon[]> {
     return this.repository.findAll();
   }
 
   /**
-   * Agregar a favoritos
+   * Add to favorites
    */
   async addToFavorites(id: string, name: string, imageUrl: string): Promise<void> {
     await this.addUseCase.execute({ id, name, imageUrl });
   }
 
   /**
-   * Eliminar de favoritos
+   * Remove from favorites
    */
   async removeFromFavorites(id: string): Promise<void> {
     await this.removeUseCase.execute(id);
   }
 
   /**
-   * Verificar si es favorito
+   * Check if it's favorite
    */
   async isFavorite(id: string): Promise<boolean> {
     const pokemonId = new FavoritePokemonId(id);
@@ -752,7 +752,7 @@ export class FavoritesViewModel {
   }
 
   /**
-   * Obtener count de favoritos
+   * Get count of favorites
    */
   async getFavoritesCount(): Promise<number> {
     return this.repository.count();
@@ -762,11 +762,11 @@ export class FavoritesViewModel {
 
 ---
 
-## 🟡 PASO 3: INFRASTRUCTURE LAYER (Adaptadores)
+## 🟡 STEP 3: INFRASTRUCTURE LAYER (Adapters)
 
-### **3.1 Crear Adaptador: LocalStorageFavoritesRepository**
+### **3.1 Create Adapter: LocalStorageFavoritesRepository**
 
-**Ubicación:** `src/features/pokemon-favorites/infrastructure/storage/LocalStorageFavoritesRepository.ts`
+**Location:** `src/features/pokemon-favorites/infrastructure/storage/LocalStorageFavoritesRepository.ts`
 
 ```typescript
 import { FavoritePokemon } from '../../domain/entities/FavoritePokemon';
@@ -774,13 +774,13 @@ import { FavoritePokemonId } from '../../domain/value-objects/FavoritePokemonId'
 import { FavoritesRepository } from '../../domain/ports/FavoritesRepository';
 
 /**
- * Adaptador que implementa FavoritesRepository usando localStorage
- * 
- * Responsabilidad:
- * - Implementar el port FavoritesRepository
- * - Manejar detalles técnicos de localStorage
- * - Serializar/deserializar datos
- * - NO contiene lógica de negocio
+ * Adapter that implements FavoritesRepository using localStorage
+ *
+ * Responsibility:
+ * - Implement the FavoritesRepository port
+ * - Handle technical details of localStorage
+ * - Serialize/deserialize data
+ * - Does NOT contain business logic
  */
 export class LocalStorageFavoritesRepository implements FavoritesRepository {
   private readonly STORAGE_KEY = 'pokemon-favorites';
@@ -837,16 +837,16 @@ export class LocalStorageFavoritesRepository implements FavoritesRepository {
 }
 ```
 
-**✅ Por qué en Infrastructure:**
-- Es un detalle de implementación
-- Usa localStorage (tecnología específica)
-- Podría cambiarse por IndexedDB sin afectar domain/application
+**✅ Why in Infrastructure:**
+- It's an implementation detail
+- Uses localStorage (specific technology)
+- Could be replaced with IndexedDB without affecting domain/application
 
 ---
 
-### **3.2 Crear Hook React: useFavorites**
+### **3.2 Create React Hook: useFavorites**
 
-**Ubicación:** `src/features/pokemon-favorites/infrastructure/react/hooks/useFavorites.ts`
+**Location:** `src/features/pokemon-favorites/infrastructure/react/hooks/useFavorites.ts`
 
 ```typescript
 import { useState, useEffect, useMemo, useCallback } from 'react';
@@ -865,13 +865,13 @@ interface UseFavoritesResult {
 }
 
 /**
- * Hook React para manejar favoritos
- * 
- * Responsabilidad:
- * - Conectar React con el ViewModel
- * - Manejar estado de React (loading, error)
- * - Exponer funciones simples para componentes
- * - NO contiene lógica de negocio
+ * React hook for handling favorites
+ *
+ * Responsibility:
+ * - Connect React with the ViewModel
+ * - Handle React state (loading, error)
+ * - Expose simple functions for components
+ * - Does NOT contain business logic
  */
 export function useFavorites(): UseFavoritesResult {
   const [favorites, setFavorites] = useState<FavoritePokemon[]>([]);
@@ -954,11 +954,11 @@ export function useFavorites(): UseFavoritesResult {
 
 ---
 
-## 🔴 PASO 4: UI LAYER (Presentación)
+## 🔴 STEP 4: UI LAYER (Presentation)
 
-### **4.1 Crear Componente: FavoriteButton**
+### **4.1 Create Component: FavoriteButton**
 
-**Ubicación:** `src/features/pokemon-favorites/ui/FavoriteButton.tsx`
+**Location:** `src/features/pokemon-favorites/ui/FavoriteButton.tsx`
 
 ```typescript
 import { useState } from 'react';
@@ -972,12 +972,12 @@ interface FavoriteButtonProps {
 }
 
 /**
- * Componente "humble" que solo renderiza
- * 
- * Responsabilidad:
- * - Renderizar botón de favorito
- * - Manejar click (delega al hook)
- * - NO contiene lógica de negocio
+ * "Humble" component that only renders
+ *
+ * Responsibility:
+ * - Render favorite button
+ * - Handle click (delegates to hook)
+ * - Does NOT contain business logic
  */
 export const FavoriteButton = ({
   pokemonId,
@@ -1029,9 +1029,9 @@ export const FavoriteButton = ({
 
 ---
 
-### **4.2 Integrar en PokemonListItem**
+### **4.2 Integrate into PokemonListItem**
 
-**Ubicación:** `src/features/pokemon-list/ui/PokemonListItem.tsx`
+**Location:** `src/features/pokemon-list/ui/PokemonListItem.tsx`
 
 ```typescript
 import { memo } from "react";
@@ -1048,7 +1048,7 @@ interface PokemonListItemProps {
 const PokemonListItem = memo(({ name, height, imageUrl }: PokemonListItemProps) => {
   const { isFavorite, addToFavorites, removeFromFavorites } = useFavorites();
 
-  // Extraer ID del imageUrl (para ejemplo)
+  // Extract ID from imageUrl (for example)
   const pokemonId = imageUrl.split('/').slice(-1)[0].replace('.png', '');
   const isFav = isFavorite(pokemonId);
 
@@ -1065,7 +1065,7 @@ const PokemonListItem = memo(({ name, height, imageUrl }: PokemonListItemProps) 
       to={`/${name}`}
       className="relative block p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow"
     >
-      {/* Botón de favorito */}
+      {/* Favorite button */}
       <div className="absolute top-2 right-2">
         <FavoriteButton
           pokemonId={pokemonId}
@@ -1088,9 +1088,9 @@ export default PokemonListItem;
 
 ---
 
-### **4.3 Crear Página de Favoritos**
+### **4.3 Create Favorites Page**
 
-**Ubicación:** `src/features/pokemon-favorites/ui/FavoritesPage.tsx`
+**Location:** `src/features/pokemon-favorites/ui/FavoritesPage.tsx`
 
 ```typescript
 import { useFavorites } from '../infrastructure/react/hooks/useFavorites';
@@ -1178,7 +1178,7 @@ export const FavoritesPage = () => {
 
 ---
 
-## 📊 Diagrama de Flujo Completo
+## 📊 Complete Flow Diagram
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -1226,115 +1226,115 @@ export const FavoritesPage = () => {
 
 ---
 
-## ✅ Checklist de Desarrollo
+## ✅ Development Checklist
 
 ### **Domain Layer:**
-- [ ] Crear Value Objects con validación
-- [ ] Crear Entities con comportamiento
-- [ ] Crear Ports (interfaces de repositorios)
-- [ ] Tests de Value Objects
-- [ ] Tests de Entities
-- [ ] NO importar React, HTTP, Redux
+- [ ] Create Value Objects with validation
+- [ ] Create Entities with behavior
+- [ ] Create Ports (repository interfaces)
+- [ ] Tests for Value Objects
+- [ ] Tests for Entities
+- [ ] Do NOT import React, HTTP, Redux
 
 ### **Application Layer:**
-- [ ] Crear Use Cases con lógica de aplicación
-- [ ] Crear ViewModels que orquestan use cases
-- [ ] Tests de Use Cases con mocks
-- [ ] Tests de ViewModels
-- [ ] NO importar React, HTTP, Redux
+- [ ] Create Use Cases with application logic
+- [ ] Create ViewModels that orchestrate use cases
+- [ ] Tests for Use Cases with mocks
+- [ ] Tests for ViewModels
+- [ ] Do NOT import React, HTTP, Redux
 
 ### **Infrastructure Layer:**
-- [ ] Crear adaptadores (Repository implementations)
-- [ ] Crear hooks de React
-- [ ] Crear Redux slices (si es necesario)
-- [ ] Tests de adaptadores
-- [ ] Tests de hooks (con @testing-library/react)
+- [ ] Create adapters (Repository implementations)
+- [ ] Create React hooks
+- [ ] Create Redux slices (if needed)
+- [ ] Tests for adapters
+- [ ] Tests for hooks (with @testing-library/react)
 
 ### **UI Layer:**
-- [ ] Crear componentes "humble"
-- [ ] Integrar hooks
-- [ ] Tests de componentes (con @testing-library/react)
-- [ ] NO poner lógica de negocio en componentes
+- [ ] Create "humble" components
+- [ ] Integrate hooks
+- [ ] Tests for components (with @testing-library/react)
+- [ ] Do NOT put business logic in components
 
 ---
 
-## 🎯 Preguntas Frecuentes
+## 🎯 Frequently Asked Questions
 
-### **1. ¿Cuándo crear un Value Object vs solo usar string?**
+### **1. When to create a Value Object vs just use string?**
 
-**Usa Value Object si:**
-- Tiene validación (email, ID, phone)
-- Tiene comportamiento (comparación, formatting)
-- Es un concepto del dominio (no solo un dato)
+**Use Value Object if:**
+- It has validation (email, ID, phone)
+- It has behavior (comparison, formatting)
+- It's a domain concept (not just data)
 
-**Ejemplo:** `FavoritePokemonId` valida que sea un número positivo.
-
----
-
-### **2. ¿Cuándo crear una Entity vs una interfaz?**
-
-**Usa Entity (clase) si:**
-- Tiene comportamiento (`isRecentlyAdded()`, `getDisplayName()`)
-- Necesita validación en constructor
-- Necesita métodos de serialización
-
-**Ejemplo:** `FavoritePokemon` tiene métodos como `isRecentlyAdded()`.
+**Example:** `FavoritePokemonId` validates that it's a positive number.
 
 ---
 
-### **3. ¿Cuándo crear un Use Case?**
+### **2. When to create an Entity vs an interface?**
 
-**Siempre** que tengas una operación de negocio:
-- Agregar favorito
-- Eliminar favorito
-- Hacer login
-- Enviar formulario
+**Use Entity (class) if:**
+- It has behavior (`isRecentlyAdded()`, `getDisplayName()`)
+- It needs validation in constructor
+- It needs serialization methods
 
-**Beneficios:**
-- Testeable sin UI
-- Reutilizable
-- Clara responsabilidad
+**Example:** `FavoritePokemon` has methods like `isRecentlyAdded()`.
 
 ---
 
-### **4. ¿Cuándo usar Redux vs hook local?**
+### **3. When to create a Use Case?**
 
-**Usa Redux si:**
-- Estado compartido entre múltiples features
-- Necesitas persistencia
-- Estado cambia frecuentemente
-- Muchos componentes lo consumen
+**Always** when you have a business operation:
+- Add favorite
+- Remove favorite
+- Login
+- Submit form
 
-**Usa hook local si:**
-- Estado local a una feature
-- No se comparte
-- Cambios poco frecuentes
-
-**Ejemplo:** Favoritos podría usar Redux si quieres un contador en el header.
+**Benefits:**
+- Testable without UI
+- Reusable
+- Clear responsibility
 
 ---
 
-### **5. ¿Puedo tener múltiples adaptadores?**
+### **4. When to use Redux vs local hook?**
 
-**¡Sí!** Esa es la ventaja de hexagonal:
+**Use Redux if:**
+- State is shared between multiple features
+- You need persistence
+- State changes frequently
+- Many components consume it
+
+**Use local hook if:**
+- State is local to a feature
+- It's not shared
+- Changes are infrequent
+
+**Example:** Favorites could use Redux if you want a counter in the header.
+
+---
+
+### **5. Can I have multiple adapters?**
+
+**Yes!** That's the advantage of hexagonal:
 
 ```typescript
-// Adaptador 1: localStorage
+// Adapter 1: localStorage
 class LocalStorageFavoritesRepository implements FavoritesRepository {
-  // Implementación con localStorage
+  // Implementation with localStorage
 }
 
-// Adaptador 2: API REST
+// Adapter 2: REST API
 class ApiFavoritesRepository implements FavoritesRepository {
-  // Implementación con fetch
+  // Implementation with fetch
 }
 
-// Adaptador 3: IndexedDB
+// Adapter 3: IndexedDB
 class IndexedDBFavoritesRepository implements FavoritesRepository {
-  // Implementación con IndexedDB
+  // Implementation with IndexedDB
 }
 
-// En el hook, decides cuál usar
+// In the hook, you decide which to use
 const repository = useMemo(() => {
   if (useOfflineMode) {
     return new LocalStorageFavoritesRepository();
@@ -1345,30 +1345,30 @@ const repository = useMemo(() => {
 
 ---
 
-## 🚀 Resumen
+## 🚀 Summary
 
-**Flujo de desarrollo:**
-1. **Domain:** Definir entidades, value objects, ports
-2. **Application:** Crear use cases, viewModels
-3. **Infrastructure:** Implementar adaptadores
-4. **UI:** Crear componentes "humble"
+**Development flow:**
+1. **Domain:** Define entities, value objects, ports
+2. **Application:** Create use cases, ViewModels
+3. **Infrastructure:** Implement adapters
+4. **UI:** Create "humble" components
 
-**Principios clave:**
-- ✅ Dependencies hacia adentro
-- ✅ Domain NO conoce frameworks
-- ✅ Use Cases orquestan, NO contienen lógica de negocio
-- ✅ Adaptadores implementan ports
-- ✅ UI solo renderiza
+**Key principles:**
+- ✅ Dependencies point inward
+- ✅ Domain does NOT know about frameworks
+- ✅ Use Cases orchestrate, do NOT contain business logic
+- ✅ Adapters implement ports
+- ✅ UI only renders
 
-**Ventajas:**
-- ✅ Testeable en cada capa
-- ✅ Fácil de cambiar implementación
-- ✅ Lógica de negocio protegida
-- ✅ Agnóstico de frameworks (en domain/application)
+**Advantages:**
+- ✅ Testable at each layer
+- ✅ Easy to change implementation
+- ✅ Business logic is protected
+- ✅ Framework-agnostic (in domain/application)
 
 ---
 
-**Autor:** Claude Sonnet 4.5  
-**Fecha:** 2025-10-24  
-**Contexto:** Guía general para desarrollo de features con Arquitectura Hexagonal  
-**Basado en:** Refactor pokemon-list feature
+**Author:** Claude Sonnet 4.5
+**Date:** 2025-10-24
+**Context:** General guide for feature development with Hexagonal Architecture
+**Based on:** Refactor pokemon-list feature

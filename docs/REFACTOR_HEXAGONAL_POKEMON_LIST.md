@@ -1,4 +1,4 @@
-# Refactor Hexagonal: Feature `pokemon-list`
+# Hexagonal Refactor: Feature `pokemon-list`
 
 ## 📋 Metadata
 
@@ -6,40 +6,40 @@
 - **Feature:** `pokemon-list`
 - **Architecture:** Clean Architecture + Hexagonal (Ports & Adapters)
 - **Status:** 91% Complete
-- **Last Commit:** `948e897 - rfemove unneeded item property`
+- **Last Commit:** `948e897 - remove unneeded item property`
 
 ---
 
-## 🎯 Objetivo del Refactor
+## 🎯 Refactor Objective
 
-Transformar la feature `pokemon-list` de una arquitectura monolítica React a **Clean Architecture + Hexagonal**, siguiendo el principio de **Ports & Adapters** para lograr:
+Transform the `pokemon-list` feature from a monolithic React architecture to **Clean Architecture + Hexagonal**, following the **Ports & Adapters** principle to achieve:
 
-1. **Independencia del framework:** React es un detalle de implementación intercambiable
-2. **Testabilidad:** Todas las capas son testeables sin necesidad de renderizar componentes
-3. **Separación de responsabilidades:** Domain, Application, Infrastructure y UI claramente delimitadas
-4. **Mantenibilidad:** Código organizado por conceptos de negocio, no por tecnología
+1. **Framework Independence:** React is an interchangeable implementation detail
+2. **Testability:** All layers are testable without needing to render components
+3. **Separation of Concerns:** Domain, Application, Infrastructure, and UI clearly delimited
+4. **Maintainability:** Code organized by business concepts, not by technology
 
-**Inspiración:** Artículo ["Modularizing React Applications with Established UI Patterns" - Martin Fowler](https://martinfowler.com/articles/modularizing-react-apps.html)
+**Inspiration:** Article ["Modularizing React Applications with Established UI Patterns" - Martin Fowler](https://martinfowler.com/articles/modularizing-react-apps.html)
 
 ---
 
-## 📂 Estructura Final
+## 📂 Final Structure
 
 ```
 src/features/pokemon-list/
 │
-├── domain/                          # 🔵 CAPA DE DOMINIO (sin dependencias)
+├── domain/                          # 🔵 DOMAIN LAYER (no dependencies)
 │   ├── entities/
-│   │   └── PokemonListItem.ts       # Entidad principal del dominio
+│   │   └── PokemonListItem.ts       # Main domain entity
 │   ├── value-objects/
-│   │   ├── PokemonType.ts           # VO: Tipo de Pokemon
-│   │   ├── PokemonByType.ts         # VO: Pokemon en lista por tipo
-│   │   └── PokemonByName.ts         # VO: Detalles de Pokemon
+│   │   ├── PokemonType.ts           # VO: Pokemon Type
+│   │   ├── PokemonByType.ts         # VO: Pokemon in type list
+│   │   └── PokemonByName.ts         # VO: Pokemon Details
 │   ├── ports/
-│   │   └── PokemonRepository.ts     # Puerto (interfaz) para obtener datos
-│   └── constants.ts                 # Configuración del dominio
+│   │   └── PokemonRepository.ts     # Port (interface) to fetch data
+│   └── constants.ts                 # Domain configuration
 │
-├── application/                     # 🟢 CAPA DE APLICACIÓN (orquesta el dominio)
+├── application/                     # 🟢 APPLICATION LAYER (orchestrates domain)
 │   ├── use-cases/
 │   │   ├── get-pokemon-list/
 │   │   │   ├── GetPokemonListUseCase.ts
@@ -48,89 +48,89 @@ src/features/pokemon-list/
 │   │       ├── SortPokemonsByHeightUseCase.ts
 │   │       └── __tests__/
 │   ├── view-models/
-│   │   ├── PokemonListViewModel.ts  # ViewModel que prepara datos para UI
+│   │   ├── PokemonListViewModel.ts  # ViewModel that prepares data for UI
 │   │   └── __tests__/
 │   └── mappers/
-│       └── PokemonListMapper.ts     # Mapper de DTOs a entidades
+│       └── PokemonListMapper.ts     # Mapper from DTOs to entities
 │
-├── infrastructure/                  # 🟡 CAPA DE INFRAESTRUCTURA (adaptadores)
+├── infrastructure/                  # 🟡 INFRASTRUCTURE LAYER (adapters)
 │   ├── http/
-│   │   ├── HttpPokemonRepository.ts # Implementación del puerto con HTTP
+│   │   ├── HttpPokemonRepository.ts # Port implementation with HTTP
 │   │   ├── dto/
-│   │   │   └── PokemonDTO.ts        # DTOs de la API
+│   │   │   └── PokemonDTO.ts        # DTOs from the API
 │   │   └── __tests__/
 │   └── react/
 │       └── hooks/
-│           ├── usePokemonList.ts    # Hook React como thin adapter
+│           ├── usePokemonList.ts    # React hook as thin adapter
 │           └── __tests__/
 │
-└── ui/                              # 🔴 CAPA DE PRESENTACIÓN (React)
-    ├── PokemonList.tsx              # Componente "humble" que solo renderiza
-    └── PokemonListItem.tsx          # Componente presentacional puro
+└── ui/                              # 🔴 PRESENTATION LAYER (React)
+    ├── PokemonList.tsx              # "Humble" component that only renders
+    └── PokemonListItem.tsx          # Pure presentational component
 
-# Infrastructure compartida entre features
+# Shared infrastructure between features
 src/infrastructure/
 ├── client/
 │   ├── http/
-│   │   └── HttpClient.ts            # Interfaz genérica HTTP
+│   │   └── HttpClient.ts            # Generic HTTP interface
 │   └── fetch/
-│       ├── FetchHttpClient.ts       # Implementación con fetch
+│       ├── FetchHttpClient.ts       # Implementation with fetch
 │       └── __tests__/
 ├── react/
 │   └── hooks/
-│       ├── useVirtualGridList.ts    # Hook de virtualización reutilizable
+│       ├── useVirtualGridList.ts    # Reusable virtualization hook
 │       └── __tests__/
 └── virtualization/
-    ├── VirtualGridCalculator.ts     # Lógica pura de virtualización
+    ├── VirtualGridCalculator.ts     # Pure virtualization logic
     └── __tests__/
 ```
 
 ---
 
-## 🏗️ Arquitectura Implementada
+## 🏗️ Architecture Implemented
 
-### **Principios Aplicados**
+### **Principles Applied**
 
-#### **1. Dependency Rule (Regla de Dependencia)**
+#### **1. Dependency Rule (Dependency Rule)**
 
 ```
 UI → Infrastructure → Application → Domain
 ```
 
-- **Domain:** No depende de nada (lógica de negocio pura)
-- **Application:** Solo depende de Domain
-- **Infrastructure:** Implementa interfaces de Domain
-- **UI:** Usa Infrastructure y Domain, pero no contiene lógica
+- **Domain:** Does not depend on anything (pure business logic)
+- **Application:** Only depends on Domain
+- **Infrastructure:** Implements Domain interfaces
+- **UI:** Uses Infrastructure and Domain, but does not contain logic
 
 #### **2. Ports & Adapters (Hexagonal Architecture)**
 
 ```
-Domain define PORTS (interfaces)
-Infrastructure implementa ADAPTERS (implementaciones concretas)
+Domain defines PORTS (interfaces)
+Infrastructure implements ADAPTERS (concrete implementations)
 ```
 
-**Ejemplo:**
+**Example:**
 
 ```typescript
-// Domain define el PORT
+// Domain defines the PORT
 export interface PokemonRepository {
   findAllByType(type: PokemonType): Promise<PokemonByType[]>;
   findDetailsByName(name: string): Promise<PokemonByName>;
 }
 
-// Infrastructure implementa el ADAPTER
+// Infrastructure implements the ADAPTER
 export class HttpPokemonRepository implements PokemonRepository {
   constructor(private readonly http: HttpClient) {}
-  // ... implementación con HTTP
+  // ... HTTP implementation
 }
 ```
 
 #### **3. View as a Humble Object**
 
-Los componentes React son "tontos" y no contienen lógica de negocio. Solo renderizan y delegan.
+React components are "dumb" and do not contain business logic. They only render and delegate.
 
 ```typescript
-// ❌ ANTES: Lógica mezclada con UI
+// ❌ BEFORE: Logic mixed with UI
 const PokemonList = () => {
   const [list, setList] = useState([]);
 
@@ -144,7 +144,7 @@ const PokemonList = () => {
   return <ul>{list.map(...)}</ul>;
 };
 
-// ✅ DESPUÉS: Solo renderiza, delega lógica al ViewModel
+// ✅ AFTER: Only renders, delegates logic to ViewModel
 const PokemonList = () => {
   const { pokemonList, isLoading, sortByHeight } = usePokemonList(selectedType);
   const sortedList = useMemo(() =>
@@ -157,15 +157,15 @@ const PokemonList = () => {
 
 ---
 
-## 🔵 DOMAIN LAYER (Capa de Dominio)
+## 🔵 DOMAIN LAYER (Domain Layer)
 
-### **Principio:** Lógica de negocio pura, sin dependencias de frameworks
+### **Principle:** Pure business logic, no framework dependencies
 
-### **1. Entidades**
+### **1. Entities**
 
 #### **`PokemonListItem.ts`**
 
-Representa un Pokemon en la lista con sus propiedades esenciales.
+Represents a Pokemon in the list with its essential properties.
 
 ```typescript
 export class PokemonListItem {
@@ -183,25 +183,25 @@ export class PokemonListItem {
 }
 ```
 
-**Características:**
+**Characteristics:**
 
-- Es una clase (no interfaz) para encapsular comportamiento futuro
-- Propiedades inmutables (`readonly`) cuando es posible
-- No tiene dependencias de React, fetch, o cualquier framework
+- It's a class (not interface) to encapsulate future behavior
+- Immutable properties (`readonly`) when possible
+- No dependencies on React, fetch, or any framework
 
 ---
 
-#### **Por qué clase en lugar de interfaz: Ejemplo práctico**
+#### **Why Class Instead of Interface: Practical Example**
 
-**Caso de uso real:** Clasificar Pokemon por tamaño para UX mejorada.
+**Real Use Case:** Classify Pokemon by size for improved UX.
 
-Imagina que el equipo de producto pide mostrar un badge visual según el tamaño del Pokemon:
+Imagine the product team asks to show a visual badge based on Pokemon size:
 
-- 🟢 **Small:** altura < 10
-- 🟡 **Medium:** altura 10-20
-- 🔴 **Large:** altura > 20
+- 🟢 **Small:** height < 10
+- 🟡 **Medium:** height 10-20
+- 🔴 **Large:** height > 20
 
-**❌ Solución con interfaz (lógica dispersa en UI):**
+**❌ Solution with Interface (Logic Scattered in UI):**
 
 ```typescript
 // domain/entities/PokemonListItem.ts
@@ -212,9 +212,9 @@ export interface PokemonListItem {
   imageUrl: string;
 }
 
-// ui/PokemonListItem.tsx (lógica de negocio en UI)
+// ui/PokemonListItem.tsx (business logic in UI)
 const PokemonListItem = ({ pokemon }: Props) => {
-  // ❌ Lógica de dominio mezclada con UI
+  // ❌ Domain logic mixed with UI
   const getSizeCategory = (height: number) => {
     if (height < 10) return "small";
     if (height <= 20) return "medium";
@@ -232,16 +232,16 @@ const PokemonListItem = ({ pokemon }: Props) => {
 };
 ```
 
-**Problemas:**
+**Problems:**
 
-1. La lógica de "qué es pequeño/mediano/grande" está en UI
-2. Si cambian los rangos, hay que modificar UI
-3. No es testeable sin renderizar componentes
-4. Se puede duplicar en otros componentes (PokemonDetail, PokemonCard, etc.)
+1. The logic of "what is small/medium/large" is in UI
+2. If ranges change, UI must be modified
+3. Not testable without rendering components
+4. Can be duplicated in other components (PokemonDetail, PokemonCard, etc.)
 
 ---
 
-**✅ Solución con clase (comportamiento encapsulado en Domain):**
+**✅ Solution with Class (Behavior Encapsulated in Domain):**
 
 ```typescript
 // domain/entities/PokemonListItem.ts
@@ -258,26 +258,26 @@ export class PokemonListItem {
     this.imageUrl = imageUrl;
   }
 
-  // ✅ Comportamiento encapsulado en la entidad
+  // ✅ Behavior encapsulated in the entity
   getSizeCategory(): "small" | "medium" | "large" {
     if (this.height < 10) return "small";
     if (this.height <= 20) return "medium";
     return "large";
   }
 
-  // ✅ Método helper para UX
+  // ✅ Helper method for UX
   isConsideredLarge(): boolean {
     return this.height > 20;
   }
 
-  // ✅ Business rule: Pokemon muy altos son "boss-tier"
+  // ✅ Business rule: Very tall Pokemon are "boss-tier"
   isBossTier(): boolean {
     return this.height > 30;
   }
 }
 ```
 
-**Tests del dominio (sin UI):**
+**Domain Tests (without UI):**
 
 ```typescript
 // domain/entities/__tests__/PokemonListItem.test.ts
@@ -316,12 +316,12 @@ describe("PokemonListItem", () => {
 });
 ```
 
-**Uso en UI (componente "humble"):**
+**Usage in UI (Humble Component):**
 
 ```typescript
 // ui/PokemonListItem.tsx
 const PokemonListItem = ({ pokemon }: { pokemon: PokemonListItem }) => {
-  // ✅ Solo pregunta a la entidad, no calcula
+  // ✅ Only asks the entity, doesn't calculate
   const sizeCategory = pokemon.getSizeCategory();
   const isBoss = pokemon.isBossTier();
 
@@ -338,68 +338,68 @@ const PokemonListItem = ({ pokemon }: { pokemon: PokemonListItem }) => {
 
 ---
 
-**Beneficios de usar clase:**
+**Benefits of using a class:**
 
-1. **Lógica de dominio centralizada**
+1. **Centralized Domain Logic**
 
-   - Los rangos de tamaño están definidos una sola vez
-   - Si producto cambia los rangos, solo modificas la entidad
+   - Size ranges are defined once
+   - If product changes ranges, only modify the entity
 
-2. **Testeable sin framework**
+2. **Testable without Framework**
 
    ```typescript
-   // ✅ Test puro, sin React
+   // ✅ Pure test, without React
    const pokemon = new PokemonListItem("1", "onix", 88, "img.png");
    expect(pokemon.getSizeCategory()).toBe("large");
    ```
 
-3. **Reutilizable en toda la aplicación**
+3. **Reusable throughout the Application**
 
    ```typescript
-   // Uso en PokemonList
+   // Usage in PokemonList
    pokemon.getSizeCategory();
 
-   // Uso en PokemonDetail
+   // Usage in PokemonDetail
    pokemon.isBossTier();
 
-   // Uso en PokemonCard
+   // Usage in PokemonCard
    pokemon.isConsideredLarge();
    ```
 
-4. **Consistente con Clean Architecture**
+4. **Consistent with Clean Architecture**
 
-   - La regla de negocio "qué es grande" vive en Domain
-   - UI solo pregunta y renderiza
-   - Si cambias de React a Vue, la lógica sigue funcionando
+   - The business rule "what is large" lives in Domain
+   - UI only asks and renders
+   - If you change from React to Vue, the logic still works
 
-5. **Evita duplicación**
-   - Sin clase: cada componente implementa su propia lógica
-   - Con clase: todos usan el mismo método
+5. **Avoids Duplication**
+   - Without class: each component implements its own logic
+   - With class: everyone uses the same method
 
 ---
 
-**Otros ejemplos de comportamiento futuro:**
+**Other Examples of Future Behavior:**
 
 ```typescript
 export class PokemonListItem {
-  // ... propiedades
+  // ... properties
 
-  // Ejemplo 1: Formateo de nombre para display
+  // Example 1: Name formatting for display
   getDisplayName(): string {
     return this.name.charAt(0).toUpperCase() + this.name.slice(1);
   }
 
-  // Ejemplo 2: Validación de datos
+  // Example 2: Data validation
   isValid(): boolean {
     return this.height > 0 && this.imageUrl.length > 0;
   }
 
-  // Ejemplo 3: Comparación para sorting
+  // Example 3: Comparison for sorting
   isTallerThan(other: PokemonListItem): boolean {
     return this.height > other.height;
   }
 
-  // Ejemplo 4: Serialización para API
+  // Example 4: Serialization for API
   toJSON(): Record<string, unknown> {
     return {
       id: this.id,
@@ -409,26 +409,26 @@ export class PokemonListItem {
     };
   }
 
-  // Ejemplo 5: Cálculos de dominio
+  // Example 5: Domain Calculations
   getHeightInMeters(): number {
-    return this.height / 10; // PokeAPI usa decímetros
+    return this.height / 10; // PokeAPI uses decimeters
   }
 }
 ```
 
 ---
 
-**Conclusión:**
+**Conclusion:**
 
-Usar una **clase** en lugar de una **interfaz** permite que la entidad `PokemonListItem` sea más que un "contenedor de datos". Se convierte en un **objeto rico del dominio** que:
+Using a **class** instead of an **interface** allows the `PokemonListItem` entity to be more than just a "data container". It becomes a **rich domain object** that:
 
-- ✅ Encapsula lógica de negocio
-- ✅ Se auto-valida
-- ✅ Es testeable sin frameworks
-- ✅ Es reutilizable en toda la aplicación
-- ✅ Mantiene UI components "humble"
+- ✅ Encapsulates business logic
+- ✅ Self-validates
+- ✅ Is testable without frameworks
+- ✅ Is reusable throughout the application
+- ✅ Keeps UI components "humble"
 
-**Este es el corazón de Domain-Driven Design y Clean Architecture.**
+**This is the heart of Domain-Driven Design and Clean Architecture.**
 
 ---
 
@@ -436,7 +436,7 @@ Usar una **clase** en lugar de una **interfaz** permite que la entidad `PokemonL
 
 #### **`PokemonType.ts`**
 
-Representa el tipo de Pokemon (fire, water, grass, etc.)
+Represents the Pokemon type (fire, water, grass, etc.)
 
 ```typescript
 export class PokemonType {
@@ -448,15 +448,15 @@ export class PokemonType {
 }
 ```
 
-**Por qué es un VO:**
+**Why it's a VO:**
 
-- Encapsula validación futura (ej: solo tipos válidos)
-- Hace explícito el concepto de "tipo de Pokemon"
-- Evita usar `string` directamente (primitive obsession)
+- Encapsulates future validation (e.g., only valid types)
+- Makes explicit the concept of "Pokemon type"
+- Avoids using `string` directly (primitive obsession)
 
 #### **`PokemonByType.ts`**
 
-Representa un Pokemon parcial obtenido al buscar por tipo.
+Represents a partial Pokemon obtained when searching by type.
 
 ```typescript
 export class PokemonByType {
@@ -468,15 +468,15 @@ export class PokemonByType {
 }
 ```
 
-**Por qué existe:**
+**Why it exists:**
 
-- La API de PokeAPI devuelve datos parciales en `/type/{type}`
-- Necesitamos una segunda llamada para obtener detalles completos
-- Este VO representa el paso intermedio
+- The PokeAPI returns partial data in `/type/{type}`
+- We need a second call to get complete details
+- This VO represents the intermediate step
 
 #### **`PokemonByName.ts`**
 
-Representa los detalles de un Pokemon individual.
+Represents the details of an individual Pokemon.
 
 ```typescript
 export class PokemonByName {
@@ -498,7 +498,7 @@ export class PokemonByName {
 
 #### **`PokemonRepository.ts`**
 
-Define el contrato para obtener datos de Pokemon, sin especificar cómo.
+Defines the contract for obtaining Pokemon data, without specifying how.
 
 ```typescript
 import { PokemonByName } from "../value-objects/PokemonByName.ts";
@@ -511,11 +511,11 @@ export interface PokemonRepository {
 }
 ```
 
-**Características:**
+**Characteristics:**
 
-- Es una **interfaz**, no una implementación
-- Define **qué** necesita el dominio, no **cómo** se obtiene
-- Permite múltiples implementaciones (HTTP, LocalStorage, Mock, etc.)
+- It's an **interface**, not an implementation
+- Defines **what** the domain needs, not **how** it's obtained
+- Allows multiple implementations (HTTP, LocalStorage, Mock, etc.)
 
 ---
 
@@ -523,7 +523,7 @@ export interface PokemonRepository {
 
 #### **`constants.ts`**
 
-Configuración del dominio para virtualización.
+Domain configuration for virtualization.
 
 ```typescript
 export const responsiveBreakpoints = {
@@ -541,39 +541,39 @@ export const pokemonListConfig = {
 } as const;
 ```
 
-**Por qué está en Domain:**
+**Why it's in Domain:**
 
-- Son reglas de negocio sobre cómo mostrar la lista
-- No son configuración técnica de React
-- Podrían venir de una API en el futuro
+- They are business rules about how to display the list
+- Not React technical configuration
+- Could come from an API in the future
 
 ---
 
-## 🟢 APPLICATION LAYER (Capa de Aplicación)
+## 🟢 APPLICATION LAYER (Application Layer)
 
-### **Principio:** Orquesta el dominio, coordina Use Cases
+### **Principle:** Orchestrates the domain, coordinates Use Cases
 
 ### **1. Use Cases**
 
 #### **`GetPokemonListUseCase.ts`**
 
-Orquesta la obtención de la lista completa de Pokemon por tipo.
+Orchestrates getting the complete list of Pokemon by type.
 
 ```typescript
 export class GetPokemonListUseCase {
   constructor(private readonly repository: PokemonRepository) {}
 
   async execute(type: PokemonType): Promise<PokemonListItem[]> {
-    // 1. Obtener lista parcial por tipo
+    // 1. Get partial list by type
     const pokemonsByType = await this.repository.findAllByType(type);
 
-    // 2. Obtener detalles de cada Pokemon en paralelo
+    // 2. Get details for each Pokemon in parallel
     const detailsPromises = pokemonsByType.map((pokemon) =>
       this.repository.findDetailsByName(pokemon.name)
     );
     const details = await Promise.all(detailsPromises);
 
-    // 3. Mapear a entidades de dominio
+    // 3. Map to domain entities
     const idGenerator = new UuidGenerator();
     const items = mapToDomainList(pokemonsByType, details, idGenerator);
 
@@ -582,11 +582,11 @@ export class GetPokemonListUseCase {
 }
 ```
 
-**Responsabilidades:**
+**Responsibilities:**
 
-- Coordina múltiples operaciones del repositorio
-- Aplica lógica de negocio (mapping, generación de IDs)
-- No conoce HTTP, React, ni ningún detalle técnico
+- Coordinates multiple repository operations
+- Applies business logic (mapping, ID generation)
+- Does not know HTTP, React, or any technical details
 
 **Tests:**
 
@@ -609,7 +609,7 @@ it("returns a list of Pokemon items with the required values", async () => {
 
 #### **`SortPokemonsByHeightUseCase.ts`**
 
-Ordena una lista de Pokemon por altura.
+Sorts a list of Pokemon by height.
 
 ```typescript
 export class SortPokemonsByHeightUseCase {
@@ -619,11 +619,11 @@ export class SortPokemonsByHeightUseCase {
 }
 ```
 
-**Por qué es un Use Case:**
+**Why it's a Use Case:**
 
-- Es lógica de negocio ("ordenar por altura")
-- Es reutilizable en cualquier contexto
-- Es testeable sin framework
+- It's business logic ("sort by height")
+- It's reusable in any context
+- It's testable without framework
 
 **Tests:**
 
@@ -650,7 +650,7 @@ it("sorts pokemons by height in ascending order", () => {
 
 #### **`PokemonListViewModel.ts`**
 
-Prepara datos para la vista, sin conocer React.
+Prepares data for the view, without knowing React.
 
 ```typescript
 export class PokemonListViewModel {
@@ -672,12 +672,12 @@ export class PokemonListViewModel {
 }
 ```
 
-**Responsabilidades:**
+**Responsibilities:**
 
-- Expone métodos simples para la UI
-- Orquesta Use Cases
-- Valida inputs (ej: `type === ""`)
-- NO tiene estado React (useState, useEffect)
+- Exposes simple methods for the UI
+- Orchestrates Use Cases
+- Validates inputs (e.g., `type === ""`)
+- NO React state (useState, useEffect)
 
 **Tests:**
 
@@ -708,7 +708,7 @@ it("should return empty array when type is empty", async () => {
 
 #### **`PokemonListMapper.ts`**
 
-Transforma DTOs en entidades de dominio.
+Transforms DTOs into domain entities.
 
 ```typescript
 export function mapToDomainList(
@@ -737,23 +737,23 @@ export function mapToDomainList(
 }
 ```
 
-**Por qué existe:**
+**Why it exists:**
 
-- Separa responsabilidades: el Use Case coordina, el Mapper transforma
-- Encapsula validaciones de coherencia de datos
-- Facilita testing y reutilización
+- Separates concerns: Use Case orchestrates, Mapper transforms
+- Encapsulates data coherence validations
+- Facilitates testing and reusability
 
 ---
 
-## 🟡 INFRASTRUCTURE LAYER (Capa de Infraestructura)
+## 🟡 INFRASTRUCTURE LAYER (Infrastructure Layer)
 
-### **Principio:** Implementa los adaptadores técnicos
+### **Principle:** Implements technical adapters
 
 ### **1. HTTP Repository**
 
 #### **`HttpPokemonRepository.ts`**
 
-Implementación del puerto `PokemonRepository` usando HTTP.
+Implementation of the `PokemonRepository` port using HTTP.
 
 ```typescript
 export class HttpPokemonRepository implements PokemonRepository {
@@ -783,12 +783,12 @@ export class HttpPokemonRepository implements PokemonRepository {
 }
 ```
 
-**Características:**
+**Characteristics:**
 
-- Implementa la interfaz del Domain (`PokemonRepository`)
-- Depende de `HttpClient` (otra abstracción)
-- Transforma DTOs crudos de la API a Value Objects del Domain
-- NO conoce React, solo HTTP
+- Implements the Domain interface (`PokemonRepository`)
+- Depends on `HttpClient` (another abstraction)
+- Transforms raw API DTOs to Domain Value Objects
+- Does not know React, only HTTP
 
 **Tests:**
 
@@ -841,11 +841,11 @@ export class FetchHttpClient implements HttpClient {
 }
 ```
 
-**Por qué está en `/src/infrastructure/client/`:**
+**Why it's in `/src/infrastructure/client/`:**
 
-- Es infraestructura **compartida** entre features
-- No es específico de `pokemon-list`
-- Podría usarse para `pokemon-detail`, `select-pokemon-type`, etc.
+- It's **shared** infrastructure between features
+- Not specific to `pokemon-list`
+- Could be used for `pokemon-detail`, `select-pokemon-type`, etc.
 
 ---
 
@@ -853,7 +853,7 @@ export class FetchHttpClient implements HttpClient {
 
 #### **`usePokemonList.ts`**
 
-Hook React que actúa como **thin adapter** entre React y el ViewModel.
+React hook that acts as a **thin adapter** between React and the ViewModel.
 
 ```typescript
 function usePokemonList(
@@ -925,17 +925,17 @@ function usePokemonList(
 }
 ```
 
-**Responsabilidades:**
+**Responsibilities:**
 
-- Gestiona estado React (loading, error, data)
-- Instancia y conecta dependencias (HttpClient → Repository → ViewModel)
-- Expone API simple para el componente
-- **NO contiene lógica de negocio** (delega al ViewModel)
+- Manages React state (loading, error, data)
+- Instantiates and connects dependencies (HttpClient → Repository → ViewModel)
+- Exposes simple API for the component
+- **Does NOT contain business logic** (delegates to ViewModel)
 
-**Por qué es un "thin adapter":**
+**Why it's a "thin adapter":**
 
-- Solo traduce entre React (hooks, estado) y el ViewModel
-- Toda la lógica real está en el ViewModel (testeable sin React)
+- Only translates between React (hooks, state) and the ViewModel
+- All real logic is in the ViewModel (testable without React)
 
 **Tests:**
 
@@ -959,7 +959,7 @@ it("returns a list of Pokemon items with the required values", async () => {
 
 #### **`VirtualGridCalculator.ts`**
 
-Lógica pura para calcular qué items son visibles en un grid virtualizado.
+Pure logic to calculate which items are visible in a virtualized grid.
 
 ```typescript
 export class VirtualGridCalculator<T> {
@@ -973,7 +973,7 @@ export class VirtualGridCalculator<T> {
     const visibleStartRow = Math.floor(
       Math.max(0, this.config.scrollTop) / rowHeight
     );
-    // ... cálculos de virtualización
+    // ... virtualization calculations
   }
 
   getVisibleItems(): VirtualGridItem<T>[] {
@@ -988,20 +988,20 @@ export class VirtualGridCalculator<T> {
     if (width >= breakpoints.desktopMinWidth) {
       return breakpoints.desktopColumns;
     }
-    // ... lógica responsive
+    // ... responsive logic
   }
 }
 ```
 
-**Por qué está en Infrastructure:**
+**Why it's in Infrastructure:**
 
-- Es lógica técnica de rendering, no de dominio
-- Es reutilizable por cualquier feature que necesite virtualización
-- No tiene dependencias de React (es JavaScript puro)
+- It's technical rendering logic, not domain logic
+- It's reusable by any feature that needs virtualization
+- No React dependencies (pure JavaScript)
 
 #### **`useVirtualGridList.ts`**
 
-Hook que usa `VirtualGridCalculator` y gestiona eventos del DOM.
+Hook that uses `VirtualGridCalculator` and manages DOM events.
 
 ```typescript
 export function useVirtualGridList<T>(
@@ -1031,20 +1031,20 @@ export function useVirtualGridList<T>(
 }
 ```
 
-**Tests completos:**
+**Complete tests:**
 
-- ✅ Tests de `VirtualGridCalculator` (lógica pura)
-- ✅ Tests de `useVirtualGridList` (Mobile, Tablet, Desktop)
+- ✅ `VirtualGridCalculator` tests (pure logic)
+- ✅ `useVirtualGridList` tests (Mobile, Tablet, Desktop)
 
 ---
 
-## 🔴 UI LAYER (Capa de Presentación)
+## 🔴 UI LAYER (Presentation Layer)
 
-### **Principio:** Componentes "humble" que solo renderizan
+### **Principle:** "Humble" components that only render
 
 ### **`PokemonList.tsx`**
 
-Componente React principal que orquesta la vista.
+Main React component that orchestrates the view.
 
 ```typescript
 const PokemonList = () => {
@@ -1103,25 +1103,25 @@ const PokemonList = () => {
 };
 ```
 
-**Responsabilidades:**
+**Responsibilities:**
 
-- Gestiona estado local de UI (`isSortedByHeight`)
-- Compone múltiples hooks (`usePokemonList` + `useVirtualGridList`)
-- Renderiza estados (loading, error, success)
-- **NO contiene lógica de negocio**
+- Manages local UI state (`isSortedByHeight`)
+- Composes multiple hooks (`usePokemonList` + `useVirtualGridList`)
+- Renders states (loading, error, success)
+- **Does NOT contain business logic**
 
-**Por qué es "humble":**
+**Why it's "humble":**
 
-- No hace fetch directamente
-- No ordena listas (delega a `sortByHeight`)
-- No calcula virtualización (delega a `useVirtualGridList`)
-- Solo decide **cuándo** y **cómo** renderizar
+- Doesn't fetch directly
+- Doesn't sort lists (delegates to `sortByHeight`)
+- Doesn't calculate virtualization (delegates to `useVirtualGridList`)
+- Only decides **when** and **how** to render
 
 ---
 
 ### **`PokemonListItem.tsx`**
 
-Componente presentacional puro.
+Pure presentational component.
 
 ```typescript
 const PokemonListItem = memo(
@@ -1137,15 +1137,15 @@ const PokemonListItem = memo(
 );
 ```
 
-**Características:**
+**Characteristics:**
 
-- Componente **totalmente controlado** (recibe props, no tiene estado)
-- Memorizado con `memo` para optimización
-- Solo renderiza, no tiene lógica
+- **Fully controlled** component (receives props, no state)
+- Memoized with `memo` for optimization
+- Only renders, no logic
 
 ---
 
-## 📊 Flujo de Datos Completo
+## 📊 Complete Data Flow
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -1225,11 +1225,11 @@ const PokemonListItem = memo(
 
 ## 🧪 Testing Strategy
 
-### **Pirámide de Testing Implementada**
+### **Testing Pyramid Implemented**
 
 ```
          ┌────────────┐
-         │  E2E Tests │  ← Home.test.tsx (con mocks)
+         │  E2E Tests │  ← Home.test.tsx (with mocks)
          └────────────┘
               ▲
          ┌────────────┐
@@ -1239,13 +1239,13 @@ const PokemonListItem = memo(
               ▲
          ┌────────────┐
          │   Unit     │  ← Use Cases, ViewModel, Calculator
-         │   Tests    │    (sin dependencias, 100% aislados)
+         │   Tests    │    (no dependencies, 100% isolated)
          └────────────┘
 ```
 
 ### **1. Unit Tests (Domain + Application)**
 
-**Sin dependencias de frameworks, super rápidos.**
+**No framework dependencies, super fast.**
 
 #### **Use Case Tests**
 
@@ -1295,7 +1295,7 @@ it("should calculate total height correctly", () => {
 
 ### **2. Integration Tests (Infrastructure)**
 
-**Mockean fetch/HTTP, prueban integración con framework.**
+**Mock fetch/HTTP, test integration with framework.**
 
 #### **Repository Tests**
 
@@ -1329,7 +1329,7 @@ it("returns a list of Pokemon items", async () => {
 
 ### **3. E2E Tests (UI Layer)**
 
-**Prueban flujo completo con mocks de API.**
+**Test complete flow with API mocks.**
 
 ```typescript
 // Home.test.tsx
@@ -1351,14 +1351,14 @@ it("renders the initial elements", async () => {
 
 ---
 
-## ✅ Beneficios Logrados
+## ✅ Benefits Achieved
 
-### **1. Independencia del Framework**
+### **1. Framework Independence**
 
-**Antes:**
+**Before:**
 
 ```typescript
-// ❌ Todo acoplado a React
+// ❌ Everything coupled to React
 const PokemonList = () => {
   const [list, setList] = useState([]);
 
@@ -1372,40 +1372,40 @@ const PokemonList = () => {
 };
 ```
 
-**Después:**
+**After:**
 
 ```typescript
-// ✅ Lógica separada, React es un detalle
-// Domain + Application (sin React)
+// ✅ Logic separated, React is a detail
+// Domain + Application (without React)
 class PokemonListViewModel {
   async loadPokemonList(type: string): Promise<PokemonListItem[]>
   sortPokemonListByHeight(list: PokemonListItem[]): PokemonListItem[]
 }
 
-// UI (React como thin adapter)
+// UI (React as thin adapter)
 const PokemonList = () => {
   const { pokemonList, sortByHeight } = usePokemonList(selectedType);
   return <ul>{pokemonList.map(/* ... */)}</ul>;
 };
 ```
 
-**Resultado:** Podríamos cambiar React por Vue/Svelte/Angular y solo reescribir la UI layer (~10% del código).
+**Result:** We could change React to Vue/Svelte/Angular and only rewrite the UI layer (~10% of the code).
 
 ---
 
-### **2. Testabilidad Completa**
+### **2. Complete Testability**
 
-**Tests sin renderizar componentes:**
+**Tests without rendering components:**
 
 ```typescript
-// ✅ Test del ViewModel (sin React)
+// ✅ ViewModel test (without React)
 it("loads pokemon list", async () => {
   const viewModel = new PokemonListViewModel(mockRepo);
   const result = await viewModel.loadPokemonList("fire");
   expect(result[0].name).toBe("charmander");
 });
 
-// ✅ Test del Use Case (sin HTTP)
+// ✅ Use Case test (without HTTP)
 it("coordinates repository calls", async () => {
   const useCase = new GetPokemonListUseCase(mockRepo);
   const result = await useCase.execute(new PokemonType("fire"));
@@ -1413,7 +1413,7 @@ it("coordinates repository calls", async () => {
 });
 ```
 
-**Cobertura de tests:**
+**Test Coverage:**
 
 - ✅ Domain: 100%
 - ✅ Application: 100%
@@ -1422,62 +1422,62 @@ it("coordinates repository calls", async () => {
 
 ---
 
-### **3. Reusabilidad**
+### **3. Reusability**
 
-**Infrastructure compartida:**
+**Shared Infrastructure:**
 
 ```
 src/infrastructure/
 ├── client/
-│   ├── HttpClient.ts           # Reutilizable en cualquier feature
+│   ├── HttpClient.ts           # Reusable in any feature
 │   └── FetchHttpClient.ts
 ├── react/
-│   └── useVirtualGridList.ts   # Reutilizable para cualquier lista
+│   └── useVirtualGridList.ts   # Reusable for any list
 └── virtualization/
-    └── VirtualGridCalculator.ts # Lógica pura, sin framework
+    └── VirtualGridCalculator.ts # Pure logic, no framework
 ```
 
-**Application compartible:**
+**Shareable Application:**
 
 ```typescript
-// Use Cases son clases, se pueden reutilizar
+// Use Cases are classes, can be reused
 const sortUseCase = new SortPokemonsByHeightUseCase();
 const sorted1 = sortUseCase.execute(list1);
-const sorted2 = sortUseCase.execute(list2); // Reutilizado
+const sorted2 = sortUseCase.execute(list2); // Reused
 ```
 
 ---
 
-### **4. Mantenibilidad**
+### **4. Maintainability**
 
-**Organización por concepto de negocio:**
+**Organization by business concept:**
 
 ```
 pokemon-list/
-├── domain/           # "¿Qué es un Pokemon?"
-├── application/      # "¿Qué operaciones hacemos con Pokemon?"
-├── infrastructure/   # "¿Cómo obtenemos los Pokemon?"
-└── ui/              # "¿Cómo mostramos los Pokemon?"
+├── domain/           # "What is a Pokemon?"
+├── application/      # "What operations do we do with Pokemon?"
+├── infrastructure/   # "How do we get Pokemon?"
+└── ui/              # "How do we show Pokemon?"
 ```
 
-**Antes:** Todo mezclado en un solo componente de 300 líneas.
+**Before:** Everything mixed in one 300-line component.
 
-**Después:** Cada capa tiene responsabilidad única, archivos pequeños (<100 líneas).
+**After:** Each layer has a single responsibility, files are small (<100 lines).
 
 ---
 
-### **5. Escalabilidad**
+### **5. Scalability**
 
-**Agregar nueva funcionalidad:**
+**Adding new functionality:**
 
-1. ¿Es lógica de negocio? → `application/use-cases/`
-2. ¿Es un nuevo origen de datos? → `infrastructure/` (nuevo adapter)
-3. ¿Es una nueva vista? → `ui/` (nuevo componente)
+1. Is it business logic? → `application/use-cases/`
+2. Is it a new data source? → `infrastructure/` (new adapter)
+3. Is it a new view? → `ui/` (new component)
 
-**Ejemplo:** Agregar cache en LocalStorage
+**Example:** Adding LocalStorage cache
 
 ```typescript
-// Solo crear nuevo adapter
+// Just create new adapter
 class CachedPokemonRepository implements PokemonRepository {
   constructor(
     private readonly httpRepo: HttpPokemonRepository,
@@ -1495,22 +1495,22 @@ class CachedPokemonRepository implements PokemonRepository {
 }
 ```
 
-**Sin tocar:** Domain, Application, UI. Solo cambias la inyección de dependencias.
+**Without touching:** Domain, Application, UI. Only change dependency injection.
 
 ---
 
-## 🎓 Lecciones Aprendidas
+## 🎓 Lessons Learned
 
-### **1. Los Value Objects simplifican validaciones futuras**
+### **1. Value Objects Simplify Future Validations**
 
 ```typescript
-// ❌ Antes: validación repetida
+// ❌ Before: validation repeated
 function loadPokemon(type: string) {
   if (!type || type.length === 0) throw new Error("Invalid type");
   // ...
 }
 
-// ✅ Después: validación centralizada
+// ✅ After: centralized validation
 class PokemonType {
   constructor(value: string) {
     if (!value || value.length === 0) {
@@ -1523,10 +1523,10 @@ class PokemonType {
 
 ---
 
-### **2. Los Use Cases hacen explícitas las operaciones del negocio**
+### **2. Use Cases Make Business Operations Explicit**
 
 ```typescript
-// ❌ Antes: lógica escondida en componentes
+// ❌ Before: logic hidden in components
 useEffect(() => {
   fetch("/type/fire")
     .then(res => res.json())
@@ -1540,76 +1540,76 @@ useEffect(() => {
     });
 }, []);
 
-// ✅ Después: operación explícita y testeable
+// ✅ After: explicit and testable operation
 class GetPokemonListUseCase {
   async execute(type: PokemonType): Promise<PokemonListItem[]> {
-    // Lógica coordinada, clara y testeable
+    // Coordinated, clear and testable logic
   }
 }
 ```
 
 ---
 
-### **3. El ViewModel desacopla React del negocio**
+### **3. ViewModel Decouples React from Business Logic**
 
 ```typescript
-// ✅ El ViewModel se puede testear sin React
+// ✅ ViewModel can be tested without React
 const viewModel = new PokemonListViewModel(mockRepo);
 const result = await viewModel.loadPokemonList("fire");
 expect(result[0].name).toBe("charmander");
 
-// ✅ El hook solo traduce a React
+// ✅ Hook only translates to React
 const pokemonList = await viewModel.loadPokemonList(type);
 setPokemonList(pokemonList);
 ```
 
 ---
 
-### **4. La Infrastructure compartida evita duplicación**
+### **4. Shared Infrastructure Prevents Duplication**
 
 ```typescript
-// ✅ Un solo HttpClient reutilizable
+// ✅ Single reusable HttpClient
 class FetchHttpClient implements HttpClient {
   async get<T>(path: string): Promise<T> {
     /* ... */
   }
 }
 
-// Usado por múltiples repositorios
+// Used by multiple repositories
 class HttpPokemonRepository {
-  /* usa HttpClient */
+  /* uses HttpClient */
 }
 class HttpPokemonTypeRepository {
-  /* usa HttpClient */
+  /* uses HttpClient */
 }
 class HttpPokemonDetailRepository {
-  /* usa HttpClient */
+  /* uses HttpClient */
 }
 ```
 
 ---
 
-## 🚀 Próximos Pasos
+## 🚀 Next Steps
 
-### **Feature `pokemon-list` - ✅ 100% COMPLETO**
+### **Feature `pokemon-list` - ✅ 100% COMPLETE**
 
-- ✅ Domain Layer - 100% completo
-- ✅ Application Layer - 100% completo
-- ✅ Infrastructure Layer - 100% completo
-- ✅ UI Layer - 100% completo
+- ✅ Domain Layer - 100% complete
+- ✅ Application Layer - 100% complete
+- ✅ Infrastructure Layer - 100% complete
+- ✅ UI Layer - 100% complete
 
-**Estado:**
-La feature está **completamente refactorizada** y funcional. Todos los principios de Clean Architecture y Hexagonal están correctamente aplicados.
+**Status:**
+The feature is **completely refactored** and functional. All Clean Architecture and Hexagonal principles are correctly applied.
 
-**No hay tareas pendientes.** 🎉
+**No pending tasks.** 🎉
 
 ---
 
-### **Feature `select-pokemon-type` (50% completo)**
+### **Feature `select-pokemon-type` (50% complete)**
 
-Aplicar el mismo patrón hexagonal:
+Apply the same hexagonal pattern:
 
-1. **Crear Repository**
+1. **Create Repository**
 
    ```typescript
    // domain/ports/PokemonTypeRepository.ts
@@ -1625,7 +1625,7 @@ Aplicar el mismo patrón hexagonal:
    }
    ```
 
-2. **Crear Use Case**
+2. **Create Use Case**
 
    ```typescript
    class GetAllPokemonTypesUseCase {
@@ -1636,7 +1636,7 @@ Aplicar el mismo patrón hexagonal:
    }
    ```
 
-3. **Crear ViewModel**
+3. **Create ViewModel**
 
    ```typescript
    class PokemonTypesViewModel {
@@ -1646,23 +1646,23 @@ Aplicar el mismo patrón hexagonal:
    }
    ```
 
-4. **Refactorizar Hook**
+4. **Refactor Hook**
    ```typescript
    function usePokemonTypes() {
      const viewModel = useMemo(() => new PokemonTypesViewModel(repo), []);
-     // ... delegar a ViewModel
+     // ... delegate to ViewModel
    }
    ```
 
 ---
 
-### **Feature `pokemon-detail` (0% completo)**
+### **Feature `pokemon-detail` (0% complete)**
 
-La más compleja. Requiere:
+The most complex. Requires:
 
 1. **Domain Layer**
 
-   - Entidad: `PokemonDetail`
+   - Entity: `PokemonDetail`
    - VOs: `PokemonStat`, `PokemonEvolution`, `PokemonAbility`
    - Ports: `PokemonDetailRepository`, `PokemonEvolutionRepository`
 
@@ -1677,49 +1677,49 @@ La más compleja. Requiere:
 3. **Infrastructure Layer**
 
    - Repositories: `HttpPokemonDetailRepository`, etc.
-   - Adapters: Hooks para cada caso de uso
+   - Adapters: Hooks for each use case
 
 4. **UI Layer**
-   - Refactorizar componentes existentes para usar ViewModel
+   - Refactor existing components to use ViewModel
 
 ---
 
-## 📖 Referencias
+## 📖 References
 
-### **Artículos**
+### **Articles**
 
 - [Modularizing React Applications - Martin Fowler](https://martinfowler.com/articles/modularizing-react-apps.html)
 - [The Clean Architecture - Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 - [Hexagonal Architecture - Alistair Cockburn](https://alistair.cockburn.us/hexagonal-architecture/)
 
-### **Libros**
+### **Books**
 
 - Clean Architecture - Robert C. Martin
 - Domain-Driven Design - Eric Evans
 - Implementing Domain-Driven Design - Vaughn Vernon
 
-### **Código de Referencia**
+### **Reference Code**
 
 - [TypeScript DDD Example - CodelyTV](https://github.com/CodelyTV/typescript-ddd-example)
 
 ---
 
-## 📝 Conclusión
+## 📝 Conclusion
 
-Este refactor transforma `pokemon-list` de un componente monolítico a una arquitectura **Clean + Hexagonal** profesional, logrando:
+This refactor transforms `pokemon-list` from a monolithic component to a professional **Clean + Hexagonal** architecture, achieving:
 
-✅ **Independencia del framework** (React es intercambiable)  
-✅ **Testabilidad completa** (100% de cobertura sin renderizar)  
-✅ **Separación de responsabilidades** (cada capa tiene un propósito claro)  
-✅ **Reusabilidad** (Use Cases, ViewModels y Infrastructure compartibles)  
-✅ **Mantenibilidad** (código organizado por dominio, no por tecnología)  
-✅ **Escalabilidad** (agregar features no requiere refactorizar existentes)
+✅ **Framework Independence** (React is interchangeable)
+✅ **Complete Testability** (100% coverage without rendering)
+✅ **Separation of Concerns** (each layer has a clear purpose)
+✅ **Reusability** (Use Cases, ViewModels and shareable Infrastructure)
+✅ **Maintainability** (code organized by domain, not by technology)
+✅ **Scalability** (adding features doesn't require refactoring existing ones)
 
-**Estado actual:** ✅ **100% completo** y completamente funcional.
+**Current Status:** ✅ **100% complete** and fully functional.
 
 ---
 
-**Branch:** `refactor-list-to-hexagonal`  
-**Last Update:** Commit `948e897`  
-**Author:** David Vivó  
+**Branch:** `refactor-list-to-hexagonal`
+**Last Update:** Commit `948e897`
+**Author:** David Vivó
 **Mentor:** Ricardo (Claude Sonnet 4.5)

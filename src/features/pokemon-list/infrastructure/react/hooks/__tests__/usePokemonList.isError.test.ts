@@ -1,8 +1,13 @@
 import { renderHook, waitFor } from "@testing-library/react";
-import { vi, it, expect } from "vitest";
+import { vi, it, expect, beforeEach } from "vitest";
 import usePokemonList from "../usePokemonList";
 import { PokemonRepository } from "../../../../domain/ports/PokemonRepository";
+import * as reduxHooks from "../../../../../../infrastructure/redux/hooks";
 import { testData } from "./setupTests";
+
+beforeEach(() => {
+  vi.spyOn(reduxHooks, "useAppSelector").mockReturnValue(false);
+});
 
 it("starts as false when no selectedType is provided", () => {
   const { result } = renderHook(() =>

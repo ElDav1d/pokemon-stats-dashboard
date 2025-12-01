@@ -1,16 +1,20 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import { expect, it } from "vitest";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
+import { Provider } from "react-redux";
 import Home from "../Home";
+import { store } from "../../../infrastructure/redux/store";
 import { clickButtonFireType } from "./helpers";
 
 it("renders a list of specific pokemons when a type is selected", async () => {
   render(
-    <MemoryRouter initialEntries={["/"]}>
-      <Routes>
-        <Route path="/" element={<Home />} />
-      </Routes>
-    </MemoryRouter>
+    <Provider store={store}>
+      <MemoryRouter initialEntries={["/"]}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+        </Routes>
+      </MemoryRouter>
+    </Provider>
   );
 
   const contentArea = within(screen.getByRole("main")).getByRole("article");

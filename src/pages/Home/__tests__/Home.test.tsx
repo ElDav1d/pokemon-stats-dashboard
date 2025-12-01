@@ -1,15 +1,19 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import { expect, it } from "vitest";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { Provider } from "react-redux";
 import Home from "../Home";
+import { store } from "../../../infrastructure/redux/store";
 
 it("renders the initial elements", async () => {
   render(
-    <MemoryRouter initialEntries={["/"]}>
-      <Routes>
-        <Route path="/" element={<Home />} />
-      </Routes>
-    </MemoryRouter>
+    <Provider store={store}>
+      <MemoryRouter initialEntries={["/"]}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+        </Routes>
+      </MemoryRouter>
+    </Provider>
   );
 
   const header = screen.getByRole("banner");

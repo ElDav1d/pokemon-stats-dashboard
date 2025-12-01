@@ -1,7 +1,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { expect, it, vi, beforeEach, afterEach } from "vitest";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { Provider } from "react-redux";
 import Home from "../Home";
+import { store } from "../../../infrastructure/redux/store";
 
 beforeEach(() => {
   // Suppress console.error for these tests since we're testing error states
@@ -24,11 +26,13 @@ afterEach(() => {
 
 it("shows error message when fetch fails", async () => {
   render(
-    <MemoryRouter initialEntries={["/?type=normal"]}>
-      <Routes>
-        <Route path="/" element={<Home />} />
-      </Routes>
-    </MemoryRouter>
+    <Provider store={store}>
+      <MemoryRouter initialEntries={["/?type=normal"]}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+        </Routes>
+      </MemoryRouter>
+    </Provider>
   );
 
   await waitFor(
@@ -45,11 +49,13 @@ it("shows error message when fetch fails", async () => {
 
 it("does not show error message when no type is selected", async () => {
   render(
-    <MemoryRouter initialEntries={["/"]}>
-      <Routes>
-        <Route path="/" element={<Home />} />
-      </Routes>
-    </MemoryRouter>
+    <Provider store={store}>
+      <MemoryRouter initialEntries={["/"]}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+        </Routes>
+      </MemoryRouter>
+    </Provider>
   );
 
   await waitFor(() => {

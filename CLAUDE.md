@@ -371,6 +371,28 @@ const SLICES_TO_PERSIST = ["testSlice"];
 mockState = { testSlice: { testProp: true } };
 ```
 
+**Blackbox Principle Check:**
+
+- [ ] Am I testing browser APIs (localStorage, fetch, window)? If YES → Mock them completely
+- [ ] Am I testing Redux internals (dispatch, reducers, state updates)? If YES → Mock Redux components
+- [ ] Am I testing my code's logic, not the library's behavior? If NO → Add mocks
+- [ ] Do my tests prove I call external APIs correctly, not that APIs work? If NO → Refactor
+
+**Example Red Flag:**
+
+```typescript
+// ❌ BAD: Testing localStorage's JSON behavior
+localStorage.setItem("key", JSON.stringify(data));
+expect(JSON.parse(localStorage.getItem("key"))).toEqual(data);
+
+// ✅ GOOD: Mocking localStorage, testing MY code
+const setItemSpy = vi
+  .spyOn(Storage.prototype, "setItem")
+  .mockImplementation(() => {});
+myFunction();
+expect(setItemSpy).toHaveBeenCalledWith("key", JSON.stringify(data));
+```
+
 **No Feature-Specific Details Check:**
 
 - [ ] Are action types hard-coded as `'featureName/action'`? If YES → Use generic names

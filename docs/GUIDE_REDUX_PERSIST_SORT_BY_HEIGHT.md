@@ -1,99 +1,99 @@
-# Guía: Persistencia de "Sort by Height" con Redux Toolkit Middleware
+# Guide: "Sort by Height" Persistence with Redux Toolkit Middleware
 
-## 📋 Objetivo
+## 📋 Objective
 
-Implementar Redux Toolkit con un **middleware customizado** para persistir el estado del checkbox "Sort by height" en localStorage, siguiendo los principios de **Arquitectura Hexagonal** y **Clean Architecture**.
+Implement Redux Toolkit with a **custom middleware** to persist the "Sort by height" checkbox state in localStorage, following **Hexagonal Architecture** and **Clean Architecture** principles.
 
-**NO usaremos Redux Persist.** Crearemos nuestro propio middleware para tener control total sobre la persistencia.
-
----
-
-## 🎯 Resultado Esperado
-
-**Comportamiento actual:**
-
-```
-1. Usuario marca checkbox "Sort by height"
-2. Lista se ordena por altura
-3. Usuario recarga la página
-4. ❌ Checkbox vuelve a estar desmarcado
-5. ❌ Lista vuelve al orden original
-```
-
-**Comportamiento después de implementar Redux Persist:**
-
-```
-1. Usuario marca checkbox "Sort by height"
-2. Lista se ordena por altura
-3. ✅ Estado se guarda en localStorage
-4. Usuario recarga la página
-5. ✅ Checkbox sigue marcado
-6. ✅ Lista sigue ordenada por altura
-```
+**We will NOT use Redux Persist.** We'll create our own middleware to have full control over persistence.
 
 ---
 
-## 🏗️ Arquitectura: Dónde va cada cosa
+## 🎯 Expected Behavior
+
+**Current behavior:**
+
+```
+1. User checks "Sort by height" checkbox
+2. List gets sorted by height
+3. User reloads the page
+4. ❌ Checkbox goes back to unchecked
+5. ❌ List returns to original order
+```
+
+**Behavior after implementing Redux Persist:**
+
+```
+1. User checks "Sort by height" checkbox
+2. List gets sorted by height
+3. ✅ State is saved to localStorage
+4. User reloads the page
+5. ✅ Checkbox remains checked
+6. ✅ List remains sorted by height
+```
+
+---
+
+## 🏗️ Architecture: Where Everything Goes
 
 ```
 src/
 ├── features/
 │   └── pokemon-list/
-│       ├── domain/                           # 🔵 NO CAMBIA
-│       ├── application/                      # 🟢 NO CAMBIA
+│       ├── domain/                           # 🔵 NO CHANGES
+│       ├── application/                      # 🟢 NO CHANGES
 │       ├── infrastructure/
-│       │   ├── http/                         # 🟡 NO CAMBIA
+│       │   ├── http/                         # 🟡 NO CHANGES
 │       │   ├── react/
 │       │   │   └── hooks/
-│       │   │       └── usePokemonList.ts     # 🔄 MODIFICAR
-│       │   └── redux/                        # ✅ NUEVO
+│       │   │       └── usePokemonList.ts     # 🔄 MODIFY
+│       │   └── redux/                        # ✅ NEW
 │       │       ├── slices/
 │       │       │   └── listPreferencesSlice.ts
 │       │       └── selectors/
 │       │           └── listPreferencesSelectors.ts
 │       └── ui/
-│           └── PokemonList.tsx               # 🔄 MODIFICAR
+│           └── PokemonList.tsx               # 🔄 MODIFY
 │
 └── infrastructure/                           # 🟡 SHARED
     └── redux/
-        ├── store.ts                          # ✅ NUEVO
-        ├── rootReducer.ts                    # ✅ NUEVO
-        ├── hooks.ts                          # ✅ NUEVO
-        └── middleware/                       # ✅ NUEVO
-            └── localStorageMiddleware.ts     # ✅ Middleware customizado
+        ├── store.ts                          # ✅ NEW
+        ├── rootReducer.ts                    # ✅ NEW
+        ├── hooks.ts                          # ✅ NEW
+        └── middleware/                       # ✅ NEW
+            └── localStorageMiddleware.ts     # ✅ Custom Middleware
 ```
 
 ---
 
-## 📦 Instalación de Dependencias
+## 📦 Installing Dependencies
 
 ```bash
 npm install @reduxjs/toolkit react-redux
 ```
 
-**Versiones recomendadas:**
+**Recommended versions:**
 
 - `@reduxjs/toolkit`: ^2.0.0
 - `react-redux`: ^9.0.0
 
-**NO necesitamos `redux-persist`.** Crearemos nuestro propio middleware.
+**We DON'T need `redux-persist`.** We'll create our own middleware.
 
 ---
 
-## 🚀 Implementación Paso a Paso
+## 🚀 Implementation Step by Step
 
 ---
 
-### **Paso 1: Crear el Redux Slice**
+### **Step 1: Create the Redux Slice**
 
-**Ubicación:** `src/features/pokemon-list/infrastructure/redux/slices/listPreferencesSlice.ts`
+**Location:** `src/features/pokemon-list/infrastructure/redux/slices/listPreferencesSlice.ts`
 
 ```typescript
 import { createSlice } from "@reduxjs/toolkit";
 
 /**
- * Estado de preferencias de la lista de Pokemon
- * Solo contiene estado de UI, NO lógica de negocio
+ * State for Pokemon list preferences
+ * Only contains UI state, NOT business logic
  */
 interface ListPreferencesState {
   sortByHeight: boolean;
@@ -104,99 +104,99 @@ const initialState: ListPreferencesState = {
 };
 
 /**
- * Slice para manejar preferencias de visualización de la lista
- * Responsabilidad: Solo estado de UI (qué checkbox está marcado)
- * NO responsabilidad: Lógica de ordenamiento (eso va en el ViewModel)
+ * Slice for handling list display preferences
+ * Responsibility: Only UI state (which checkbox is checked)
+ * NOT responsibility: Sorting logic (that goes in the ViewModel)
  */
 export const listPreferencesSlice = createSlice({
   name: "listPreferences",
   initialState,
   reducers: {
     /**
-     * Toggle el estado del checkbox "Sort by height"
+     * Toggle the "Sort by height" checkbox state
      */
     toggleSortByHeight: (state) => {
       state.sortByHeight = !state.sortByHeight;
     },
 
     /**
-     * Set explícito del estado (útil para tests)
+     * Explicitly set the state (useful for tests)
      */
     setSortByHeight: (state, action) => {
       state.sortByHeight = action.payload;
     },
 
     /**
-     * Reset a valores por defecto
+     * Reset to default values
      */
     resetPreferences: () => initialState,
   },
 });
 
-// Exportar actions
+// Export actions
 export const { toggleSortByHeight, setSortByHeight, resetPreferences } =
   listPreferencesSlice.actions;
 
-// Exportar reducer
+// Export reducer
 export default listPreferencesSlice.reducer;
 ```
 
-**✅ Principios aplicados:**
+**✅ Principles applied:**
 
-- ✅ Solo estado de UI (no lógica de negocio)
-- ✅ Interface tipada
-- ✅ Comentarios explicando responsabilidades
-- ✅ Actions con nombres claros
+- ✅ Only UI state (not business logic)
+- ✅ Typed interface
+- ✅ Comments explaining responsibilities
+- ✅ Clear action names
 
 ---
 
-### **Paso 2: Crear Selectors**
+### **Step 2: Create Selectors**
 
-**Ubicación:** `src/features/pokemon-list/infrastructure/redux/selectors/listPreferencesSelectors.ts`
+**Location:** `src/features/pokemon-list/infrastructure/redux/selectors/listPreferencesSelectors.ts`
 
 ```typescript
 import { RootState } from "../../../../../infrastructure/redux/store";
 
 /**
- * Selector para obtener el estado de sortByHeight
- * Permite que componentes se suscriban solo a esta parte del estado
+ * Selector to get the sortByHeight state
+ * Allows components to subscribe only to this part of the state
  */
 export const selectSortByHeight = (state: RootState): boolean =>
   state.listPreferences.sortByHeight;
 
 /**
- * Selector para obtener todas las preferencias
- * Útil si en el futuro agregamos más preferencias
+ * Selector to get all preferences
+ * Useful if we add more preferences in the future
  */
 export const selectAllPreferences = (state: RootState) => state.listPreferences;
 ```
 
-**✅ Principios aplicados:**
+**✅ Principles applied:**
 
-- ✅ Selectores tipados
-- ✅ Granulares (permiten suscripción selectiva)
-- ✅ Documentados
+- ✅ Typed selectors
+- ✅ Granular (allow selective subscription)
+- ✅ Documented
 
 ---
 
-### **Paso 3: Crear Root Reducer**
+### **Step 3: Create Root Reducer**
 
-**Ubicación:** `src/infrastructure/redux/rootReducer.ts`
+**Location:** `src/infrastructure/redux/rootReducer.ts`
 
 ```typescript
 import { combineReducers } from "@reduxjs/toolkit";
 import listPreferencesReducer from "../../features/pokemon-list/infrastructure/redux/slices/listPreferencesSlice";
 
 /**
- * Root reducer que combina todos los slices de la aplicación
- * En el futuro se pueden agregar más slices aquí:
- * - comparisonSlice (para Pokemon Comparison feature)
- * - filtersSlice (para filtros avanzados)
+ * Root reducer that combines all slices from the application
+ * In the future, more slices can be added here:
+ * - comparisonSlice (for Pokemon Comparison feature)
+ * - filtersSlice (for advanced filtering)
  * - etc.
  */
 const rootReducer = combineReducers({
   listPreferences: listPreferencesReducer,
-  // Futuros slices:
+  // Future slices:
   // comparison: comparisonReducer,
   // filters: filtersReducer,
 });
@@ -206,58 +206,58 @@ export default rootReducer;
 
 ---
 
-### **Paso 4: Crear Middleware Customizado para localStorage**
+### **Step 4: Create Custom Middleware for localStorage**
 
-**Ubicación:** `src/infrastructure/redux/middleware/localStorageMiddleware.ts`
+**Location:** `src/infrastructure/redux/middleware/localStorageMiddleware.ts`
 
 ```typescript
 import { Middleware } from "@reduxjs/toolkit";
 import { RootState } from "../store";
 
 /**
- * Clave para guardar el estado en localStorage
+ * Key for storing state in localStorage
  */
 const STORAGE_KEY = "pokemon-app-preferences";
 
 /**
- * Middleware customizado para sincronizar estado de Redux con localStorage
+ * Custom middleware to sync Redux state with localStorage
  *
- * Responsabilidades:
- * 1. Intercepta TODAS las acciones
- * 2. Si la acción es de listPreferences, guarda el estado en localStorage
- * 3. NO bloquea las acciones (siempre hace next(action))
+ * Responsibilities:
+ * 1. Intercepts ALL actions
+ * 2. If the action is from listPreferences, saves state to localStorage
+ * 3. Does NOT block actions (always calls next(action))
  *
- * Ventajas sobre Redux Persist:
- * - Control total sobre QUÉ y CUÁNDO persistir
- * - Sin dependencias externas
- * - Fácil de debuggear
- * - Fácil de testear
+ * Advantages over Redux Persist:
+ * - Full control over WHAT and WHEN to persist
+ * - No external dependencies
+ * - Easy to debug
+ * - Easy to test
  */
 export const localStorageMiddleware: Middleware<{}, RootState> =
   (store) => (next) => (action) => {
-    // 1. Primero, deja que la acción pase al reducer
+    // 1. First, let the action pass to the reducer
     const result = next(action);
 
-    // 2. Después de que el estado se actualizó, persiste si es necesario
+    // 2. After state updates, persist if necessary
     if (action.type?.startsWith("listPreferences/")) {
       try {
-        // Obtener el estado actualizado
+        // Get the updated state
         const state = store.getState();
 
-        // Serializar y guardar en localStorage
+        // Serialize and save to localStorage
         const dataToSave = {
           listPreferences: state.listPreferences,
-          _timestamp: new Date().toISOString(), // Para debugging
+          _timestamp: new Date().toISOString(), // For debugging
         };
 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
 
-        // Log en desarrollo (opcional)
+        // Log in development (optional)
         if (process.env.NODE_ENV === "development") {
           console.log("💾 State persisted to localStorage:", dataToSave);
         }
       } catch (error) {
-        // Fallar silenciosamente si localStorage no está disponible
+        // Fail silently if localStorage is unavailable
         console.error("Failed to save to localStorage:", error);
       }
     }
@@ -266,25 +266,25 @@ export const localStorageMiddleware: Middleware<{}, RootState> =
   };
 
 /**
- * Función helper para cargar el estado inicial desde localStorage
- * Se llama una vez al crear el store
+ * Helper function to load initial state from localStorage
+ * Called once when creating the store
  */
 export const loadStateFromLocalStorage = (): Partial<RootState> | undefined => {
   try {
     const serializedState = localStorage.getItem(STORAGE_KEY);
 
     if (serializedState === null) {
-      return undefined; // No hay estado guardado
+      return undefined; // No saved state
     }
 
     const parsedState = JSON.parse(serializedState);
 
-    // Log en desarrollo (opcional)
+    // Log in development (optional)
     if (process.env.NODE_ENV === "development") {
       console.log("📂 State loaded from localStorage:", parsedState);
     }
 
-    // Retornar solo la parte que nos interesa
+    // Return only the parts we care about
     return {
       listPreferences: parsedState.listPreferences,
     };
@@ -295,7 +295,7 @@ export const loadStateFromLocalStorage = (): Partial<RootState> | undefined => {
 };
 
 /**
- * Función helper para limpiar el localStorage (útil para testing o reset)
+ * Helper function to clear localStorage (useful for testing or reset)
  */
 export const clearPersistedState = (): void => {
   try {
@@ -307,33 +307,33 @@ export const clearPersistedState = (): void => {
 };
 ```
 
-**✅ Principios aplicados:**
+**✅ Principles applied:**
 
-- ✅ **Middleware pattern** - Intercepta acciones sin modificarlas
-- ✅ **Selective persistence** - Solo persiste acciones de `listPreferences/`
-- ✅ **Error handling** - Falla silenciosamente si localStorage no disponible
-- ✅ **Debugging** - Logs en desarrollo
-- ✅ **Testability** - Funciones helper exportables
+- ✅ **Middleware pattern** - Intercepts actions without modifying them
+- ✅ **Selective persistence** - Only persists `listPreferences/` actions
+- ✅ **Error handling** - Fails silently if localStorage unavailable
+- ✅ **Debugging** - Logs in development
+- ✅ **Testability** - Exported helper functions
 
 ---
 
-**Ventajas de este enfoque vs Redux Persist:**
+**Advantages of this approach vs Redux Persist:**
 
-| Aspecto           | Redux Persist  | Middleware Custom             |
+| Aspect            | Redux Persist  | Custom Middleware             |
 | ----------------- | -------------- | ----------------------------- |
-| **Control**       | Limitado       | Total                         |
-| **Tamaño bundle** | +15KB          | 0KB extra                     |
-| **Configuración** | Compleja       | Simple                        |
-| **Debugging**     | Difícil        | Fácil (código propio)         |
-| **Testing**       | Requiere mocks | Tests simples                 |
-| **Flexibilidad**  | Limitada       | Total                         |
-| **Performance**   | Buena          | Excelente (solo lo necesario) |
+| **Control**       | Limited        | Total                         |
+| **Bundle size**   | +15KB          | 0KB extra                     |
+| **Configuration** | Complex        | Simple                        |
+| **Debugging**     | Difficult      | Easy (own code)               |
+| **Testing**       | Requires mocks | Simple tests                  |
+| **Flexibility**   | Limited        | Total                         |
+| **Performance**   | Good           | Excellent (only what needed)  |
 
 ---
 
-### **Paso 5: Configurar Store con Middleware Customizado**
+### **Step 5: Configure Store with Custom Middleware**
 
-**Ubicación:** `src/infrastructure/redux/store.ts`
+**Location:** `src/infrastructure/redux/store.ts`
 
 ```typescript
 import { configureStore } from "@reduxjs/toolkit";
@@ -344,112 +344,112 @@ import {
 } from "./middleware/localStorageMiddleware";
 
 /**
- * Cargar estado inicial desde localStorage (si existe)
+ * Load initial state from localStorage (if it exists)
  */
 const preloadedState = loadStateFromLocalStorage();
 
 /**
- * Store de Redux con middleware customizado
+ * Redux store with custom middleware
  */
 export const store = configureStore({
   reducer: rootReducer,
 
-  // ✅ Estado inicial cargado desde localStorage
+  // ✅ Initial state loaded from localStorage
   preloadedState,
 
-  // ✅ Agregar middleware customizado
+  // ✅ Add custom middleware
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(localStorageMiddleware), // Nuestro middleware al final
+    getDefaultMiddleware().concat(localStorageMiddleware), // Our middleware at the end
 
-  // DevTools solo en desarrollo
+  // DevTools only in development
   devTools: process.env.NODE_ENV !== "production",
 });
 
 /**
- * Tipos para TypeScript
+ * Types for TypeScript
  */
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 ```
 
-**✅ Configuración explicada:**
+**✅ Configuration explained:**
 
-| Opción           | Valor                         | Por qué                           |
+| Option           | Value                         | Why                               |
 | ---------------- | ----------------------------- | --------------------------------- |
-| `reducer`        | `rootReducer`                 | Combina todos los slices          |
-| `preloadedState` | `loadStateFromLocalStorage()` | Carga estado guardado al iniciar  |
-| `middleware`     | `localStorageMiddleware`      | Guarda estado en cada acción      |
-| `devTools`       | Solo en dev                   | Redux DevTools solo en desarrollo |
+| `reducer`        | `rootReducer`                 | Combines all slices               |
+| `preloadedState` | `loadStateFromLocalStorage()` | Loads saved state on start        |
+| `middleware`     | `localStorageMiddleware`      | Saves state on each action        |
+| `devTools`       | Only in dev                   | Redux DevTools only in development |
 
-**Flujo de persistencia:**
+**Persistence flow:**
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ 1. APP INICIA                                               │
-│ loadStateFromLocalStorage() se ejecuta                      │
-│ → Lee localStorage                                          │
-│ → Retorna estado guardado (o undefined)                     │
+│ 1. APP STARTS                                               │
+│ loadStateFromLocalStorage() executes                        │
+│ → Reads localStorage                                        │
+│ → Returns saved state (or undefined)                        │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────────┐
-│ 2. STORE SE CREA                                            │
-│ preloadedState restaura el estado guardado                  │
-│ → Checkbox ya está en el estado correcto                    │
+│ 2. STORE IS CREATED                                         │
+│ preloadedState restores the saved state                     │
+│ → Checkbox already in correct state                         │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────────┐
-│ 3. USUARIO MARCA CHECKBOX                                   │
+│ 3. USER CHECKS CHECKBOX                                     │
 │ dispatch(toggleSortByHeight())                              │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────────┐
-│ 4. MIDDLEWARE INTERCEPTA                                    │
-│ localStorageMiddleware detecta acción "listPreferences/"    │
-│ → Deja pasar la acción (next(action))                       │
-│ → Estado se actualiza en Redux                              │
-│ → Guarda estado en localStorage                             │
+│ 4. MIDDLEWARE INTERCEPTS                                    │
+│ localStorageMiddleware detects "listPreferences/" action    │
+│ → Lets action pass (next(action))                           │
+│ → State updates in Redux                                    │
+│ → Saves state to localStorage                               │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────────┐
-│ 5. COMPONENTE RE-RENDERIZA                                  │
-│ useAppSelector lee nuevo estado                             │
+│ 5. COMPONENT RE-RENDERS                                     │
+│ useAppSelector reads new state                              │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-### **Paso 6: Crear Hooks Tipados**
+### **Step 6: Create Typed Hooks**
 
-**Ubicación:** `src/infrastructure/redux/hooks.ts`
+**Location:** `src/infrastructure/redux/hooks.ts`
 
 ```typescript
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "./store";
 
 /**
- * Hook tipado para useDispatch
- * Uso: const dispatch = useAppDispatch();
+ * Typed hook for useDispatch
+ * Usage: const dispatch = useAppDispatch();
  */
 export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
 
 /**
- * Hook tipado para useSelector
- * Uso: const value = useAppSelector(state => state.x);
+ * Typed hook for useSelector
+ * Usage: const value = useAppSelector(state => state.x);
  */
 export const useAppSelector = useSelector.withTypes<RootState>();
 ```
 
-**✅ Por qué hooks tipados:**
+**✅ Why typed hooks:**
 
-- ✅ Autocompletado en TypeScript
-- ✅ Detecta errores en tiempo de desarrollo
-- ✅ Mejor experiencia de desarrollo
+- ✅ Autocomplete in TypeScript
+- ✅ Detects errors at development time
+- ✅ Better developer experience
 
 ---
 
-### **Paso 7: Modificar el Hook usePokemonList**
+### **Step 7: Modify the usePokemonList Hook**
 
-**Ubicación:** `src/features/pokemon-list/infrastructure/react/hooks/usePokemonList.ts`
+**Location:** `src/features/pokemon-list/infrastructure/react/hooks/usePokemonList.ts`
 
 ```typescript
 import { useState, useEffect, useMemo } from "react";
@@ -467,19 +467,19 @@ interface UsePokemonListResult {
 }
 
 /**
- * Hook para manejar la lista de Pokemon
- * Integra Redux para leer el estado de sortByHeight
- * Usa el ViewModel para la lógica de ordenamiento
+ * Hook for managing Pokemon list
+ * Integrates Redux to read sortByHeight state
+ * Uses ViewModel for sorting logic
  */
 function usePokemonList(selectedType: string): UsePokemonListResult {
   const [pokemonList, setPokemonList] = useState<PokemonListItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
 
-  // ✅ Lee estado de Redux (persiste entre recargas)
+  // ✅ Read state from Redux (persists between reloads)
   const sortByHeight = useAppSelector(selectSortByHeight);
 
-  // Setup infrastructure (sin cambios)
+  // Setup infrastructure (no changes)
   const httpClient = useMemo(
     () => new FetchHttpClient("https://pokeapi.co/api/v2/"),
     []
@@ -495,7 +495,7 @@ function usePokemonList(selectedType: string): UsePokemonListResult {
     [repository]
   );
 
-  // ✅ Fetch data y aplica sorting si está activado
+  // ✅ Fetch data and apply sorting if enabled
   useEffect(() => {
     if (!selectedType) {
       setPokemonList([]);
@@ -509,10 +509,10 @@ function usePokemonList(selectedType: string): UsePokemonListResult {
       setIsError(false);
 
       try {
-        // 1. Cargar datos del ViewModel
+        // 1. Load data from ViewModel
         let result = await viewModel.loadPokemonList(selectedType);
 
-        // 2. ✅ Aplicar sorting si está activado en Redux
+        // 2. ✅ Apply sorting if enabled in Redux
         if (sortByHeight) {
           result = viewModel.sortPokemonListByHeight(result);
         }
@@ -528,7 +528,7 @@ function usePokemonList(selectedType: string): UsePokemonListResult {
     };
 
     fetchData();
-  }, [selectedType, sortByHeight, viewModel]); // ✅ sortByHeight como dependencia
+  }, [selectedType, sortByHeight, viewModel]); // ✅ sortByHeight as dependency
 
   return {
     pokemonList,
@@ -540,18 +540,18 @@ function usePokemonList(selectedType: string): UsePokemonListResult {
 export default usePokemonList;
 ```
 
-**✅ Cambios aplicados:**
+**✅ Changes applied:**
 
-1. ✅ Importa `useAppSelector` y `selectSortByHeight`
-2. ✅ Lee `sortByHeight` de Redux (línea 30)
-3. ✅ Aplica sorting condicionalmente (línea 58-60)
-4. ✅ Agrega `sortByHeight` a dependencias del useEffect (línea 71)
+1. ✅ Imports `useAppSelector` and `selectSortByHeight`
+2. ✅ Reads `sortByHeight` from Redux (line 30)
+3. ✅ Applies sorting conditionally (line 58-60)
+4. ✅ Adds `sortByHeight` to useEffect dependencies (line 71)
 
 ---
 
-### **Paso 8: Modificar el Componente PokemonList**
+### **Step 8: Modify the PokemonList Component**
 
-**Ubicación:** `src/features/pokemon-list/ui/PokemonList.tsx`
+**Location:** `src/features/pokemon-list/ui/PokemonList.tsx`
 
 ```typescript
 import { useSearchParams } from "react-router-dom";
@@ -567,11 +567,11 @@ const PokemonList = () => {
   const [searchParams] = useSearchParams();
   const selectedTypeParam = searchParams.get("type");
 
-  // ✅ Redux para estado de UI (persiste)
+  // ✅ Redux for UI state (persists)
   const dispatch = useAppDispatch();
   const sortByHeight = useAppSelector(selectSortByHeight);
 
-  // Hook: Data fetching (ya usa sortByHeight de Redux internamente)
+  // Hook: Data fetching (already uses sortByHeight from Redux internally)
   const { pokemonList, isLoading, isError } = usePokemonList(
     selectedTypeParam ?? ""
   );
@@ -588,7 +588,7 @@ const PokemonList = () => {
 
   return (
     <section>
-      {/* ✅ SIEMPRE VISIBLE - Preferencia de UI independiente de datos */}
+      {/* ✅ ALWAYS VISIBLE - UI preference independent of data */}
       <fieldset className="my-6">
         <legend className="text-lg l:text-xl xl:text-2xl">
           Order the pokemons:
@@ -598,13 +598,13 @@ const PokemonList = () => {
           type="checkbox"
           id="height"
           name="height"
-          checked={sortByHeight} // ✅ De Redux (persiste)
+          checked={sortByHeight} // ✅ From Redux (persists)
           onChange={handleSortChange}
         />
         <label htmlFor="height">By height</label>
       </fieldset>
 
-      {/* ✅ Estados de carga/error */}
+      {/* ✅ Loading/error states */}
       {isLoading && (
         <div className="text-center my-4 text-gray-500">
           <h3>Loading pokemon list...</h3>
@@ -617,7 +617,7 @@ const PokemonList = () => {
         </div>
       )}
 
-      {/* ✅ Lista (solo si hay datos) */}
+      {/* ✅ List (only if there's data) */}
       {!isLoading && !isError && visibleItems.length > 0 && (
         <ul
           aria-label="Pokemon List"
@@ -655,7 +655,7 @@ const PokemonList = () => {
         </ul>
       )}
 
-      {/* ✅ Estado vacío (opcional) */}
+      {/* ✅ Empty state (optional) */}
       {!isLoading && !isError && visibleItems.length === 0 && selectedTypeParam && (
         <div className="text-center my-4 text-gray-500">
           <p>No pokemon found for type "{selectedTypeParam}"</p>
@@ -668,72 +668,72 @@ const PokemonList = () => {
 export default PokemonList;
 ```
 
-**✅ Mejoras aplicadas:**
+**✅ Improvements applied:**
 
-1. **Fieldset siempre visible** ✅
+1. **Fieldset always visible** ✅
 
-   - El checkbox NO desaparece durante loading/error
-   - El usuario siempre ve el estado de su preferencia
-   - Mejor UX: no hay "sorpresas" al cambiar de tipo
+   - Checkbox doesn't disappear during loading/error
+   - User always sees their preference state
+   - Better UX: no "surprises" when changing types
 
-2. **Redux integrado** ✅
+2. **Redux integrated** ✅
 
-   - Elimina `useState` local
-   - Usa `useAppDispatch` y `useAppSelector`
-   - Estado persiste entre tipos y recargas
+   - Removes local `useState`
+   - Uses `useAppDispatch` and `useAppSelector`
+   - State persists between types and reloads
 
-3. **Estados separados y claros** ✅
+3. **Clear and separate states** ✅
 
-   - Loading: spinner mientras carga
-   - Error: mensaje de error
-   - Success con datos: muestra lista
-   - Success sin datos: mensaje de empty state
+   - Loading: spinner while loading
+   - Error: error message
+   - Success with data: shows list
+   - Success without data: empty state message
 
-4. **Código simplificado** ✅
-   - Elimina `sortablePokemonList` (el hook ya ordena)
-   - Elimina lógica de sorting del componente
-   - Componente "humble" que solo renderiza
-
----
-
-**Comparación de comportamiento:**
-
-| Escenario                   | ANTES (con useState)                   | AHORA (con Redux)               |
-| --------------------------- | -------------------------------------- | ------------------------------- |
-| **Usuario marca checkbox**  | ✅ Marca                               | ✅ Marca                        |
-| **Usuario cambia de tipo**  | ❌ Checkbox desaparece durante loading | ✅ Checkbox siempre visible     |
-| **Lista termina de cargar** | ❌ Checkbox desmarcado (perdió estado) | ✅ Checkbox marcado (persistió) |
-| **Usuario recarga página**  | ❌ Checkbox desmarcado                 | ✅ Checkbox marcado             |
+4. **Simplified code** ✅
+   - Removes `sortablePokemonList` (hook already sorts)
+   - Removes sorting logic from component
+   - Component is "humble" and only renders
 
 ---
 
-**Experiencia del usuario:**
+**Behavior comparison:**
+
+| Scenario                    | BEFORE (with useState)                     | NOW (with Redux)            |
+| --------------------------- | ------------------------------------------ | --------------------------- |
+| **User checks checkbox**    | ✅ Checks                                  | ✅ Checks                   |
+| **User changes type**       | ❌ Checkbox disappears during loading      | ✅ Checkbox always visible  |
+| **List finishes loading**   | ❌ Checkbox unchecked (lost state)         | ✅ Checkbox checked (saved) |
+| **User reloads page**       | ❌ Checkbox unchecked                      | ✅ Checkbox checked         |
+
+---
+
+**User experience:**
 
 ```
 ┌─────────────────────────────────────────┐
-│ 1. Usuario en tipo "fire"               │
-│    Marca checkbox ✅                     │
+│ 1. User in "fire" type                  │
+│    Checks checkbox ✅                    │
 └─────────────────────────────────────────┘
                  ↓
 ┌─────────────────────────────────────────┐
-│ 2. Usuario cambia a "water"             │
-│    ✅ Checkbox SIEMPRE visible (marcado)│
-│    Abajo: "Loading..."                  │
+│ 2. User changes to "water"              │
+│    ✅ Checkbox ALWAYS visible (checked) │
+│    Below: "Loading..."                  │
 └─────────────────────────────────────────┘
                  ↓
 ┌─────────────────────────────────────────┐
-│ 3. Lista "water" carga                  │
-│    ✅ Checkbox sigue marcado             │
-│    ✅ Lista viene ordenada               │
-│    ✅ Experiencia consistente            │
+│ 3. "water" list loads                   │
+│    ✅ Checkbox remains checked           │
+│    ✅ List comes sorted                  │
+│    ✅ Consistent experience              │
 └─────────────────────────────────────────┘
 ```
 
 ---
 
-### **Paso 9: Configurar App.tsx con Redux Provider**
+### **Step 9: Configure App.tsx with Redux Provider**
 
-**Ubicación:** `src/App.tsx`
+**Location:** `src/App.tsx`
 
 ```typescript
 import { lazy, Suspense } from "react";
@@ -766,33 +766,33 @@ function App() {
 export default App;
 ```
 
-**✅ Diferencias con Redux Persist:**
+**✅ Differences from Redux Persist:**
 
-- ❌ **NO necesitamos** `<PersistGate>` - El estado ya se carga en el store
-- ✅ **Más simple** - Solo el `<Provider>` estándar
-- ✅ **Sin loading** - El estado se carga síncronamente en `preloadedState`
+- ❌ **We DON'T need** `<PersistGate>` - State already loads in the store
+- ✅ **Simpler** - Only standard `<Provider>`
+- ✅ **No loading** - State loads synchronously in `preloadedState`
 
-**¿Por qué no necesitamos PersistGate?**
+**Why no PersistGate?**
 
 ```typescript
-// Redux Persist (asíncrono):
-// 1. Store se crea SIN estado
-// 2. <PersistGate> espera a que se restaure
-// 3. Cuando termina, renderiza la app
+// Redux Persist (asynchronous):
+// 1. Store created WITHOUT state
+// 2. <PersistGate> waits for restoration
+// 3. When done, renders app
 
-// Nuestro middleware (síncrono):
-// 1. loadStateFromLocalStorage() se ejecuta ANTES de crear el store
-// 2. Store se crea YA con el estado restaurado
-// 3. App renderiza inmediatamente con estado correcto
+// Our middleware (synchronous):
+// 1. loadStateFromLocalStorage() executes BEFORE store creation
+// 2. Store created ALREADY with restored state
+// 3. App renders immediately with correct state
 ```
 
 ---
 
 ## ✅ Testing
 
-### **Test del Middleware**
+### **Test the Middleware**
 
-**Ubicación:** `src/infrastructure/redux/middleware/__tests__/localStorageMiddleware.test.ts`
+**Location:** `src/infrastructure/redux/middleware/__tests__/localStorageMiddleware.test.ts`
 
 ```typescript
 import { configureStore } from "@reduxjs/toolkit";
@@ -808,11 +808,11 @@ import listPreferencesReducer, {
 let store: any;
 
 beforeEach(() => {
-  // Limpiar localStorage antes de cada test
+  // Clear localStorage before each test
   localStorage.clear();
   clearPersistedState();
 
-  // Crear store con middleware
+  // Create store with middleware
   store = configureStore({
     reducer: {
       listPreferences: listPreferencesReducer,
@@ -830,7 +830,7 @@ it("should save state to localStorage when listPreferences action is dispatched"
   // Dispatch action
   store.dispatch(toggleSortByHeight());
 
-  // Verificar que se guardó en localStorage
+  // Verify it was saved to localStorage
   const saved = localStorage.getItem("pokemon-app-preferences");
   expect(saved).not.toBeNull();
 
@@ -840,21 +840,21 @@ it("should save state to localStorage when listPreferences action is dispatched"
 });
 
 it("should not save to localStorage for non-listPreferences actions", () => {
-  // Dispatch una acción que no es de listPreferences
+  // Dispatch an action that's not listPreferences
   store.dispatch({ type: "some/other/action" });
 
-  // No debería haber nada en localStorage
+  // Nothing should be in localStorage
   const saved = localStorage.getItem("pokemon-app-preferences");
   expect(saved).toBeNull();
 });
 
 it("should update localStorage on every listPreferences action", () => {
-  // Toggle 3 veces
+  // Toggle 3 times
   store.dispatch(toggleSortByHeight()); // true
   store.dispatch(toggleSortByHeight()); // false
   store.dispatch(toggleSortByHeight()); // true
 
-  // Verificar estado final
+  // Verify final state
   const saved = localStorage.getItem("pokemon-app-preferences");
   const parsed = JSON.parse(saved!);
   expect(parsed.listPreferences.sortByHeight).toBe(true);
@@ -866,14 +866,14 @@ it("should return undefined if no state in localStorage", () => {
 });
 
 it("should load state from localStorage", () => {
-  // Guardar estado manualmente
+  // Save state manually
   const mockState = {
     listPreferences: { sortByHeight: true },
     _timestamp: new Date().toISOString(),
   };
   localStorage.setItem("pokemon-app-preferences", JSON.stringify(mockState));
 
-  // Cargar estado
+  // Load state
   const loaded = loadStateFromLocalStorage();
   expect(loaded).toEqual({
     listPreferences: { sortByHeight: true },
@@ -881,7 +881,7 @@ it("should load state from localStorage", () => {
 });
 
 it("should return undefined if localStorage data is corrupted", () => {
-  // Guardar JSON inválido
+  // Save invalid JSON
   localStorage.setItem("pokemon-app-preferences", "invalid json");
 
   const loaded = loadStateFromLocalStorage();
@@ -889,16 +889,16 @@ it("should return undefined if localStorage data is corrupted", () => {
 });
 
 it("should remove state from localStorage when cleared", () => {
-  // Guardar algo
+  // Save something
   localStorage.setItem(
     "pokemon-app-preferences",
     JSON.stringify({ test: true })
   );
 
-  // Limpiar
+  // Clear
   clearPersistedState();
 
-  // Verificar que se eliminó
+  // Verify it was deleted
   const saved = localStorage.getItem("pokemon-app-preferences");
   expect(saved).toBeNull();
 });
@@ -906,9 +906,9 @@ it("should remove state from localStorage when cleared", () => {
 
 ---
 
-### **Test del Slice**
+### **Test the Slice**
 
-**Ubicación:** `src/features/pokemon-list/infrastructure/redux/slices/__tests__/listPreferencesSlice.test.ts`
+**Location:** `src/features/pokemon-list/infrastructure/redux/slices/__tests__/listPreferencesSlice.test.ts`
 
 ```typescript
 import listPreferencesReducer, {
@@ -958,9 +958,9 @@ it("should reset to initial state", () => {
 
 ---
 
-### **Test de Selectors**
+### **Test Selectors**
 
-**Ubicación:** `src/features/pokemon-list/infrastructure/redux/selectors/__tests__/listPreferencesSelectors.test.ts`
+**Location:** `src/features/pokemon-list/infrastructure/redux/selectors/__tests__/listPreferencesSelectors.test.ts`
 
 ```typescript
 import {
@@ -988,9 +988,9 @@ it("should select all preferences", () => {
 
 ---
 
-### **Test de Integración con Hook**
+### **Integration Test with Hook**
 
-**Ubicación:** `src/features/pokemon-list/infrastructure/react/hooks/__tests__/usePokemonList.test.tsx`
+**Location:** `src/features/pokemon-list/infrastructure/react/hooks/__tests__/usePokemonList.test.tsx`
 
 ```typescript
 import { renderHook, waitFor } from '@testing-library/react';
@@ -1025,7 +1025,7 @@ it('should apply sorting when sortByHeight is true', async () => {
     expect(result.current.isLoading).toBe(false);
   });
 
-  // Verificar que la lista está ordenada
+  // Verify the list is sorted
   const heights = result.current.pokemonList.map(p => p.height);
   const sortedHeights = [...heights].sort((a, b) => a - b);
   expect(heights).toEqual(sortedHeights);
@@ -1044,32 +1044,32 @@ it('should not apply sorting when sortByHeight is false', async () => {
     expect(result.current.isLoading).toBe(false);
   });
 
-  // Lista no debe estar ordenada necesariamente
+  // List doesn't need to be sorted
   expect(result.current.pokemonList.length).toBeGreaterThan(0);
 });
 ```
 
 ---
 
-## 🔍 Verificación
+## 🔍 Verification
 
-### **1. Verificar en DevTools de Redux**
+### **1. Verify in Redux DevTools**
 
-1. Instalar **Redux DevTools Extension** en tu navegador
-2. Abrir la app y las DevTools
-3. Ir a la pestaña "Redux"
-4. Hacer click en checkbox "Sort by height"
-5. ✅ Deberías ver la acción `listPreferences/toggleSortByHeight`
-6. ✅ Ver el cambio de estado: `sortByHeight: false → true`
+1. Install **Redux DevTools Extension** in your browser
+2. Open the app and DevTools
+3. Go to "Redux" tab
+4. Click "Sort by height" checkbox
+5. ✅ You should see the action `listPreferences/toggleSortByHeight`
+6. ✅ See the state change: `sortByHeight: false → true`
 
 ---
 
-### **2. Verificar en localStorage**
+### **2. Verify in localStorage**
 
-1. Abrir DevTools → Pestaña "Application" (Chrome) o "Storage" (Firefox)
-2. Ir a "Local Storage" → `http://localhost:5173`
-3. ✅ Deberías ver una clave: `pokemon-app-preferences`
-4. ✅ Valor debe contener:
+1. Open DevTools → "Application" tab (Chrome) or "Storage" (Firefox)
+2. Go to "Local Storage" → `http://localhost:5173`
+3. ✅ You should see a key: `pokemon-app-preferences`
+4. ✅ Value should contain:
 
 ```json
 {
@@ -1082,11 +1082,11 @@ it('should not apply sorting when sortByHeight is false', async () => {
 
 ---
 
-### **3. Verificar logs del middleware (desarrollo)**
+### **3. Verify middleware logs (development)**
 
-1. Abrir consola del navegador
-2. Marcar checkbox "Sort by height"
-3. ✅ Deberías ver en consola:
+1. Open browser console
+2. Check "Sort by height" checkbox
+3. ✅ You should see in console:
 
 ```
 💾 State persisted to localStorage: {
@@ -1097,89 +1097,89 @@ it('should not apply sorting when sortByHeight is false', async () => {
 
 ---
 
-### **4. Verificar persistencia**
+### **4. Verify persistence**
 
-1. Marcar checkbox "Sort by height"
-2. Lista se ordena
-3. Recargar la página (F5)
-4. ✅ Checkbox sigue marcado
-5. ✅ Lista sigue ordenada
+1. Check "Sort by height" checkbox
+2. List gets sorted
+3. Reload the page (F5)
+4. ✅ Checkbox remains checked
+5. ✅ List remains sorted
 
 ---
 
-### **5. Verificar que el middleware solo se ejecuta en acciones relevantes**
+### **5. Verify middleware only runs on relevant actions**
 
-1. Navegar entre páginas (Home → Detail → Home)
-2. En consola NO deberías ver logs de persistencia
-3. Solo al marcar/desmarcar checkbox deberías ver logs
+1. Navigate between pages (Home → Detail → Home)
+2. In console, you should NOT see persistence logs
+3. Only when checking/unchecking checkbox should you see logs
 
 ---
 
 ## 🐛 Troubleshooting
 
-### **Problema 1: Estado no persiste**
+### **Problem 1: State doesn't persist**
 
-**Síntoma:** Al recargar, el checkbox vuelve a estar desmarcado.
+**Symptom:** On reload, checkbox goes back to unchecked.
 
-**Soluciones:**
+**Solutions:**
 
-1. Verificar que el middleware está agregado al store:
+1. Verify middleware is added to store:
 
 ```typescript
 export const store = configureStore({
   reducer: rootReducer,
   preloadedState: loadStateFromLocalStorage(),
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(localStorageMiddleware), // ✅ Debe estar aquí
+    getDefaultMiddleware().concat(localStorageMiddleware), // ✅ Must be here
 });
 ```
 
-2. Verificar en consola si hay logs del middleware (en desarrollo):
+2. Check console for middleware logs (in development):
 
 ```
 💾 State persisted to localStorage: { listPreferences: { sortByHeight: true }, _timestamp: "..." }
 ```
 
-3. Verificar en DevTools → Application → Local Storage:
+3. Verify in DevTools → Application → Local Storage:
 
-   - Clave: `pokemon-app-preferences`
-   - Valor debe contener el estado
+   - Key: `pokemon-app-preferences`
+   - Value should contain the state
 
-4. Limpiar localStorage y probar de nuevo:
+4. Clear localStorage and try again:
 
 ```javascript
-// En consola del navegador
+// In browser console
 localStorage.clear();
 ```
 
 ---
 
-### **Problema 2: Redux DevTools no aparece**
+### **Problem 2: Redux DevTools doesn't show up**
 
-**Síntoma:** No veo la pestaña Redux en DevTools.
+**Symptom:** No Redux tab in DevTools.
 
-**Soluciones:**
+**Solutions:**
 
-1. Instalar extensión: [Redux DevTools](https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd)
+1. Install extension: [Redux DevTools](https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd)
 
-2. Verificar configuración del store:
+2. Verify store configuration:
 
 ```typescript
 export const store = configureStore({
   reducer: rootReducer,
-  devTools: process.env.NODE_ENV !== "production", // ✅ Debe estar en true en dev
+  devTools: process.env.NODE_ENV !== "production", // ✅ Must be true in dev
 });
 ```
 
 ---
 
-### **Problema 3: TypeScript errors**
+### **Problem 3: TypeScript errors**
 
-**Síntoma:** Errores de tipos al usar `useAppSelector` o `useAppDispatch`.
+**Symptom:** Type errors using `useAppSelector` or `useAppDispatch`.
 
-**Soluciones:**
+**Solutions:**
 
-1. Verificar que los hooks tipados están bien exportados:
+1. Verify typed hooks are correctly exported:
 
 ```typescript
 // infrastructure/redux/hooks.ts
@@ -1187,34 +1187,34 @@ export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
 export const useAppSelector = useSelector.withTypes<RootState>();
 ```
 
-2. Importar hooks tipados (no los de react-redux directamente):
+2. Import typed hooks (not from react-redux directly):
 
 ```typescript
-// ❌ No uses estos
+// ❌ Don't use these
 import { useDispatch, useSelector } from "react-redux";
 
-// ✅ Usa estos
+// ✅ Use these
 import { useAppDispatch, useAppSelector } from "../infrastructure/redux/hooks";
 ```
 
 ---
 
-### **Problema 4: Middleware se ejecuta en cada acción**
+### **Problem 4: Middleware runs on every action**
 
-**Síntoma:** Logs de persistencia en TODAS las acciones, no solo listPreferences.
+**Symptom:** Persistence logs on ALL actions, not just listPreferences.
 
-**Solución:**
+**Solution:**
 
-Verificar que el middleware filtra correctamente:
+Verify middleware filters correctly:
 
 ```typescript
 export const localStorageMiddleware: Middleware<{}, RootState> =
   (store) => (next) => (action) => {
     const result = next(action);
 
-    // ✅ Solo persiste si la acción empieza con 'listPreferences/'
+    // ✅ Only persist if action starts with 'listPreferences/'
     if (action.type?.startsWith("listPreferences/")) {
-      // ... guardar en localStorage
+      // ... save to localStorage
     }
 
     return result;
@@ -1223,73 +1223,73 @@ export const localStorageMiddleware: Middleware<{}, RootState> =
 
 ---
 
-### **Problema 5: localStorage está lleno**
+### **Problem 5: localStorage is full**
 
-**Síntoma:** Error "QuotaExceededError" en consola.
+**Symptom:** "QuotaExceededError" in console.
 
-**Soluciones:**
+**Solutions:**
 
-1. localStorage tiene límite de ~5-10MB. Verificar qué hay guardado:
+1. localStorage has a limit of ~5-10MB. Check what's stored:
 
 ```javascript
-// En consola del navegador
+// In browser console
 for (let key in localStorage) {
   console.log(key, localStorage.getItem(key).length);
 }
 ```
 
-2. Si tu app guarda mucho, considera:
-   - Comprimir datos antes de guardar
-   - Usar IndexedDB para datos grandes
-   - Limpiar datos antiguos periódicamente
+2. If your app stores a lot, consider:
+   - Compressing data before saving
+   - Using IndexedDB for large data
+   - Cleaning up old data periodically
 
 ---
 
-### **Problema 6: Estado se carga pero componente no actualiza**
+### **Problem 6: State loads but component doesn't update**
 
-**Síntoma:** localStorage tiene el estado, pero checkbox está desmarcado.
+**Symptom:** localStorage has state, but checkbox is unchecked.
 
-**Soluciones:**
+**Solutions:**
 
-1. Verificar que `preloadedState` se pasa correctamente:
+1. Verify `preloadedState` is passed correctly:
 
 ```typescript
 const preloadedState = loadStateFromLocalStorage();
 
 export const store = configureStore({
   reducer: rootReducer,
-  preloadedState, // ✅ Debe estar aquí
+  preloadedState, // ✅ Must be here
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(localStorageMiddleware),
 });
 ```
 
-2. Verificar que el selector lee del store:
+2. Verify selector reads from store:
 
 ```typescript
 const sortByHeight = useAppSelector(selectSortByHeight);
 console.log("sortByHeight from Redux:", sortByHeight);
 ```
 
-3. Verificar que el componente usa el valor correcto:
+3. Verify component uses correct value:
 
 ```typescript
 <input
   type="checkbox"
-  checked={sortByHeight} // ✅ Debe venir de Redux, no de useState
+  checked={sortByHeight} // ✅ Must come from Redux, not useState
   onChange={handleSortChange}
 />
 ```
 
 ---
 
-## 📊 Diagrama de Flujo
+## 📊 Flow Diagrams
 
-### **Flujo: Usuario marca checkbox**
+### **Flow: User checks checkbox**
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ 1. USUARIO MARCA CHECKBOX                                   │
+│ 1. USER CHECKS CHECKBOX                                     │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────────┐
@@ -1298,170 +1298,170 @@ console.log("sortByHeight from Redux:", sortByHeight);
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────────┐
-│ 3. MIDDLEWARE INTERCEPTA                                    │
-│ localStorageMiddleware recibe la acción                     │
-│ → Deja pasar: next(action)                                  │
+│ 3. MIDDLEWARE INTERCEPTS                                    │
+│ localStorageMiddleware receives the action                  │
+│ → Lets it pass: next(action)                                │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────────┐
-│ 4. REDUCER ACTUALIZA ESTADO                                 │
+│ 4. REDUCER UPDATES STATE                                    │
 │ state.listPreferences.sortByHeight = !sortByHeight          │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────────┐
-│ 5. MIDDLEWARE PERSISTE                                      │
+│ 5. MIDDLEWARE PERSISTS                                      │
 │ if (action.type.startsWith('listPreferences/')) {           │
 │   localStorage.setItem('pokemon-app-preferences', state)    │
 │ }                                                            │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────────┐
-│ 6. COMPONENTES RE-RENDERIZAN                                │
-│ useAppSelector detecta cambio de estado                     │
-│ → Checkbox actualiza su valor                               │
+│ 6. COMPONENTS RE-RENDER                                     │
+│ useAppSelector detects state change                         │
+│ → Checkbox updates its value                                │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────────┐
-│ 7. USEEFFECT SE EJECUTA                                     │
-│ Detecta cambio en sortByHeight (dependencia)                │
+│ 7. USEEFFECT EXECUTES                                       │
+│ Detects sortByHeight = true (dependency)                    │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────────┐
-│ 8. VIEWMODEL APLICA SORTING                                 │
+│ 8. VIEWMODEL APPLIES SORTING                                │
 │ if (sortByHeight) {                                         │
 │   result = viewModel.sortPokemonListByHeight(result)        │
 │ }                                                            │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────────┐
-│ 9. LISTA SE RENDERIZA ORDENADA                              │
+│ 9. LIST RENDERS SORTED                                      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-### **Flujo: Usuario recarga la página**
+### **Flow: User reloads page**
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ 1. APP INICIA                                               │
+│ 1. APP STARTS                                               │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────────┐
-│ 2. CARGAR ESTADO DESDE LOCALSTORAGE                         │
+│ 2. LOAD STATE FROM LOCALSTORAGE                             │
 │ const preloadedState = loadStateFromLocalStorage()          │
-│ → Lee 'pokemon-app-preferences' de localStorage             │
-│ → Retorna: { listPreferences: { sortByHeight: true } }      │
+│ → Reads 'pokemon-app-preferences' from localStorage         │
+│ → Returns: { listPreferences: { sortByHeight: true } }      │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────────┐
-│ 3. STORE SE CREA CON ESTADO INICIAL                         │
+│ 3. STORE CREATED WITH INITIAL STATE                         │
 │ configureStore({ preloadedState })                          │
-│ → Redux ya tiene sortByHeight: true                         │
+│ → Redux already has sortByHeight: true                      │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────────┐
-│ 4. APP RENDERIZA                                            │
+│ 4. APP RENDERS                                              │
 │ <Provider store={store}>                                    │
-│ → Componentes acceden al estado restaurado                  │
+│ → Components access restored state                          │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────────┐
-│ 5. COMPONENTE LEE ESTADO                                    │
+│ 5. COMPONENT READS STATE                                    │
 │ const sortByHeight = useAppSelector(selectSortByHeight)     │
-│ → sortByHeight = true (valor restaurado)                    │
+│ → sortByHeight = true (restored value)                      │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────────┐
-│ 6. CHECKBOX RENDERIZA MARCADO                               │
+│ 6. CHECKBOX RENDERS CHECKED                                 │
 │ <input checked={sortByHeight} />                            │
-│ → Checkbox está marcado desde el inicio                     │
+│ → Checkbox is checked from the start                        │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────────┐
-│ 7. USEEFFECT FETCH DATA                                     │
-│ useEffect detecta sortByHeight = true                       │
-│ → Aplica sorting automáticamente                            │
+│ 7. USEEFFECT FETCHES DATA                                   │
+│ useEffect detects sortByHeight = true                       │
+│ → Applies sorting automatically                             │
 └─────────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────────┐
-│ 8. LISTA SE MUESTRA ORDENADA                                │
-│ Usuario ve la lista ordenada desde el primer render         │
+│ 8. LIST SHOWS SORTED                                        │
+│ User sees the list sorted from the first render             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-### **Comparación: Redux Persist vs Middleware Custom**
+### **Comparison: Redux Persist vs Custom Middleware**
 
-| Aspecto           | Redux Persist                           | Middleware Custom                              |
+| Aspect            | Redux Persist                           | Custom Middleware                              |
 | ----------------- | --------------------------------------- | ---------------------------------------------- |
-| **Timing**        | ⏱️ Asíncrono (necesita `<PersistGate>`) | ⚡ Síncrono (carga en `preloadedState`)        |
-| **Loading state** | ❌ Necesita mostrar spinner             | ✅ Sin loading, estado disponible de inmediato |
-| **Control**       | 🔒 Limitado (configuración)             | 🎯 Total (código propio)                       |
+| **Timing**        | ⏱️ Asynchronous (needs `<PersistGate>`) | ⚡ Synchronous (loads in `preloadedState`)    |
+| **Loading state** | ❌ Need to show spinner                 | ✅ No loading, state available immediately    |
+| **Control**       | 🔒 Limited (configuration)              | 🎯 Total (own code)                           |
 | **Bundle size**   | 📦 +15KB                                | 📦 +0KB                                        |
-| **Debugging**     | 🐛 Complejo (código externo)            | 🐛 Fácil (logs propios)                        |
-| **Testing**       | 🧪 Requiere mocks complejos             | 🧪 Tests simples                               |
+| **Debugging**     | 🐛 Complex (external code)              | 🐛 Easy (own logs)                            |
+| **Testing**       | 🧪 Complex mocks required               | 🧪 Simple tests                               |
 
 ---
 
-## 📝 Checklist de Implementación
+## 📝 Implementation Checklist
 
-### **Configuración inicial:**
+### **Initial Setup:**
 
-- [ ] Instalar dependencias (`@reduxjs/toolkit`, `react-redux`)
-- [ ] Crear `listPreferencesSlice.ts`
-- [ ] Crear `listPreferencesSelectors.ts`
-- [ ] Crear `rootReducer.ts`
-- [ ] Crear `localStorageMiddleware.ts` con funciones helper
-- [ ] Crear `store.ts` con middleware y preloadedState
-- [ ] Crear `hooks.ts` con hooks tipados
+- [ ] Install dependencies (`@reduxjs/toolkit`, `react-redux`)
+- [ ] Create `listPreferencesSlice.ts`
+- [ ] Create `listPreferencesSelectors.ts`
+- [ ] Create `rootReducer.ts`
+- [ ] Create `localStorageMiddleware.ts` with helper functions
+- [ ] Create `store.ts` with middleware and preloadedState
+- [ ] Create `hooks.ts` with typed hooks
 
-### **Integración:**
+### **Integration:**
 
-- [ ] Modificar `usePokemonList.ts` para usar Redux
-- [ ] Modificar `PokemonList.tsx` para usar Redux
-- [ ] Agregar `<Provider>` en `App.tsx` (sin PersistGate)
+- [ ] Modify `usePokemonList.ts` to use Redux
+- [ ] Modify `PokemonList.tsx` to use Redux
+- [ ] Add `<Provider>` in `App.tsx` (no PersistGate)
 
 ### **Testing:**
 
-- [ ] Tests del middleware (save, load, clear)
-- [ ] Tests del slice
-- [ ] Tests de selectors
-- [ ] Tests de integración con hook
-- [ ] Test manual: marcar checkbox, recargar, verificar persistencia
+- [ ] Middleware tests (save, load, clear)
+- [ ] Slice tests
+- [ ] Selector tests
+- [ ] Integration tests with hook
+- [ ] Manual test: check checkbox, reload, verify persistence
 
-### **Verificación:**
+### **Verification:**
 
-- [ ] Redux DevTools muestra acciones
-- [ ] localStorage contiene el estado con estructura correcta
-- [ ] Logs del middleware aparecen en consola (desarrollo)
-- [ ] Checkbox persiste entre recargas
-- [ ] Lista se ordena correctamente
-- [ ] No hay warnings en consola
-- [ ] Middleware solo se ejecuta en acciones relevantes
+- [ ] Redux DevTools shows actions
+- [ ] localStorage contains state with correct structure
+- [ ] Middleware logs appear in console (development)
+- [ ] Checkbox persists between reloads
+- [ ] List sorts correctly
+- [ ] No warnings in console
+- [ ] Middleware only runs on relevant actions
 
 ---
 
-## 🎯 Próximos Pasos
+## 🎯 Next Steps
 
-Una vez implementada la persistencia de "Sort by height", puedes extender Redux para:
+Once "Sort by height" persistence is implemented, you can extend Redux for:
 
-### **1. Feature: Filtros Avanzados**
+### **1. Feature: Advanced Filters**
 
 ```typescript
 interface ListPreferencesState {
   sortByHeight: boolean;
-  heightRangeMin: number; // ✅ Nuevo
-  heightRangeMax: number; // ✅ Nuevo
-  searchQuery: string; // ✅ Nuevo
+  heightRangeMin: number; // ✅ New
+  heightRangeMax: number; // ✅ New
+  searchQuery: string; // ✅ New
 }
 ```
 
 ### **2. Feature: Pokemon Comparison**
 
 ```typescript
-// Nuevo slice
+// New slice
 interface ComparisonState {
   selectedIds: string[];
   pokemonData: Record<string, PokemonListItem>;
@@ -1471,7 +1471,7 @@ interface ComparisonState {
 ### **3. Feature: Theme Preferences**
 
 ```typescript
-// Nuevo slice
+// New slice
 interface ThemeState {
   mode: "light" | "dark";
   accentColor: string;
@@ -1480,7 +1480,7 @@ interface ThemeState {
 
 ---
 
-## 📚 Referencias
+## 📚 References
 
 - [Redux Toolkit Docs](https://redux-toolkit.js.org/)
 - [Redux Persist Docs](https://github.com/rt2zz/redux-persist)
@@ -1489,40 +1489,40 @@ interface ThemeState {
 
 ---
 
-## ✅ Resumen
+## ✅ Summary
 
-**Lo que implementamos:**
+**What we implemented:**
 
-- ✅ Redux Toolkit para estado de UI
-- ✅ **Middleware customizado** para guardar en localStorage (sin Redux Persist)
-- ✅ Funciones helper para load/save/clear state
-- ✅ Arquitectura hexagonal respetada (Redux en Infrastructure)
-- ✅ Separación de responsabilidades (Redux = UI state, ViewModel = lógica)
-- ✅ Persistencia automática del checkbox "Sort by height"
-- ✅ Tests completos (middleware, slice, selectors, integración)
+- ✅ Redux Toolkit for UI state
+- ✅ **Custom middleware** for localStorage (no Redux Persist)
+- ✅ Helper functions for load/save/clear state
+- ✅ Hexagonal architecture respected (Redux in Infrastructure)
+- ✅ Separation of concerns (Redux = UI state, ViewModel = logic)
+- ✅ Automatic persistence of "Sort by height" checkbox
+- ✅ Complete tests (middleware, slice, selectors, integration)
 
-**Ventajas del middleware customizado:**
+**Advantages of custom middleware:**
 
-- ✅ Control total sobre la persistencia
-- ✅ Sin dependencias externas (+0KB vs +15KB)
-- ✅ Carga síncrona (sin `<PersistGate>`)
-- ✅ Código más simple y directo
-- ✅ Fácil de debuggear y testear
-- ✅ Logs informativos en desarrollo
-- ✅ Filtrado selectivo de acciones
+- ✅ Full control over persistence
+- ✅ No external dependencies (+0KB vs +15KB)
+- ✅ Synchronous loading (no `<PersistGate>`)
+- ✅ Simpler and more direct code
+- ✅ Easy to debug and test
+- ✅ Informative development logs
+- ✅ Selective action filtering
 
-**Principios aplicados:**
+**Principles applied:**
 
-- ✅ Clean Architecture (lógica en domain/application)
-- ✅ Hexagonal Architecture (Redux como adaptador)
-- ✅ Separation of Concerns (cada capa su responsabilidad)
-- ✅ Single Responsibility (slice solo estado de UI, middleware solo persistencia)
-- ✅ Testability (tests sin UI, sin HTTP)
+- ✅ Clean Architecture (logic in domain/application)
+- ✅ Hexagonal Architecture (Redux as adapter)
+- ✅ Separation of Concerns (each layer has its responsibility)
+- ✅ Single Responsibility (slice only UI state, middleware only persistence)
+- ✅ Testability (tests without UI, without HTTP)
 - ✅ KISS (Keep It Simple, Stupid)
 
 ---
 
-**Autor:** Claude Sonnet 4.5  
-**Fecha:** 2025-10-24  
-**Contexto:** Refactor Hexagonal - Feature pokemon-list  
-**Branch sugerido:** `feat/redux-custom-middleware-sort-by-height`
+**Author:** Claude Sonnet 4.5
+**Date:** 2025-10-24
+**Context:** Hexagonal Refactor - Feature pokemon-list
+**Suggested Branch:** `feat/redux-custom-middleware-sort-by-height`

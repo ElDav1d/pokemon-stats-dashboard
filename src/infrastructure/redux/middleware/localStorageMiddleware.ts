@@ -1,4 +1,4 @@
-import { Middleware } from '@reduxjs/toolkit';
+import { Middleware } from "@reduxjs/toolkit";
 
 export interface PersistenceConfig {
   storageKey: string;
@@ -28,7 +28,7 @@ export const createPersistenceMiddleware = <S = any>(
         );
         localStorage.setItem(config.storageKey, JSON.stringify(dataToSave));
       } catch (error) {
-        console.error('Failed to save to localStorage:', error);
+        console.error("Failed to save to localStorage:", error);
       }
     }
 
@@ -44,7 +44,7 @@ export const loadStateFromLocalStorage = <S = any>(
     if (serializedState === null) return undefined;
     return JSON.parse(serializedState) as Partial<S>;
   } catch (error) {
-    console.error('Failed to load from localStorage:', error);
+    console.error("Failed to load from localStorage:", error);
     return undefined;
   }
 };
@@ -52,8 +52,7 @@ export const loadStateFromLocalStorage = <S = any>(
 export const clearPersistedState = (storageKey: string): void => {
   try {
     localStorage.removeItem(storageKey);
-    console.log('Persisted state cleared');
   } catch (error) {
-    console.error('Failed to clear localStorage:', error);
+    console.error("Failed to clear localStorage:", error);
   }
 };

@@ -300,7 +300,6 @@ export const loadStateFromLocalStorage = (): Partial<RootState> | undefined => {
 export const clearPersistedState = (): void => {
   try {
     localStorage.removeItem(STORAGE_KEY);
-    console.log("🗑️  Persisted state cleared");
   } catch (error) {
     console.error("Failed to clear localStorage:", error);
   }
@@ -319,15 +318,15 @@ export const clearPersistedState = (): void => {
 
 **Advantages of this approach vs Redux Persist:**
 
-| Aspect            | Redux Persist  | Custom Middleware             |
-| ----------------- | -------------- | ----------------------------- |
-| **Control**       | Limited        | Total                         |
-| **Bundle size**   | +15KB          | 0KB extra                     |
-| **Configuration** | Complex        | Simple                        |
-| **Debugging**     | Difficult      | Easy (own code)               |
-| **Testing**       | Requires mocks | Simple tests                  |
-| **Flexibility**   | Limited        | Total                         |
-| **Performance**   | Good           | Excellent (only what needed)  |
+| Aspect            | Redux Persist  | Custom Middleware            |
+| ----------------- | -------------- | ---------------------------- |
+| **Control**       | Limited        | Total                        |
+| **Bundle size**   | +15KB          | 0KB extra                    |
+| **Configuration** | Complex        | Simple                       |
+| **Debugging**     | Difficult      | Easy (own code)              |
+| **Testing**       | Requires mocks | Simple tests                 |
+| **Flexibility**   | Limited        | Total                        |
+| **Performance**   | Good           | Excellent (only what needed) |
 
 ---
 
@@ -374,11 +373,11 @@ export type AppDispatch = typeof store.dispatch;
 
 **✅ Configuration explained:**
 
-| Option           | Value                         | Why                               |
-| ---------------- | ----------------------------- | --------------------------------- |
-| `reducer`        | `rootReducer`                 | Combines all slices               |
-| `preloadedState` | `loadStateFromLocalStorage()` | Loads saved state on start        |
-| `middleware`     | `localStorageMiddleware`      | Saves state on each action        |
+| Option           | Value                         | Why                                |
+| ---------------- | ----------------------------- | ---------------------------------- |
+| `reducer`        | `rootReducer`                 | Combines all slices                |
+| `preloadedState` | `loadStateFromLocalStorage()` | Loads saved state on start         |
+| `middleware`     | `localStorageMiddleware`      | Saves state on each action         |
 | `devTools`       | Only in dev                   | Redux DevTools only in development |
 
 **Persistence flow:**
@@ -698,12 +697,12 @@ export default PokemonList;
 
 **Behavior comparison:**
 
-| Scenario                    | BEFORE (with useState)                     | NOW (with Redux)            |
-| --------------------------- | ------------------------------------------ | --------------------------- |
-| **User checks checkbox**    | ✅ Checks                                  | ✅ Checks                   |
-| **User changes type**       | ❌ Checkbox disappears during loading      | ✅ Checkbox always visible  |
-| **List finishes loading**   | ❌ Checkbox unchecked (lost state)         | ✅ Checkbox checked (saved) |
-| **User reloads page**       | ❌ Checkbox unchecked                      | ✅ Checkbox checked         |
+| Scenario                  | BEFORE (with useState)                | NOW (with Redux)            |
+| ------------------------- | ------------------------------------- | --------------------------- |
+| **User checks checkbox**  | ✅ Checks                             | ✅ Checks                   |
+| **User changes type**     | ❌ Checkbox disappears during loading | ✅ Checkbox always visible  |
+| **List finishes loading** | ❌ Checkbox unchecked (lost state)    | ✅ Checkbox checked (saved) |
+| **User reloads page**     | ❌ Checkbox unchecked                 | ✅ Checkbox checked         |
 
 ---
 
@@ -1394,14 +1393,14 @@ console.log("sortByHeight from Redux:", sortByHeight);
 
 ### **Comparison: Redux Persist vs Custom Middleware**
 
-| Aspect            | Redux Persist                           | Custom Middleware                              |
-| ----------------- | --------------------------------------- | ---------------------------------------------- |
-| **Timing**        | ⏱️ Asynchronous (needs `<PersistGate>`) | ⚡ Synchronous (loads in `preloadedState`)    |
-| **Loading state** | ❌ Need to show spinner                 | ✅ No loading, state available immediately    |
-| **Control**       | 🔒 Limited (configuration)              | 🎯 Total (own code)                           |
-| **Bundle size**   | 📦 +15KB                                | 📦 +0KB                                        |
-| **Debugging**     | 🐛 Complex (external code)              | 🐛 Easy (own logs)                            |
-| **Testing**       | 🧪 Complex mocks required               | 🧪 Simple tests                               |
+| Aspect            | Redux Persist                           | Custom Middleware                          |
+| ----------------- | --------------------------------------- | ------------------------------------------ |
+| **Timing**        | ⏱️ Asynchronous (needs `<PersistGate>`) | ⚡ Synchronous (loads in `preloadedState`) |
+| **Loading state** | ❌ Need to show spinner                 | ✅ No loading, state available immediately |
+| **Control**       | 🔒 Limited (configuration)              | 🎯 Total (own code)                        |
+| **Bundle size**   | 📦 +15KB                                | 📦 +0KB                                    |
+| **Debugging**     | 🐛 Complex (external code)              | 🐛 Easy (own logs)                         |
+| **Testing**       | 🧪 Complex mocks required               | 🧪 Simple tests                            |
 
 ---
 

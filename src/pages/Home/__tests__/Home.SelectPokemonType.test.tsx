@@ -27,6 +27,8 @@ it("renders a list of specific pokemons when a type is selected", async () => {
 
   const contentArea = within(screen.getByRole("main")).getByRole("article");
 
+  // Wait for type list to load
+
   await within(contentArea).findByRole("list", {
     name: /select a pokemon type to get the list/i,
   });
@@ -53,7 +55,7 @@ it("renders a list of specific pokemons when a type is selected", async () => {
   });
 });
 
-it("shows loading message when fetching pokemon types", async () => {
+it("shows loading message when fetching pokemon types, then displays type buttons", async () => {
   global.fetch = vi.fn((url: string) => {
     // Only delay the pokemon types endpoint
     if (url.includes("/type") && !url.match(/\/type\/\w+$/)) {
@@ -62,7 +64,12 @@ it("shows loading message when fetching pokemon types", async () => {
           () =>
             resolve({
               ok: true,
-              json: async () => ({ results: [] }),
+              json: async () => ({
+                results: [
+                  { name: "fire", url: "https://pokeapi.co/api/v2/type/10/" },
+                  { name: "water", url: "https://pokeapi.co/api/v2/type/11/" },
+                ],
+              }),
             } as Response),
           100
         )
@@ -85,27 +92,46 @@ it("shows loading message when fetching pokemon types", async () => {
     </Provider>
   );
 
+  const contentArea = within(screen.getByRole("main")).getByRole("article");
+
+  // Verify loading message appears
   await waitFor(() => {
     expect(
-      screen.getByRole("heading", {
+      within(contentArea).getByRole("heading", {
         name: /loading pokemon types/i,
       })
     ).toBeInTheDocument();
   });
 
+  // Verify loading message disappears and type buttons appear
   await waitFor(
     () => {
       expect(
-        screen.queryByRole("heading", {
+        within(contentArea).queryByRole("heading", {
           name: /loading pokemon types/i,
         })
       ).not.toBeInTheDocument();
+
+      // Verify type list with buttons now appears
+      expect(
+        within(contentArea).getByRole("list", {
+          name: /select a pokemon type to get the list/i,
+        })
+      ).toBeInTheDocument();
+
+      // Verify specific type buttons are rendered
+      expect(
+        within(contentArea).getByRole("button", { name: /fire/i })
+      ).toBeInTheDocument();
+      expect(
+        within(contentArea).getByRole("button", { name: /water/i })
+      ).toBeInTheDocument();
     },
     { timeout: 200 }
   );
 });
 
-it("shows error message when fetch fails", async () => {
+it("shows error message when fetching pokemon types fails and prevents type selection", async () => {
   global.fetch = vi.fn((url: string) => {
     // Only fail the pokemon types endpoint
     if (url.includes("/type") && !url.match(/\/type\/\w+$/)) {
@@ -131,11 +157,26 @@ it("shows error message when fetch fails", async () => {
     </Provider>
   );
 
+  const contentArea = within(screen.getByRole("main")).getByRole("article");
+
+  // Verify error message appears
   await waitFor(() => {
     expect(
-      screen.getByRole("heading", {
+      within(contentArea).getByRole("heading", {
         name: /error loading pokemon types/i,
       })
     ).toBeInTheDocument();
   });
+
+  // Verify type buttons do NOT appear when there's an error
+  expect(
+    within(contentArea).queryByRole("list", {
+      name: /select a pokemon type to get the list/i,
+    })
+  ).not.toBeInTheDocument();
+
+  // Verify no type buttons are rendered
+  expect(
+    within(contentArea).queryByRole("button", { name: /fire/i })
+  ).not.toBeInTheDocument();
 });

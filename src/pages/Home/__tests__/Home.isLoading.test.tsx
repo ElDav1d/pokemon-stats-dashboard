@@ -1,7 +1,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { Provider } from "react-redux";
 import Home from "../Home";
+import { store } from "../../../infrastructure/redux/store";
 
 it("shows loading message when fetching pokemon list", async () => {
   // Mock a delayed fetch to simulate loading
@@ -22,11 +24,13 @@ it("shows loading message when fetching pokemon list", async () => {
   );
 
   render(
-    <MemoryRouter initialEntries={["/?type=normal"]}>
-      <Routes>
-        <Route path="/" element={<Home />} />
-      </Routes>
-    </MemoryRouter>
+    <Provider store={store}>
+      <MemoryRouter initialEntries={["/?type=normal"]}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+        </Routes>
+      </MemoryRouter>
+    </Provider>
   );
 
   const loadingMessage = screen.getByRole("heading", {
@@ -62,11 +66,13 @@ it("does not show loading message when no type is selected", async () => {
   );
 
   render(
-    <MemoryRouter initialEntries={["/"]}>
-      <Routes>
-        <Route path="/" element={<Home />} />
-      </Routes>
-    </MemoryRouter>
+    <Provider store={store}>
+      <MemoryRouter initialEntries={["/"]}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+        </Routes>
+      </MemoryRouter>
+    </Provider>
   );
 
   await waitFor(() => {

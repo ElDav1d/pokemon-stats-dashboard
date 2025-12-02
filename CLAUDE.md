@@ -566,11 +566,70 @@ React State → UI Render
 
 ## Testing Strategy
 
+### Two-Layer Testing Philosophy
+
+We employ a **dual-layer testing approach** that balances fast development feedback with high user-facing confidence:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  LAYER 1: Integration Tests (Primary Confidence)       │
+│  Purpose: Verify user-facing behavior                  │
+│  Location: src/pages/{Page}/__tests__/                 │
+│  Tools: render(), screen, userEvent                    │
+│  Focus: "Does the feature work for users?"             │
+└─────────────────────────────────────────────────────────┘
+                           ↓
+              Detects: "Feature is broken"
+                           ↓
+┌─────────────────────────────────────────────────────────┐
+│  LAYER 2: Unit Tests (Development & Debugging Aid)     │
+│  Purpose: TDD development + bug isolation              │
+│  Location: Feature/domain/application/infrastructure   │
+│  Tools: Direct function calls, renderHook()            │
+│  Focus: "Which specific logic broke?"                  │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Why Two Layers?**
+
+**Integration tests alone** provide confidence but:
+
+- ❌ Slow feedback during TDD development
+- ❌ Harder to isolate bugs (component vs hook vs repository)
+- ❌ Difficult to test edge cases requiring complex UI setup
+
+**Unit tests** complement integration tests by:
+
+- ✅ Enabling fast TDD red-green-refactor cycles
+- ✅ Pinpointing exact failure location (hook logic vs component)
+- ✅ Testing edge cases without complex UI interactions
+- ✅ Verifying performance characteristics (large datasets)
+
+**Both layers together** provide:
+
+- ✅ Fast development (unit tests)
+- ✅ High confidence (integration tests)
+- ✅ Efficient debugging (layered isolation)
+
 ### Test Organization
 
 Tests are co-located with source code in `__tests__/` directories.
 
-**Mock Scoping Rule**: Feature-level mocks must be consolidated in a single `__tests__/mocks.ts` file at the feature root. Page-level mocks are scoped to `pages/{page}/__tests__/mocks.ts` for UI-specific test data.
+### Mock Organization and Scoping
+
+**Rule: Mocks are scoped at feature or page level, never scattered across individual test files.**
+
+Feature-level mocks must be consolidated in a single `__tests__/mocks.ts` file at the feature root. Page-level mocks are scoped to `pages/{page}/__tests__/mocks.ts` for UI-specific test data.
+
+**Benefits:**
+
+1. **Single Source of Truth**: All domain entity mocks for a feature in one place
+2. **Consistency**: Tests use the same mock instances, preventing divergence
+3. **Maintainability**: Update mock data in one location
+4. **Discoverability**: New contributors know where to find/add mocks
+5. **Reusability**: Easy to share mocks across multiple test files in the feature
+
+**Directory Structure:**
 
 ```
 feature/
@@ -596,8 +655,6 @@ pages/
 │       ├── setupTests.ts           ← Page-level fetch mocks
 │       └── mocks.ts                ← Page-level UI test data
 ```
-
-### Mock Usage Pattern
 
 **Feature-Level Mocks** (`src/features/{feature}/__tests__/mocks.ts`):
 
@@ -646,7 +703,9 @@ beforeEach(() => {
 });
 ```
 
-### Testing Strategy Overview
+**Important:** When adding new tests, always check if a mock already exists in the appropriate `__tests__/mocks.ts` before creating new ones. Keep mocks centralized in one place per layer to maintain consistency.
+
+### Testing Pyramid
 
 **Test Structure (TDD Foundation + Integration Safeguard):**
 
@@ -731,6 +790,210 @@ expect(setItemSpy).toHaveBeenCalledWith("key", JSON.stringify(data)); // Tests o
 4. Repeat for all layers
 5. Integration tests from pages verify composition
 
+### Refactoring-Driven Development: Hook Extraction Workflow
+
+**Critical: Hooks are extracted AFTER satisfying user stories, not before.**
+
+We follow a **refactoring-driven approach** where logic is first implemented in views to satisfy user requirements, then extracted into hooks for reusability and testability.
+
+**The Workflow:**
+
+```
+User Story → Page Test (RED) → View Implementation (GREEN) → Extract Hook → Hook Test
+```
+
+**Step-by-Step Process:**
+
+```
+1. RED: Write page-level integration test (user story)
+   └─> Test fails because feature doesn't exist yet
+
+2. GREEN: Implement logic directly in the view/component
+   └─> Page test passes
+   └─> Feature works for users
+
+3. RED: Write hook unit test for the logic you want to extract
+   └─> Test fails because hook doesn't exist yet
+   └─> Test describes the hook API and behavior
+
+4. GREEN: Extract logic from view into hook
+   └─> Hook test passes
+   └─> Page test STAYS GREEN (no regression)
+   └─> Logic now reusable and testable in isolation
+```
+
+**Key Principle:** The page test must NEVER go RED during hook extraction. If it does, you've broken the feature.
+
+**Example: Extracting usePokemonList Hook**
+
+**Step 1: RED - Write page-level test (user story)**
+
+```typescript
+// src/pages/Home/__tests__/Home.test.tsx
+
+it("displays pokemon list when user selects a type", async () => {
+  render(<Home />);
+
+  const typeSelector = screen.getByRole('combobox', { name: /type/i });
+  await userEvent.selectOptions(typeSelector, 'grass');
+
+  // ❌ FAILS - feature doesn't exist yet
+  await waitFor(() => {
+    expect(screen.getByText('Bulbasaur')).toBeInTheDocument();
+    expect(screen.getByText('Ivysaur')).toBeInTheDocument();
+  });
+});
+```
+
+**Step 2: GREEN - Implement in view directly**
+
+```typescript
+// src/pages/Home/Home.tsx
+
+export function Home() {
+  const [selectedType, setSelectedType] = useState('grass');
+  const [pokemonList, setPokemonList] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Logic implemented directly in component
+  useEffect(() => {
+    const fetchPokemon = async () => {
+      setIsLoading(true);
+      const repository = new HttpPokemonRepository(httpClient);
+      const pokemonsByType = await repository.findAllByType(new PokemonType(selectedType));
+
+      const details = await Promise.all(
+        pokemonsByType.map(p => repository.findDetailsByName(p.name))
+      );
+
+      setPokemonList(details.map((d, i) =>
+        new PokemonListItem(i, d.name, d.height, d.imageUrl)
+      ));
+      setIsLoading(false);
+    };
+
+    if (selectedType) fetchPokemon();
+  }, [selectedType]);
+
+  return (
+    <div>
+      <select value={selectedType} onChange={e => setSelectedType(e.target.value)}>
+        <option value="grass">Grass</option>
+      </select>
+      {isLoading ? <p>Loading...</p> : pokemonList.map(p => <div>{p.name}</div>)}
+    </div>
+  );
+}
+
+// ✅ Page test now PASSES - feature works for users
+```
+
+**Step 3: RED - Write hook unit test**
+
+```typescript
+// src/features/pokemon-list/infrastructure/react/hooks/__tests__/usePokemonList.test.ts
+
+it("loads pokemon list for selected type", async () => {
+  const mockRepository = createMockPokemonRepository();
+
+  // ❌ FAILS - hook doesn't exist yet
+  const { result } = renderHook(() => usePokemonList("grass", mockRepository));
+
+  await waitFor(() => expect(result.current.isLoading).toBe(false));
+  expect(result.current.pokemonList.length).toBe(2);
+  expect(result.current.pokemonList[0].name).toBe("bulbasaur");
+});
+```
+
+**Step 4: GREEN - Extract logic to hook**
+
+```typescript
+// src/features/pokemon-list/infrastructure/react/hooks/usePokemonList.ts
+
+export function usePokemonList(
+  selectedType: string,
+  repository: PokemonRepository
+) {
+  const [pokemonList, setPokemonList] = useState<PokemonListItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchPokemon = async () => {
+      setIsLoading(true);
+      const pokemonsByType = await repository.findAllByType(
+        new PokemonType(selectedType)
+      );
+
+      const details = await Promise.all(
+        pokemonsByType.map((p) => repository.findDetailsByName(p.name))
+      );
+
+      setPokemonList(
+        details.map(
+          (d, i) => new PokemonListItem(i, d.name, d.height, d.imageUrl)
+        )
+      );
+      setIsLoading(false);
+    };
+
+    if (selectedType) fetchPokemon();
+  }, [selectedType, repository]);
+
+  return { pokemonList, isLoading };
+}
+
+// ✅ Hook test now PASSES
+```
+
+**Step 5: Refactor view to use hook**
+
+```typescript
+// src/pages/Home/Home.tsx
+
+export function Home() {
+  const [selectedType, setSelectedType] = useState('grass');
+  const repository = useMemo(() => new HttpPokemonRepository(httpClient), []);
+
+  // Use extracted hook
+  const { pokemonList, isLoading } = usePokemonList(selectedType, repository);
+
+  return (
+    <div>
+      <select value={selectedType} onChange={e => setSelectedType(e.target.value)}>
+        <option value="grass">Grass</option>
+      </select>
+      {isLoading ? <p>Loading...</p> : pokemonList.map(p => <div>{p.name}</div>)}
+    </div>
+  );
+}
+
+// ✅ Page test STILL PASSES (no regression)
+// ✅ Hook test PASSES (logic isolated)
+// ✅ Logic now reusable across components
+```
+
+**Benefits of This Approach:**
+
+1. **User-Story First**: Page test ensures we're building the right feature
+2. **Fast Feedback**: Get feature working quickly in view
+3. **Safe Refactoring**: Hook extraction doesn't break existing functionality
+4. **Both Layers Pass**: Integration + unit tests both green after extraction
+5. **Reusability**: Hook can now be used in other components
+6. **Testability**: Complex logic testable in isolation via hook tests
+
+**When NOT to Extract a Hook:**
+
+- Logic is too simple (< 10 lines, no conditionals)
+- Logic is used in only one place and won't be reused
+- Logic is tightly coupled to specific component UI state
+
+**When TO Extract a Hook:**
+
+- Logic is complex (filtering, sorting, transformations)
+- Logic will be reused across multiple components
+- Logic involves async operations with loading/error states
+- Logic needs isolated unit testing for TDD
+
 ### Testing Patterns by Layer
 
 **Domain Layer** - Pure logic, no mocks needed:
@@ -767,6 +1030,8 @@ expect(setItemSpy).toHaveBeenCalledWith("key", JSON.stringify(data)); // Tests o
 - Use `renderHook` from React Testing Library
 - Verify hook exposes correct state and callbacks
 - Example: `renderHook(() => useFeature(mockRepository))`
+- **When to write**: After extracting logic from view (refactoring-driven)
+- **Purpose**: Enable TDD for complex logic, aid debugging when page tests fail
 
 **Pages (UI Components)** - Integration tests from user perspective:
 
@@ -774,6 +1039,327 @@ expect(setItemSpy).toHaveBeenCalledWith("key", JSON.stringify(data)); // Tests o
 - Test page composition of multiple hooks
 - Verify user interactions trigger correct behavior
 - Example: User selects type → list updates → items visible
+- **When to write**: FIRST (before implementing feature)
+- **Purpose**: Define user acceptance criteria, ensure feature works end-to-end
+
+### When to Write Hook Unit Tests (Decision Guide)
+
+**Philosophy:** Hook tests are **not mandatory**—they serve specific purposes. Write them strategically.
+
+#### ✅ WRITE Hook Unit Tests When:
+
+**1. Complex Business Logic**
+
+- Filtering algorithms with multiple conditions
+- Sorting logic with edge cases
+- Data transformations (mapping, reducing, aggregating)
+- Calculations or computations
+- State machines with multiple transitions
+
+**Example:**
+
+```typescript
+// ✅ Complex filtering - WRITE hook unit test
+export function usePokemonList(type, repository, options) {
+  const filtered = pokemonList.filter(pokemon => {
+    const matchesSearch = !options?.searchTerm ||
+      pokemon.name.toLowerCase().includes(options.searchTerm.toLowerCase());
+
+    const matchesHeight = !options?.minHeight ||
+      pokemon.height >= options.minHeight;
+
+    const matchesType = !options?.excludeTypes?.includes(pokemon.primaryType);
+
+    return matchesSearch && matchesHeight && matchesType;
+  });
+
+  return { pokemonList: filtered, ... };
+}
+```
+
+**Why:** Multiple conditions are easier to test in isolation than through UI.
+
+---
+
+**2. Async State Management**
+
+- Loading states with race conditions
+- Error recovery and retry logic
+- Debouncing/throttling
+- Cancellation of pending requests
+- Optimistic updates with rollback
+
+**Example:**
+
+```typescript
+// ✅ Complex async handling - WRITE hook unit test
+export function usePokemonList(type, repository) {
+  const [retryCount, setRetryCount] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchWithRetry = async () => {
+      try {
+        const data = await repository.findAllByType(type);
+        if (!cancelled) setPokemonList(data);
+      } catch (err) {
+        if (!cancelled && retryCount < 3) {
+          setRetryCount((prev) => prev + 1);
+          setTimeout(fetchWithRetry, 1000 * retryCount);
+        } else {
+          setError(err);
+        }
+      }
+    };
+
+    fetchWithRetry();
+    return () => {
+      cancelled = true;
+    };
+  }, [type, retryCount]);
+}
+```
+
+**Why:** Testing retry logic, cancellation, and race conditions is difficult through UI.
+
+---
+
+**3. Performance-Critical Code**
+
+- Large datasets (1000+ items)
+- Virtual scrolling calculations
+- Memoization strategies
+- Optimization algorithms
+
+**Example:**
+
+```typescript
+// ✅ Performance-critical - WRITE hook unit test
+export function useVirtualGridList({ items, itemHeight, containerHeight }) {
+  const calculateVisibleItems = useCallback(() => {
+    const startIndex = Math.floor(scrollTop / itemHeight);
+    const endIndex = Math.ceil((scrollTop + containerHeight) / itemHeight);
+    return items.slice(startIndex, endIndex);
+  }, [items, itemHeight, containerHeight, scrollTop]);
+
+  return { visibleItems: calculateVisibleItems() };
+}
+```
+
+**Why:** Need to verify calculations work with 10k+ items without rendering DOM.
+
+---
+
+**4. Edge Cases Hard to Reproduce via UI**
+
+- Empty states
+- Null/undefined handling
+- Rapid state changes
+- Concurrent operations
+- Boundary conditions
+
+**Example:**
+
+```typescript
+// ✅ Edge case handling - WRITE hook unit test
+it("handles repository returning null gracefully", async () => {
+  const mockRepository = {
+    findAllByType: vi.fn().mockResolvedValue(null),
+  };
+
+  const { result } = renderHook(() => usePokemonList("grass", mockRepository));
+
+  await waitFor(() => expect(result.current.isLoading).toBe(false));
+  expect(result.current.pokemonList).toEqual([]);
+  expect(result.current.error).toBeNull();
+});
+```
+
+**Why:** Setting up UI to trigger null response is complex; hook test is simpler.
+
+---
+
+**5. Refactoring-Driven Hook Extraction**
+
+- You implemented logic in view first
+- Now extracting to hook for reusability
+- Need isolated tests to verify extraction didn't break logic
+
+**Example Workflow:**
+
+```
+1. Page test passes with logic in view
+2. Write hook unit test (defines extracted behavior)
+3. Extract logic to hook
+4. Hook test passes + page test stays green
+```
+
+**Why:** Hook test ensures extraction is correct; page test prevents regressions.
+
+---
+
+#### ❌ SKIP Hook Unit Tests When:
+
+**1. Simple Pass-Through Hook**
+
+```typescript
+// ❌ NO unit test needed - too simple
+export function useRepository() {
+  return useMemo(() => new HttpPokemonRepository(httpClient), []);
+}
+
+// ✅ Only integration test
+it("loads pokemon from API", async () => {
+  render(<Home />);
+  await waitFor(() => expect(screen.getByText('Bulbasaur')).toBeInTheDocument());
+});
+```
+
+**Why:** No logic to test; integration test covers functionality.
+
+---
+
+**2. Hook with No Conditionals**
+
+```typescript
+// ❌ NO unit test needed - no branching logic
+export function usePokemonType(initialType) {
+  const [selectedType, setSelectedType] = useState(initialType);
+  return { selectedType, setSelectedType };
+}
+
+// ✅ Only integration test
+it("updates list when user changes type", async () => {
+  render(<Home />);
+  await userEvent.selectOptions(screen.getByRole('combobox'), 'fire');
+  expect(screen.getByText('Charmander')).toBeInTheDocument();
+});
+```
+
+**Why:** Trivial state management; integration test is sufficient.
+
+---
+
+**3. Already Fully Covered by Integration Tests**
+
+```typescript
+// ❌ Skip if integration tests verify all paths
+export function usePokemonList(type, repository) {
+  const [list, setList] = useState([]);
+
+  useEffect(() => {
+    repository.findAllByType(type).then(setList);
+  }, [type]);
+
+  return { pokemonList: list };
+}
+
+// ✅ Integration tests already cover:
+// - Initial load
+// - Type changes
+// - Error handling
+// Therefore: No hook unit test needed
+```
+
+**Why:** No additional value from unit test if integration tests cover all scenarios.
+
+---
+
+**4. Trivial Hook (< 10 Lines, No Logic)**
+
+```typescript
+// ❌ Too trivial for unit test
+export function useDebounce(value, delay) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+```
+
+**Why:** Standard React pattern; integration test verifies it works in context.
+
+---
+
+### Debugging Workflow: When Integration Tests Fail
+
+**Step-by-Step Isolation:**
+
+```
+1. Integration test fails at page level
+   └─> "updates pokemon list when user selects fire type" ❌
+
+2. Check if corresponding hook unit test exists
+   └─> "updates list when selectedType changes"
+
+3a. Hook test EXISTS and PASSES ✅
+    └─> Bug is in component layer (not hook logic)
+    └─> Check: Is component passing correct props to hook?
+    └─> Check: Is component rendering hook data correctly?
+    └─> Check: Are event handlers wired correctly?
+
+3b. Hook test EXISTS and FAILS ❌
+    └─> Bug is in hook logic
+    └─> Use hook test to debug in isolation (faster)
+    └─> Fix: useEffect dependency array missing selectedType?
+    └─> Fix: Repository not being called with new type?
+    └─> Verify hook test passes → then verify page test passes
+
+3c. Hook test DOESN'T EXIST
+    └─> Write hook unit test now to isolate the issue
+    └─> If hook test passes → bug in component
+    └─> If hook test fails → bug in hook
+    └─> Keep the hook test for future debugging
+```
+
+**Example Debugging Session:**
+
+```typescript
+// SCENARIO: Integration test fails
+// Home.pokemon-type-updates.test.tsx
+it("updates list when user selects fire type", async () => {
+  render(<Home />);
+  await userEvent.selectOptions(typeSelector, 'fire');
+  // ❌ Expected "Charmander" but got "Bulbasaur" (list didn't update)
+  expect(screen.getByText('Charmander')).toBeInTheDocument();
+});
+
+// STEP 1: Run corresponding hook test
+// usePokemonList.test.ts
+it("updates pokemon list when selectedType changes", async () => {
+  const { result, rerender } = renderHook(
+    ({ selectedType }) => usePokemonList(selectedType, mockRepository),
+    { initialProps: { selectedType: "grass" } }
+  );
+
+  await waitFor(() => expect(result.current.pokemonList.length).toBe(2));
+
+  rerender({ selectedType: "fire" });
+
+  await waitFor(() => {
+    expect(result.current.pokemonList[0].name).toBe("charmander"); // ❓
+  });
+});
+
+// RESULT A: Hook test PASSES ✅
+// → Hook logic works correctly
+// → Bug must be in <Home /> component
+// → Check: Is <Home /> passing selectedType to hook?
+// → Found: <Home /> has stale selectedType in closure!
+//   Fix: Add selectedType to useEffect dependencies
+
+// RESULT B: Hook test FAILS ❌
+// → Hook logic is broken
+// → Debug hook in isolation (no component complexity)
+// → Found: useEffect missing selectedType in dependency array!
+//   Fix: Add selectedType to useEffect([selectedType, repository])
+// → Hook test now passes → Page test now passes
+```
 
 ### Test Configuration
 
@@ -781,31 +1367,6 @@ Vitest uses `jsdom` environment with auto-discovered setup files:
 
 - Automatically loads all `setupTests.ts` files via glob pattern
 - Global test utilities available (`describe`, `it`, `expect`, `vi`)
-
-### Mock Organization Best Practices
-
-**Rule: Mocks are scoped at feature or page level, never scattered across individual test files.**
-
-**Benefits:**
-
-1. **Single Source of Truth**: All domain entity mocks for a feature in one place
-2. **Consistency**: Tests use the same mock instances, preventing divergence
-3. **Maintainability**: Update mock data in one location
-4. **Discoverability**: New contributors know where to find/add mocks
-5. **Reusability**: Easy to share mocks across multiple test files in the feature
-
-**How to Organize Mocks:**
-
-- **Feature-level:** `src/features/{feature}/__tests__/mocks.ts`
-
-  - All domain entity mocks for the feature
-  - Shared across use case, view model, and hook tests
-
-- **Page-level:** `src/pages/{page}/__tests__/mocks.ts`
-  - HTTP response mocks specific to the page
-  - UI-specific test data
-
-When adding new tests, always check if a mock already exists in the appropriate `__tests__/mocks.ts` before creating new ones. Keep mocks centralized in one place per layer to maintain consistency.
 
 ## Test Writing Style Guide
 
@@ -935,12 +1496,62 @@ When adding new tests, always check if a mock already exists in the appropriate 
     expect(heading).toBeInTheDocument(); // DOM
     ```
 
-11. **Avoid Test Nesting**
+11. **Flat Test Structure Without `describe()` Blocks**
 
-    - Use top-level `it()` statements
-    - Don't nest tests in `describe()` blocks, just break into scoped, self describingly named files when the initial one becomes too large
-    - Keep test file structure flat and searchable
+    - Write all tests at the top level using only `it()` statements
+    - **Never use `describe()` blocks** for grouping tests
+    - When a test file grows too large, split it into multiple files with descriptive names
+    - Use file names to communicate test grouping, not `describe()` blocks
     - For UI layer: apply outside-in user-centered behavior driven strategy from pages' views
+
+    ✅ **GOOD - Flat structure with descriptive file name:**
+
+    ```typescript
+    // pokemon-list-sorting.test.ts
+    it("sorts pokemon by height in ascending order when sort is enabled", () => {
+      // test code
+    });
+
+    it("returns original order when sort is disabled", () => {
+      // test code
+    });
+
+    it("handles empty list when sorting", () => {
+      // test code
+    });
+    ```
+
+    ❌ **BAD - Using describe() blocks:**
+
+    ```typescript
+    // pokemon-list.test.ts
+    describe("sorting behavior", () => {
+      // ❌ Don't use describe()
+      it("sorts by height ascending", () => {});
+      it("returns original order", () => {});
+    });
+
+    describe("error handling", () => {
+      // ❌ Don't use describe()
+      it("handles empty list", () => {});
+    });
+    ```
+
+    **When to split files:**
+
+    - Original file: `pokemon-list.test.ts` becomes too large (20+ tests)
+    - Split into:
+      - `pokemon-list-sorting.test.ts`
+      - `pokemon-list-error-handling.test.ts`
+      - `pokemon-list-loading-states.test.ts`
+
+    **Benefits:**
+
+    - File structure becomes the test organization system
+    - Better IDE navigation (jump to specific test file)
+    - Easier to find tests by file name search
+    - Clearer test scope from file names
+    - Simpler test runner output (no nested hierarchies)
 
 12. **Mock Spy and Restoration**
 

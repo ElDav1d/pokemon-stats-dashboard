@@ -26,27 +26,26 @@ beforeEach(() => {
   testData.mockPokemonsByName = [
     new PokemonByName(
       "bulbasaur",
-      70,
+      20,
       "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png"
     ),
     new PokemonByName(
       "ivysaur",
-      100,
+      10,
       "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/2.png"
     ),
     new PokemonByName(
       "venusaur",
-      200,
+      7,
       "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/3.png"
     ),
   ];
 
   testData.mockRepository = {
     findAllByType: vi.fn().mockResolvedValue(testData.mockPokemonsByType),
-    findDetailsByName: vi
-      .fn()
-      .mockResolvedValueOnce(testData.mockPokemonsByName[0])
-      .mockResolvedValueOnce(testData.mockPokemonsByName[1])
-      .mockResolvedValueOnce(testData.mockPokemonsByName[2]),
+    findDetailsByName: vi.fn().mockImplementation((name: string) => {
+      const detail = testData.mockPokemonsByName.find((p) => p.name === name);
+      return Promise.resolve(detail);
+    }),
   };
 });

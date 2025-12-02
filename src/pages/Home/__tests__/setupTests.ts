@@ -1,4 +1,6 @@
 import { beforeEach, vi, afterEach } from "vitest";
+import { store } from "../../../infrastructure/redux/store";
+import { toggleSortByHeight } from "../../../features/pokemon-list/infrastructure/redux/slices/listControlsSlice";
 import {
   listByTypeNormalMock,
   listByTypeFireMock,
@@ -12,6 +14,12 @@ import {
 } from "./mocks";
 
 beforeEach(() => {
+  localStorage.clear();
+  const state = store.getState();
+  if (state.listControls.sortByHeight) {
+    store.dispatch(toggleSortByHeight());
+  }
+
   // Store any existing mock to chain with it
   const existingFetch = globalThis.fetch;
 

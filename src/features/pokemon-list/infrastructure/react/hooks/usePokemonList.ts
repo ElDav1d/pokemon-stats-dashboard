@@ -1,21 +1,20 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { PokemonListItem } from "../../../domain/entities/PokemonListItem";
 import { PokemonRepository } from "../../../domain/ports/PokemonRepository";
 import { PokemonListViewModel } from "../../../application/view-models/PokemonListViewModel";
 import { HttpPokemonRepository } from "../../http/HttpPokemonRepository";
 import { FetchHttpClient } from "../../../../../infrastructure/client/fetch/FetchHttpClient";
+import { useAppSelector } from "../../../../../infrastructure/redux/hooks";
 
 interface UsePokemonListResult {
   pokemonList: PokemonListItem[];
   isLoading: boolean;
   isError: boolean;
-  sortByHeight: (list: PokemonListItem[]) => PokemonListItem[];
 }
 
-// Overload for component usage (with boolean flag)
+// Overload for component usage (Redux internally reads sortByHeight)
 function usePokemonList(
-  selectedType: string,
-  shouldSortByHeight?: boolean
+  selectedType: string
 ): UsePokemonListResult;
 
 // Overload for testing (with repository injection)
@@ -27,41 +26,33 @@ function usePokemonList(
 // Implementation
 function usePokemonList(
   selectedType: string,
-  secondParam?: boolean | PokemonRepository
+  repository?: PokemonRepository
 ): UsePokemonListResult {
   const [pokemonList, setPokemonList] = useState<PokemonListItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
 
-  // Determine if second param is a repository (for testing) or a boolean flag (for component)
-  const isRepositoryInjected =
-    secondParam && typeof secondParam === "object" && "findAllByType" in secondParam;
+  const sortByHeight = useAppSelector((state) => state.listControls.sortByHeight);
 
-  // Infrastructure setup (only if not injected for testing)
+  const isRepositoryInjected = repository !== undefined;
+
   const httpClient = useMemo(
     () => new FetchHttpClient("https://pokeapi.co/api/v2/"),
     []
   );
 
-  const repository = useMemo(() => {
+  const repositoryInstance = useMemo(() => {
     if (isRepositoryInjected) {
-      return secondParam as PokemonRepository;
+      return repository!;
     }
     return new HttpPokemonRepository(httpClient);
-  }, [httpClient, isRepositoryInjected, secondParam]);
+  }, [httpClient, isRepositoryInjected, repository]);
 
   const viewModel = useMemo(
-    () => new PokemonListViewModel(repository),
-    [repository]
+    () => new PokemonListViewModel(repositoryInstance),
+    [repositoryInstance]
   );
 
-  // Expose sorting function to component for composition
-  const sortByHeight = useCallback(
-    (list: PokemonListItem[]) => viewModel.sortPokemonListByHeight(list),
-    [viewModel]
-  );
-
-  // Data fetching
   useEffect(() => {
     if (!selectedType) {
       setPokemonList([]);
@@ -75,7 +66,12 @@ function usePokemonList(
       setIsError(false);
 
       try {
-        const result = await viewModel.loadPokemonList(selectedType);
+        let result = await viewModel.loadPokemonList(selectedType);
+
+        if (sortByHeight) {
+          result = viewModel.sortPokemonListByHeight(result);
+        }
+
         setPokemonList(result);
       } catch (error) {
         console.error("Error fetching pokemon list:", error);
@@ -87,14 +83,13 @@ function usePokemonList(
     };
 
     fetchData();
-  }, [selectedType, viewModel]);
+  }, [selectedType, viewModel, sortByHeight]);
 
   return {
     pokemonList,
     isLoading,
     isError,
-    sortByHeight,
   };
-};
+}
 
 export default usePokemonList;

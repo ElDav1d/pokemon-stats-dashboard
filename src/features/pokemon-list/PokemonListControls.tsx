@@ -2,7 +2,7 @@ import React from "react";
 
 interface PokemonListControlsProps {
   isSortedByHeight: boolean;
-  onSortChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onSortChange: () => void;
 }
 
 const PokemonListControls: React.FC<PokemonListControlsProps> = ({

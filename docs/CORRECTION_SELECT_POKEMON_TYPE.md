@@ -1,215 +1,215 @@
-# 🔧 Corrección: Feature `select-pokemon-type`
+# 🔧 Correction: Feature `select-pokemon-type`
 
-## 📊 RESUMEN EJECUTIVO
+## 📊 EXECUTIVE SUMMARY
 
-### **Puntuación: 8/10** 🟢
+### **Score: 8/10** 🟢
 
-**Fortalezas:**
+**Strengths:**
 
-- ✅ Arquitectura hexagonal correcta (capas bien separadas)
-- ✅ Dependency Rule respetada
-- ✅ Value Object compartido (`PokemonType`) bien ubicado
-- ✅ Tests unitarios de Use Case y Repository bien hechos
-- ✅ Use Case trivial pero arquitectónicamente correcto
+- ✅ Correct hexagonal architecture (layers well separated)
+- ✅ Dependency Rule respected
+- ✅ Shared Value Object (`PokemonType`) well placed
+- ✅ Unit tests for Use Case and Repository well done
+- ✅ Trivial Use Case but architecturally correct
 
-**Debilidades:**
+**Weaknesses:**
 
-- ❌ **Crítico:** Hook `usePokemonTypes` no sigue patrón de overloads para inyección de dependencias
-- ⚠️ Componente crea infrastructure (consecuencia del punto anterior)
-- ⚠️ Falta test de `useSelectPokemonType`
-- ⚠️ Tests de página incompletos (solo happy path)
-
----
-
-## 🎯 PLAN DE ACCIÓN
-
-Ejecuta los siguientes prompts **en orden secuencial**. No continúes al siguiente hasta que el anterior esté completado y verificado.
+- ❌ **Critical:** Hook `usePokemonTypes` does not follow overloads pattern for dependency injection
+- ⚠️ Component creates infrastructure (consequence of previous point)
+- ⚠️ Missing test for `useSelectPokemonType`
+- ⚠️ Incomplete page tests (happy path only)
 
 ---
 
-## ✅ PASO 1: Refactor Hook `usePokemonTypes` con Overloads
+## 🎯 ACTION PLAN
 
-### **Objetivo:**
+Execute the following prompts **in sequential order**. Do not proceed to the next one until the previous one is completed and verified.
 
-Implementar el patrón de overloads en `usePokemonTypes` para permitir:
+---
 
-- **Producción:** El hook crea su propio repository internamente
-- **Testing:** Inyectar un mock repository desde los tests
+## ✅ STEP 1: Refactor Hook `usePokemonTypes` with Overloads
 
-### **Prompt para el agente:**
+### **Objective:**
+
+Implement the overloads pattern in `usePokemonTypes` to allow:
+
+- **Production:** The hook creates its own repository internally
+- **Testing:** Inject a mock repository from tests
+
+### **Prompt for the agent:**
 
 ```
-Refactoriza el hook usePokemonTypes en src/features/select-pokemon-type/infrastructure/react/hooks/usePokemonTypes.tsx para seguir el mismo patrón de overloads que usePokemonList.
+Refactor the usePokemonTypes hook in src/features/select-pokemon-type/infrastructure/react/hooks/usePokemonTypes.tsx to follow the same overloads pattern as usePokemonList.
 
-REQUISITOS:
+REQUIREMENTS:
 
-1. Crear dos overloads de función:
-   - Overload 1 (producción): usePokemonTypes(): IUsePokemonTypesReturn
+1. Create two function overloads:
+   - Overload 1 (production): usePokemonTypes(): IUsePokemonTypesReturn
    - Overload 2 (testing): usePokemonTypes(repository: PokemonTypesRepository): IUsePokemonTypesReturn
 
-2. En la implementación:
-   - Usar useMemo para crear HttpPokemonTypesRepository solo si no se inyecta repository
-   - Importar url desde '../../lib/constants' para la baseUrl
-   - El repository a usar será: repository || defaultRepository
-   - Mantener toda la lógica existente de useEffect, isMounted, loading y error
+2. In the implementation:
+   - Use useMemo to create HttpPokemonTypesRepository only if repository is not injected
+   - Import url from '../../lib/constants' for the baseUrl
+   - The repository to use will be: repository || defaultRepository
+   - Maintain all existing logic for useEffect, isMounted, loading and error
 
-3. NO cambiar:
-   - La interfaz IUsePokemonTypesReturn
-   - La lógica de GetPokemonTypesUseCase
-   - El mapeo de types.map((type) => type.value)
-   - La limpieza del useEffect con isMounted
+3. DO NOT change:
+   - The IUsePokemonTypesReturn interface
+   - The GetPokemonTypesUseCase logic
+   - The types.map((type) => type.value) mapping
+   - The useEffect cleanup with isMounted
 
-4. Verificar que los tests existentes en __tests__/usePokemonTypes.test.ts sigan pasando sin modificaciones.
+4. Verify that existing tests in __tests__/usePokemonTypes.test.ts continue passing without modifications.
 
-REFERENCIA:
-Ver src/features/pokemon-list/infrastructure/react/hooks/usePokemonList.ts líneas 14-26 para el patrón correcto de overloads.
+REFERENCE:
+See src/features/pokemon-list/infrastructure/react/hooks/usePokemonList.ts lines 14-26 for the correct overloads pattern.
 ```
 
-### **Verificación:**
+### **Verification:**
 
 ```bash
 npm test src/features/select-pokemon-type/infrastructure/react/hooks/__tests__/usePokemonTypes.test.ts
 ```
 
-**Resultado esperado:** ✅ Todos los tests pasan sin modificaciones
+**Expected result:** ✅ All tests pass without modifications
 
 ---
 
-## ✅ PASO 2: Eliminar Creación de Repository en Componente
+## ✅ STEP 2: Remove Repository Creation from Component
 
-### **Objetivo:**
+### **Objective:**
 
-El componente `SelectPokemonType` no debe crear infrastructure directamente.
+The `SelectPokemonType` component should not create infrastructure directly.
 
-### **Prompt para el agente:**
+### **Prompt for the agent:**
 
 ```
-Simplifica el componente SelectPokemonType en src/features/select-pokemon-type/SelectPokemonType.tsx eliminando la creación del repository.
+Simplify the SelectPokemonType component in src/features/select-pokemon-type/SelectPokemonType.tsx by removing the repository creation.
 
-CAMBIOS REQUERIDOS:
+REQUIRED CHANGES:
 
-1. Eliminar estas líneas:
+1. Remove these lines:
    - const repository = useMemo(() => new HttpPokemonTypesRepository(url.BASE), []);
-   - La importación de useMemo
-   - La importación de HttpPokemonTypesRepository
-   - La importación de url
+   - The useMemo import
+   - The HttpPokemonTypesRepository import
+   - The url import
 
-2. Cambiar la llamada al hook:
-   ANTES: const { typeNames, isLoading, isError } = usePokemonTypes(repository);
-   DESPUÉS: const { typeNames, isLoading, isError } = usePokemonTypes();
+2. Change the hook call:
+   BEFORE: const { typeNames, isLoading, isError } = usePokemonTypes(repository);
+   AFTER: const { typeNames, isLoading, isError } = usePokemonTypes();
 
-3. Mantener intacto:
+3. Keep intact:
    - useSelectPokemonType
    - handleButtonClick
-   - Todo el JSX del return
+   - All JSX return
 
-RESULTADO ESPERADO:
-El componente debe tener estas importaciones finales:
+EXPECTED RESULT:
+The component should have these final imports:
 - useCallback from 'react'
 - SelectButton, SelectButtonList, LoadingMessage, ErrorMessage from '../../ui'
 - DEFAULT_POKEMON_TYPE from './domain/constants'
 - usePokemonTypes, useSelectPokemonType from './infrastructure/react/hooks'
 ```
 
-### **Verificación:**
+### **Verification:**
 
 ```bash
 npm test src/pages/Home/__tests__/Home.SelectPokemonType.test.tsx
 ```
 
-**Resultado esperado:** ✅ Test de integración sigue pasando
+**Expected result:** ✅ Integration test continues to pass
 
 ---
 
-## ✅ PASO 3: Agregar Tests de `useSelectPokemonType`
+## ✅ STEP 3: Add Tests for `useSelectPokemonType`
 
-### **Objetivo:**
+### **Objective:**
 
-Probar el hook `useSelectPokemonType` que maneja la lógica de URL params con React Router.
+Test the `useSelectPokemonType` hook that handles URL params logic with React Router.
 
-### **Prompt para el agente:**
+### **Prompt for the agent:**
 
 ```
-Crea tests para useSelectPokemonType en src/features/select-pokemon-type/infrastructure/react/hooks/__tests__/useSelectPokemonType.test.ts
+Create tests for useSelectPokemonType in src/features/select-pokemon-type/infrastructure/react/hooks/__tests__/useSelectPokemonType.test.ts
 
-ESTRUCTURA DEL ARCHIVO:
+FILE STRUCTURE:
 
 import { renderHook, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { it, expect } from "vitest";
 import useSelectPokemonType from "../useSelectPokemonType";
 
-TESTS REQUERIDOS:
+REQUIRED TESTS:
 
 1. it("returns selected type from URL params")
-   - Wrapper: MemoryRouter con initialEntries={["/?type=fire"]}
+   - Wrapper: MemoryRouter with initialEntries={["/?type=fire"]}
    - Hook: useSelectPokemonType("normal")
    - Assert: selectedTypeParam toBe("fire")
 
 2. it("sets default type when no type in URL")
-   - Wrapper: MemoryRouter con initialEntries={["/"]}
+   - Wrapper: MemoryRouter with initialEntries={["/"]}
    - Hook: useSelectPokemonType("normal")
-   - Assert: selectedTypeParam toBe("normal") después de waitFor
+   - Assert: selectedTypeParam toBe("normal") after waitFor
 
 3. it("updates URL when selectType is called")
-   - Wrapper: MemoryRouter con initialEntries={["/?type=normal"]}
+   - Wrapper: MemoryRouter with initialEntries={["/?type=normal"]}
    - Hook: useSelectPokemonType("normal")
    - Act: result.current.selectType("fire")
-   - Assert: selectedTypeParam toBe("fire") después de waitFor
+   - Assert: selectedTypeParam toBe("fire") after waitFor
 
-PATRÓN DE WRAPPER:
+WRAPPER PATTERN:
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <MemoryRouter initialEntries={["/?type=fire"]}>
     {children}
   </MemoryRouter>
 );
 
-IMPORTANTE:
-- Usa renderHook de @testing-library/react
-- Usa waitFor para cambios de estado asíncronos
-- Usa act() para llamadas a selectType
-- NO uses describe() blocks, solo it() statements
+IMPORTANT:
+- Use renderHook from @testing-library/react
+- Use waitFor for async state changes
+- Use act() for selectType calls
+- DO NOT use describe() blocks, only it() statements
 ```
 
-### **Verificación:**
+### **Verification:**
 
 ```bash
 npm test src/features/select-pokemon-type/infrastructure/react/hooks/__tests__/useSelectPokemonType.test.ts
 ```
 
-**Resultado esperado:** ✅ 3 tests pasan
+**Expected result:** ✅ 3 tests pass
 
 ---
 
-## ✅ PASO 4: Completar Tests de Página (Loading y Error)
+## ✅ STEP 4: Complete Page Tests (Loading and Error)
 
-### **Objetivo:**
+### **Objective:**
 
-Agregar tests de estados de loading y error para completar la cobertura de integración.
+Add tests for loading and error states to complete integration coverage.
 
-### **Prompt para el agente:**
+### **Prompt for the agent:**
 
 ```
-Agrega tests de loading y error al archivo src/pages/Home/__tests__/Home.SelectPokemonType.test.tsx
+Add loading and error tests to the file src/pages/Home/__tests__/Home.SelectPokemonType.test.tsx
 
-TESTS A AGREGAR (al final del archivo existente):
+TESTS TO ADD (at the end of the existing file):
 
 1. it("shows loading message when fetching pokemon types")
-   - Mock fetch con Promise que resuelve después de 100ms
+   - Mock fetch with Promise that resolves after 100ms
    - Render: <MemoryRouter><Home /></MemoryRouter>
-   - Assert: heading con /loading pokemon types/i está en el documento
-   - Assert: después de waitFor (200ms), el loading desaparece
+   - Assert: heading with /loading pokemon types/i is in the document
+   - Assert: after waitFor (200ms), loading disappears
 
 2. it("shows error message when fetch fails")
-   - Mock fetch que retorna { ok: false, status: 500 }
+   - Mock fetch that returns { ok: false, status: 500 }
    - Render: <MemoryRouter><Home /></MemoryRouter>
-   - Assert: después de waitFor, heading con /error loading pokemon types/i está en el documento
+   - Assert: after waitFor, heading with /error loading pokemon types/i is in the document
 
-SETUP NECESARIO:
-- beforeEach con vi.spyOn(console, 'error').mockImplementation(() => {})
-- afterEach con vi.restoreAllMocks()
+NECESSARY SETUP:
+- beforeEach with vi.spyOn(console, 'error').mockImplementation(() => {})
+- afterEach with vi.restoreAllMocks()
 
-PATRÓN DE FETCH MOCK PARA LOADING:
+FETCH MOCK PATTERN FOR LOADING:
 global.fetch = vi.fn(() =>
   new Promise(resolve =>
     setTimeout(() => resolve({
@@ -219,64 +219,64 @@ global.fetch = vi.fn(() =>
   )
 );
 
-PATRÓN DE FETCH MOCK PARA ERROR:
+FETCH MOCK PATTERN FOR ERROR:
 global.fetch = vi.fn(() => Promise.resolve({
   ok: false,
   status: 500
 }));
 
-IMPORTANTE:
-- NO uses describe() blocks
-- Usa waitFor con timeout adecuado para loading (200ms mínimo)
-- Suprime console.error en beforeEach para tests de error
+IMPORTANT:
+- DO NOT use describe() blocks
+- Use waitFor with appropriate timeout for loading (200ms minimum)
+- Suppress console.error in beforeEach for error tests
 ```
 
-### **Verificación:**
+### **Verification:**
 
 ```bash
 npm test src/pages/Home/__tests__/Home.SelectPokemonType.test.tsx
 ```
 
-**Resultado esperado:** ✅ 3 tests pasan (1 existente + 2 nuevos)
+**Expected result:** ✅ 3 tests pass (1 existing + 2 new)
 
 ---
 
-## 🎉 VERIFICACIÓN FINAL
+## 🎉 FINAL VERIFICATION
 
-### **Ejecutar Suite Completa de Tests:**
+### **Run Complete Test Suite:**
 
 ```bash
-# Tests de la feature completa
+# Tests for the complete feature
 npm test src/features/select-pokemon-type
 
-# Tests de integración en página
+# Integration tests on page
 npm test src/pages/Home/__tests__/Home.SelectPokemonType.test.tsx
 
-# Verificar que no rompimos pokemon-list
+# Verify we didn't break pokemon-list
 npm test src/features/pokemon-list
 ```
 
-### **Checklist de Éxito:**
+### **Success Checklist:**
 
-- [ ] ✅ `usePokemonTypes` tiene overloads (producción + testing)
-- [ ] ✅ `SelectPokemonType` NO crea repository
-- [ ] ✅ `useSelectPokemonType` tiene 3 tests
-- [ ] ✅ Página tiene tests de loading y error
-- [ ] ✅ Todos los tests de `select-pokemon-type` pasan
-- [ ] ✅ Tests de `pokemon-list` siguen pasando
-- [ ] ✅ Tests de integración en `Home` pasan
-
----
-
-## 📋 ACTUALIZACIÓN DE CLAUDE.md
-
-Para evitar estos errores en futuras implementaciones, agrega la siguiente sección a tu `CLAUDE.md`:
+- [ ] ✅ `usePokemonTypes` has overloads (production + testing)
+- [ ] ✅ `SelectPokemonType` does NOT create repository
+- [ ] ✅ `useSelectPokemonType` has 3 tests
+- [ ] ✅ Page has loading and error tests
+- [ ] ✅ All `select-pokemon-type` tests pass
+- [ ] ✅ `pokemon-list` tests continue to pass
+- [ ] ✅ Integration tests in `Home` pass
 
 ---
 
-## 🆕 SECCIÓN NUEVA PARA CLAUDE.md
+## 📋 UPDATE CLAUDE.md
 
-### **Ubicación:** Después de `## React Hook Architecture`
+To avoid these errors in future implementations, add the following section to your `CLAUDE.md`:
+
+---
+
+## 🆕 NEW SECTION FOR CLAUDE.md
+
+### **Location:** After `## React Hook Architecture`
 
 ````markdown
 ## React Hook Architecture: Dependency Injection Pattern
@@ -457,28 +457,28 @@ Does hook create infrastructure (repositories, clients)?
 
 ---
 
-## 📝 NOTAS FINALES
+## 📝 FINAL NOTES
 
-### **Para tu agente:**
+### **For your agent:**
 
-1. **Siempre revisa hooks similares existentes** antes de implementar uno nuevo
-2. **Inyección de dependencias es crítica** para testabilidad
-3. **Componentes NO crean infrastructure** - eso va en hooks
-4. **Tests deben cubrir:** happy path, loading, error
+1. **Always review existing similar hooks** before implementing a new one
+2. **Dependency injection is critical** for testability
+3. **Components do NOT create infrastructure** - that goes in hooks
+4. **Tests should cover:** happy path, loading, error
 
-### **Para ti (David):**
+### **For you (David):**
 
-Este patrón de overloads es **fundamental** para mantener:
-- ✅ Componentes "humble" (solo orquestan)
-- ✅ Hooks testeables en aislamiento
-- ✅ Infrastructure oculta del componente
-- ✅ Flexibilidad para cambiar implementación sin tocar UI
+This overloads pattern is **fundamental** to maintain:
+- ✅ "Humble" components (only orchestrate)
+- ✅ Hooks testable in isolation
+- ✅ Infrastructure hidden from component
+- ✅ Flexibility to change implementation without touching UI
 
-**Referencia siempre:** `usePokemonList` es tu hook "dorado" - todos los demás hooks con infrastructure deben seguir ese patrón exacto.
+**Always reference:** `usePokemonList` is your "golden" hook - all other hooks with infrastructure should follow that exact pattern.
 
 ---
 
-## 🎯 RESULTADO ESPERADO POST-CORRECCIÓN
+## 🎯 EXPECTED POST-CORRECTION RESULT
 
 ```
 
@@ -486,29 +486,29 @@ src/features/select-pokemon-type/
 ├── infrastructure/
 │ └── react/
 │ └── hooks/
-│ ├── usePokemonTypes.tsx ← ✅ Con overloads
+│ ├── usePokemonTypes.tsx ← ✅ With overloads
 │ └── **tests**/
-│ ├── usePokemonTypes.test.ts ← ✅ Pasan sin cambios
-│ └── useSelectPokemonType.test.ts ← ✅ 3 tests nuevos
+│ ├── usePokemonTypes.test.ts ← ✅ Pass without changes
+│ └── useSelectPokemonType.test.ts ← ✅ 3 new tests
 │
-├── SelectPokemonType.tsx ← ✅ NO crea repository
+├── SelectPokemonType.tsx ← ✅ Does NOT create repository
 │
 └── ...
 
 src/pages/Home/**tests**/
-└── Home.SelectPokemonType.test.tsx ← ✅ 3 tests (1 + 2 nuevos)
+└── Home.SelectPokemonType.test.tsx ← ✅ 3 tests (1 + 2 new)
 
 ```
 
 **Test Count:**
-- Select-pokemon-type feature: 8 tests (5 existentes + 3 nuevos)
-- Home integration: 3 tests (1 existente + 2 nuevos)
-- **Total nuevos:** 5 tests
+- Select-pokemon-type feature: 8 tests (5 existing + 3 new)
+- Home integration: 3 tests (1 existing + 2 new)
+- **Total new:** 5 tests
 
 ---
 
-**Autor:** Ricardo (Claude Sonnet 4.5)
-**Fecha:** 2025-11-07
-**Contexto:** Auditoría feature select-pokemon-type desarrollada por agente
-**Próxima feature:** Aplicar estos aprendizajes desde el inicio
+**Author:** Ricardo (Claude Sonnet 4.5)
+**Date:** 2025-11-07
+**Context:** Audit of select-pokemon-type feature developed by agent
+**Next feature:** Apply these learnings from the start
 ```

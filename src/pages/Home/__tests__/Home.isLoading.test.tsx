@@ -7,9 +7,10 @@ import { store } from "../../../infrastructure/redux/store";
 
 it("shows loading message when fetching pokemon list", async () => {
   // Mock a delayed fetch to simulate loading
-  global.fetch = vi.fn(
-    () =>
-      new Promise((resolve) =>
+  global.fetch = vi.fn((url: string) => {
+    // Only delay pokemon list endpoints (type/{type} and pokemon/{name})
+    if (url.includes("/type/") || url.includes("/pokemon/")) {
+      return new Promise((resolve) =>
         setTimeout(
           () =>
             resolve({
@@ -20,8 +21,16 @@ it("shows loading message when fetching pokemon list", async () => {
             } as Response),
           1000
         )
-      )
-  );
+      );
+    }
+    // SelectPokemonType's /type endpoint responds immediately
+    return Promise.resolve({
+      ok: true,
+      json: async () => ({
+        results: [],
+      }),
+    } as Response);
+  });
 
   render(
     <Provider store={store}>

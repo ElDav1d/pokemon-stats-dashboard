@@ -1,6 +1,7 @@
 import { renderHook, waitFor } from "@testing-library/react";
-import { vi, it, expect } from "vitest";
+import { vi, it, expect, beforeEach } from "vitest";
 import usePokemonList from "../usePokemonList";
+import * as reduxHooks from "../../../../../../infrastructure/redux/hooks";
 import { PokemonByType } from "../../../../domain/value-objects/PokemonByType";
 import { PokemonByName } from "../../../../domain/value-objects/PokemonByName";
 import { testData } from "./setupTests";
@@ -10,6 +11,10 @@ import {
   mockPokemonsByTypeForHookTests,
   mockPokemonsByNameForHookTests,
 } from "../../../../__tests__/mocks";
+
+beforeEach(() => {
+  vi.spyOn(reduxHooks, "useAppSelector").mockReturnValue(false);
+});
 
 it("returns a list of Pokemon items with the required values", async () => {
   const { result } = renderHook(() =>

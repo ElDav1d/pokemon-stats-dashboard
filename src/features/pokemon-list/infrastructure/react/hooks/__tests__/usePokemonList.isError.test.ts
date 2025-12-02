@@ -1,6 +1,8 @@
 import { renderHook, waitFor } from "@testing-library/react";
-import { vi, it, expect } from "vitest";
+import { vi, it, expect, beforeEach } from "vitest";
 import usePokemonList from "../usePokemonList";
+import * as reduxHooks from "../../../../../../infrastructure/redux/hooks";
+
 import { testData } from "./setupTests";
 import {
   createMockPokemonRepositoryErrorThenSuccess,
@@ -8,6 +10,10 @@ import {
   mockPokemonsByTypeForHookTests,
   mockPokemonsByNameForHookTests,
 } from "../../../../__tests__/mocks";
+
+beforeEach(() => {
+  vi.spyOn(reduxHooks, "useAppSelector").mockReturnValue(false);
+});
 
 it("starts as false when no selectedType is provided", () => {
   const { result } = renderHook(() =>
@@ -32,10 +38,11 @@ it("remains false during successful fetch", async () => {
 });
 
 it("resets to false when successful fetch happens after error", async () => {
-  const errorThenSuccessRepository = createMockPokemonRepositoryErrorThenSuccess(
-    mockPokemonsByTypeForHookTests,
-    mockPokemonsByNameForHookTests
-  );
+  const errorThenSuccessRepository =
+    createMockPokemonRepositoryErrorThenSuccess(
+      mockPokemonsByTypeForHookTests,
+      mockPokemonsByNameForHookTests
+    );
 
   const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
@@ -60,7 +67,9 @@ it("resets to false when successful fetch happens after error", async () => {
 });
 
 it("resets to false when selectedType becomes empty", async () => {
-  const errorRepository = createMockPokemonRepositoryWithError(new Error("API Error"));
+  const errorRepository = createMockPokemonRepositoryWithError(
+    new Error("API Error")
+  );
 
   const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 

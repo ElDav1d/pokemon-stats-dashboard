@@ -1195,7 +1195,9 @@ class GetPokemonListUseCase {
 // ✅ Page test passes with logic in view
 ```
 
-**Step 1: RED - Write page-level test (already exists and passes)**
+**Example: Extracting usePokemonList Hook**
+
+**Step 1: RED - Write page-level test (user story)**
 
 ```typescript
 // src/pages/Home/__tests__/Home.test.tsx
@@ -1206,7 +1208,7 @@ it("displays pokemon list when user selects a type", async () => {
   const typeSelector = screen.getByRole('combobox', { name: /type/i });
   await userEvent.selectOptions(typeSelector, 'grass');
 
-  // ✅ PASSES - feature already works in view
+  // ❌ FAILS - feature doesn't exist yet
   await waitFor(() => {
     expect(screen.getByText('Bulbasaur')).toBeInTheDocument();
     expect(screen.getByText('Ivysaur')).toBeInTheDocument();
@@ -1214,7 +1216,7 @@ it("displays pokemon list when user selects a type", async () => {
 });
 ```
 
-**Step 2: View has logic inline (current state)**
+**Step 2: GREEN - Implement in view directly with inline logic**
 
 ```typescript
 // src/pages/Home/Home.tsx
@@ -1225,6 +1227,7 @@ export function Home() {
   const [isLoading, setIsLoading] = useState(false);
 
   // ✅ Logic implemented directly in component (works but violates architecture)
+
   useEffect(() => {
     const fetchPokemon = async () => {
       setIsLoading(true);
@@ -1254,7 +1257,8 @@ export function Home() {
   );
 }
 
-// ✅ Page test PASSES - feature works for users
+
+// ✅ Page test now PASSES - feature works for users
 ```
 
 **Step 3: RED - Write hook unit test**

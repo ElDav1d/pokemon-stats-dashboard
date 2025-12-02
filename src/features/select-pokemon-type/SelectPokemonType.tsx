@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import {
   SelectButton,
   SelectButtonList,
@@ -10,16 +10,10 @@ import {
   usePokemonTypes,
   useSelectPokemonType,
 } from "./infrastructure/react/hooks";
-import { HttpPokemonTypesRepository } from "./infrastructure/http/HttpPokemonTypesRepository";
-import { url } from "../../lib/constants";
 
 const SelectPokemonType = () => {
-  const repository = useMemo(
-    () => new HttpPokemonTypesRepository(url.BASE),
-    []
-  );
+  const { typeNames, isLoading, isError } = usePokemonTypes();
 
-  const { typeNames, isLoading, isError } = usePokemonTypes(repository);
   const { selectedTypeParam, selectType } =
     useSelectPokemonType(DEFAULT_POKEMON_TYPE);
 

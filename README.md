@@ -1,10 +1,10 @@
 [Español](/README.es.md) | [English](/README.en.md) | [Galego](/README.md)
 
-# Pokemon Stats Dashboard
+# 🎓 The Overengineered Pokemon Stats Dashboard
 
-A **React-based Pokemon dashboard application** for exploring and analyzing Pokemon data with advanced performance optimizations and modern frontend patterns.
+A **deliberately overengineered React-based Pokemon dashboard** designed as a **learning project** to study and understand **Clean Architecture** and **Hexagonal Architecture** patterns.
 
-This project serves as a practical implementation of advanced React patterns, custom virtualization techniques, and comprehensive testing strategies using the **PokeAPI**.
+**Purpose:** This project intentionally applies enterprise-grade architectural patterns to a simple domain problem to explore advanced React patterns, custom virtualization techniques, comprehensive testing strategies, and clean code principles using the **PokeAPI**.
 
 ## 🎯 **Project Overview**
 
@@ -159,16 +159,51 @@ The application implements clean architecture principles with clear separation o
 
 ## 📈 **Project Status**
 
-This personal project demonstrates advanced React patterns, performance optimization techniques, and clean architecture principles. The codebase implements **Hexagonal Architecture** for separation of concerns, with clear boundaries between domain, application, and infrastructure layers.
+### **Hexagonal Architecture Refactoring: 🚧 WORK IN PROGRESS (Learning Project)**
 
-**Recent Refactoring Focus:**
-- Implementation of Hexagonal/Clean Architecture patterns
-- Extraction of domain constants for configuration injection
-- Centralized mock organization for consistent testing
-- Comprehensive test coverage across all layers
-- Improved separation of concerns and testability
+This is an **intentional overengineering exercise** to study and understand Clean and Hexagonal Architecture patterns. The codebase is undergoing a gradual refactoring to implement these patterns with clear separation of concerns across domain, application, and infrastructure layers.
 
-The application successfully balances technical complexity with user experience, creating a performant and accessible Pokemon exploration tool that demonstrates enterprise-grade architecture patterns in a practical context.
+**Note:** This is a pragmatic trade-off between learning architectural patterns and practical development. In production, many of these patterns would be considered over-architected for a simple Pokemon browsing application.
+
+#### **✅ Fully Refactored to Hexagonal Architecture:**
+
+- **`select-pokemon-type` Feature** - Complete end-to-end implementation:
+  - ✅ Domain layer: Entities and value objects
+  - ✅ Application layer: Use cases for business logic
+  - ✅ Infrastructure layer: HTTP adapters and React hooks
+  - ✅ **Dependency Injection Pattern**: Function overloads for testable hooks
+    - Production: `usePokemonTypes()` - infrastructure created internally
+    - Testing: `usePokemonTypes(mockRepository)` - dependency injection for isolated testing
+  - ✅ Components remain "humble" - zero infrastructure knowledge
+  - ✅ Comprehensive testing: Unit tests per layer + integration tests
+  - ✅ URL-specific fetch mocking for endpoint isolation
+  - ✅ Complete UI state verification (loading → success/error)
+
+#### **⚠️ Partially Refactored:**
+
+- **`pokemon-list` Feature** - Partial hexagonal architecture:
+  - ✅ Domain and application layers implemented
+  - ✅ Repository pattern and HTTP adapters
+  - ⚠️ DI pattern and comprehensive testing in progress
+
+#### **❌ Not Yet Refactored:**
+
+- **Other features** - Still using legacy patterns
+- **Shared infrastructure** - Mixed concerns
+
+#### **Definition of "Fully Refactored" (Our Criteria):**
+
+1. Domain layer with entities and value objects
+2. Application layer with use cases/view models
+3. Infrastructure layer with HTTP adapters
+4. React hooks with dependency injection (function overloads)
+5. Components without direct infrastructure instantiation
+6. Unit tests for each layer
+7. Integration tests with endpoint-specific mocking
+8. Complete UI state coverage (loading, error, success)
+9. Documentation in CLAUDE.md about patterns used
+
+This learning project demonstrates how Clean and Hexagonal Architecture principles can be applied to React applications, even when not strictly necessary for the business domain.
 
 ---
 

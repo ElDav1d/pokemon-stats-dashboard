@@ -1,10 +1,18 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
-import { expect, it } from "vitest";
+import { expect, it, beforeEach, afterEach, vi } from "vitest";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { Provider } from "react-redux";
 import Home from "../Home";
 import { store } from "../../../infrastructure/redux/store";
 import { clickButtonFireType } from "./helpers";
+
+beforeEach(() => {
+  vi.spyOn(console, "error").mockImplementation(() => {});
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 it("renders a list of specific pokemons when a type is selected", async () => {
   render(
@@ -41,6 +49,93 @@ it("renders a list of specific pokemons when a type is selected", async () => {
     expect(within(pokemonOne).getByText(/height: 6/i)).toBeInTheDocument();
     expect(
       within(pokemonOne).getByRole("img", { name: /charmander/i })
+    ).toBeInTheDocument();
+  });
+});
+
+it("shows loading message when fetching pokemon types", async () => {
+  global.fetch = vi.fn((url: string) => {
+    // Only delay the pokemon types endpoint
+    if (url.includes("/type") && !url.match(/\/type\/\w+$/)) {
+      return new Promise((resolve) =>
+        setTimeout(
+          () =>
+            resolve({
+              ok: true,
+              json: async () => ({ results: [] }),
+            } as Response),
+          100
+        )
+      );
+    }
+    // Other endpoints respond immediately
+    return Promise.resolve({
+      ok: true,
+      json: async () => ({ pokemon: [], results: [] }),
+    } as Response);
+  });
+
+  render(
+    <Provider store={store}>
+      <MemoryRouter initialEntries={["/"]}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+        </Routes>
+      </MemoryRouter>
+    </Provider>
+  );
+
+  await waitFor(() => {
+    expect(
+      screen.getByRole("heading", {
+        name: /loading pokemon types/i,
+      })
+    ).toBeInTheDocument();
+  });
+
+  await waitFor(
+    () => {
+      expect(
+        screen.queryByRole("heading", {
+          name: /loading pokemon types/i,
+        })
+      ).not.toBeInTheDocument();
+    },
+    { timeout: 200 }
+  );
+});
+
+it("shows error message when fetch fails", async () => {
+  global.fetch = vi.fn((url: string) => {
+    // Only fail the pokemon types endpoint
+    if (url.includes("/type") && !url.match(/\/type\/\w+$/)) {
+      return Promise.resolve({
+        ok: false,
+        status: 500,
+      } as Response);
+    }
+    // Other endpoints respond successfully
+    return Promise.resolve({
+      ok: true,
+      json: async () => ({ pokemon: [], results: [] }),
+    } as Response);
+  });
+
+  render(
+    <Provider store={store}>
+      <MemoryRouter initialEntries={["/"]}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+        </Routes>
+      </MemoryRouter>
+    </Provider>
+  );
+
+  await waitFor(() => {
+    expect(
+      screen.getByRole("heading", {
+        name: /error loading pokemon types/i,
+      })
     ).toBeInTheDocument();
   });
 });

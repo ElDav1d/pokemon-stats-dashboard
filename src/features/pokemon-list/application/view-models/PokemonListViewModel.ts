@@ -2,7 +2,7 @@ import { PokemonRepository } from "../../domain/ports/PokemonRepository";
 import { PokemonListItem } from "../../domain/entities/PokemonListItem";
 import { GetPokemonListUseCase } from "../use-cases/get-pokemon-list/GetPokemonListUseCase";
 import { SortPokemonsByHeightUseCase } from "../use-cases/sort-pokemon-list-by-height/SortPokemonLIstByHeightUseCase";
-import { PokemonType } from "../../domain/value-objects/PokemonType";
+import { PokemonType } from "../../../../shared/domain/value-objects/PokemonType";
 
 export class PokemonListViewModel {
   constructor(private readonly repository: PokemonRepository) {}

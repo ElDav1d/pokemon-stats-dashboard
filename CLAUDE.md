@@ -2,6 +2,17 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 🚨 CRITICAL RULE: Git Workflow
+
+**NEVER commit changes automatically. The user will commit manually.**
+
+- ❌ Do NOT use `git commit` commands
+- ❌ Do NOT use `git add` followed by `git commit`
+- ✅ Make file changes as requested
+- ✅ Let the user review and commit manually when they approve
+
+**Why:** The user wants full control over commit messages and timing.
+
 ## Project Overview
 
 A React-based Pokemon dashboard application implementing advanced performance optimizations and hexagonal architecture patterns. The project uses the PokeAPI to provide Pokemon data visualization with a custom virtual scrolling system for large datasets.
@@ -110,10 +121,12 @@ The codebase implements **Hexagonal Architecture** (Ports & Adapters) with clear
 
 **4. Rich Domain Entities (Classes, not Interfaces)**
 
-Entities are **classes** (not interfaces) to encapsulate behavior alongside data:
+Entities are **classes** (not interfaces) to encapsulate behavior alongside data.
+
+**Example of a rich entity (with behavior):**
 
 ```typescript
-// ✅ Entity encapsulates behavior
+// ✅ Rich entity encapsulates behavior
 export class PokemonListItem {
   constructor(
     public readonly id: string,
@@ -135,6 +148,8 @@ export class PokemonListItem {
 }
 ```
 
+**⚠️ Note**: This is an **example** of what a rich entity LOOKS like, **not the current project state**. In this project, entities are currently simple data containers without behavior (no `getSizeCategory()` or `isBossTier()` methods exist). If these methods are needed in the future, they would be added using TDD (test first).
+
 **Why classes instead of interfaces:**
 
 - Centralizes domain logic (single source of truth for "what is large")
@@ -143,10 +158,11 @@ export class PokemonListItem {
 - Testeable without rendering components
 - Future behavior can be added without breaking contracts
 
-**Domain-layer tests don't need React:**
+**Domain-layer tests don't need React (when entities have behavior):**
 
 ```typescript
 // Pure domain logic test, no framework needed
+// (This example shows testing a rich entity - only write if entity HAS behavior)
 it("should classify large pokemon correctly", () => {
   const onix = new PokemonListItem("3", "onix", 88, "img.png");
 
@@ -154,6 +170,8 @@ it("should classify large pokemon correctly", () => {
   expect(onix.isBossTier()).toBe(true);
 });
 ```
+
+**⚠️ Important**: This test only exists if `getSizeCategory()` and `isBossTier()` methods exist on the entity. Currently, project entities are simple data containers with no such methods, so no domain tests exist.
 
 **5. View as a Humble Object**
 
@@ -369,28 +387,6 @@ mockState = { listPreferences: { sortByHeight: true } };
 // ✅ GOOD: Generic test data
 const SLICES_TO_PERSIST = ["testSlice"];
 mockState = { testSlice: { testProp: true } };
-```
-
-**Blackbox Principle Check:**
-
-- [ ] Am I testing browser APIs (localStorage, fetch, window)? If YES → Mock them completely
-- [ ] Am I testing Redux internals (dispatch, reducers, state updates)? If YES → Mock Redux components
-- [ ] Am I testing my code's logic, not the library's behavior? If NO → Add mocks
-- [ ] Do my tests prove I call external APIs correctly, not that APIs work? If NO → Refactor
-
-**Example Red Flag:**
-
-```typescript
-// ❌ BAD: Testing localStorage's JSON behavior
-localStorage.setItem("key", JSON.stringify(data));
-expect(JSON.parse(localStorage.getItem("key"))).toEqual(data);
-
-// ✅ GOOD: Mocking localStorage, testing MY code
-const setItemSpy = vi
-  .spyOn(Storage.prototype, "setItem")
-  .mockImplementation(() => {});
-myFunction();
-expect(setItemSpy).toHaveBeenCalledWith("key", JSON.stringify(data));
 ```
 
 **No Feature-Specific Details Check:**
@@ -790,39 +786,414 @@ expect(setItemSpy).toHaveBeenCalledWith("key", JSON.stringify(data)); // Tests o
 4. Repeat for all layers
 5. Integration tests from pages verify composition
 
-### Refactoring-Driven Development: Hook Extraction Workflow
+## Complete TDD Workflow for Hexagonal Architecture Refactoring
 
-**Critical: Hooks are extracted AFTER satisfying user stories, not before.**
+When refactoring an existing feature to Hexagonal Architecture, follow this **layer-by-layer approach**. Apply TDD selectively based on complexity.
 
-We follow a **refactoring-driven approach** where logic is first implemented in views to satisfy user requirements, then extracted into hooks for reusability and testability.
+### Prerequisites (Must Be True):
 
-**The Workflow:**
+- ✅ Page integration test exists and passes
+- ✅ Feature works in production (logic in view/component)
+- ✅ You understand what logic needs extraction
+
+### The Complete Refactoring Sequence:
 
 ```
-User Story → Page Test (RED) → View Implementation (GREEN) → Extract Hook → Hook Test
+┌─────────────────────────────────────────────────────────────┐
+│ EXISTING STATE: Feature works but violates architecture    │
+│ ✅ Page Test: PASSES                                        │
+│ ✅ View: Has all logic inline (services, fetch calls)      │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│ PHASE 1: DOMAIN LAYER (Entities & Value Objects)           │
+│                                                             │
+│ Step 1: Create entity class      │
+│ Step 2: Define repository port (interface only)            │
+│                                                             │
+│ ⚠️  NO TESTS - If entities are still too simple (data containers)   │
+│ ✅ Page test: STILL PASSES (no changes to view yet)        │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│ PHASE 2: INFRASTRUCTURE LAYER (Repository Adapter)         │
+│                                                             │
+│ Step 3: RED - Write repository test (mock HTTP client)     │
+│ Step 4: GREEN - Implement repository                       │
+│ Step 5: REFACTOR - Add error handling, edge cases          │
+│                                                             │
+│ ✅ Repository tests: PASS (TDD starts here)                │
+│ ✅ Page test: STILL PASSES (view not using repo yet)       │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│ PHASE 3: APPLICATION LAYER (Use Case)                      │
+│                                                             │
+│ Step 6: RED - Write use case test (mock repository)        │
+│ Step 7: GREEN - Implement use case                         │
+│ Step 8: REFACTOR - Add orchestration logic                 │
+│                                                             │
+│ ✅ Use case tests: PASS                                     │
+│ ✅ Page test: STILL PASSES (view not using use case yet)   │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│ PHASE 4: APPLICATION LAYER (ViewModel - Optional)          │
+│                                                             │
+│ Step 9: RED - Write view model test           │
+│ Step 10: GREEN - Implement view model                      │
+│ Step 11: REFACTOR - Add data transformation logic          │
+│                                                             │
+│ ✅ ViewModel tests: PASS (if created)                      │
+│ ✅ Page test: STILL PASSES                                 │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│ PHASE 5: INFRASTRUCTURE LAYER (React Hook)                 │
+│                                                             │
+│ Step 12: RED - Write hook test (mock repository)           │
+│ Step 13: GREEN - Extract logic from view to hook           │
+│ Step 14: Update view to use hook                           │
+│ Step 15: REFACTOR - Simplify hook                          │
+│                                                             │
+│ ✅ Hook tests: PASS                                         │
+│ ✅ Page test: STILL PASSES ⚠️ (CRITICAL - verify!)         │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│ FINAL STATE: Feature refactored to Hexagonal Architecture  │
+│ ✅ Page Test: STILL PASSES (no regression)                 │
+│ ✅ Unit Tests: PASS (Repository, Use Case, ViewModel, Hook)│
+│ ✅ Architecture: Clean separation of concerns               │
+│ ⚠️  Domain entities: No tests (YAGNI - too simple)         │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### When to Test Domain Layer:
+
+**TDD Rule: Test behavior, not data containers.**
+
+#### ✅ WRITE TESTS (TDD) When Domain Entities Have Behavior:
+
+Domain entities or value objects with **methods containing logic** require TDD:
+
+**Examples requiring tests:**
+
+```typescript
+// ✅ HAS BEHAVIOR → WRITE TESTS FIRST (TDD)
+export class PokemonListItem {
+  constructor(
+    public readonly id: string,
+    public readonly name: string,
+    public readonly height: number,
+    public readonly imageUrl: string
+  ) {}
+
+  // ← BEHAVIOR: Conditional logic
+  getSizeCategory(): "small" | "medium" | "large" {
+    if (this.height < 10) return "small";
+    if (this.height <= 20) return "medium";
+    return "large";
+  }
+
+  // ← BEHAVIOR: Business rule
+  isBossTier(): boolean {
+    return this.height > 30;
+  }
+}
+
+// Test FIRST (RED-GREEN-REFACTOR)
+it("classifies pokemon by size category based on height", () => {
+  const small = new PokemonListItem("1", "pikachu", 4, "url");
+  const medium = new PokemonListItem("2", "charizard", 17, "url");
+  const large = new PokemonListItem("3", "onix", 88, "url");
+
+  expect(small.getSizeCategory()).toBe("small");
+  expect(medium.getSizeCategory()).toBe("medium");
+  expect(large.getSizeCategory()).toBe("large");
+});
+```
+
+**When to write domain tests:**
+
+- Methods with conditionals (`if/else`, `switch`)
+- Business rules (validation beyond type checking)
+- Calculations or transformations
+- Derived properties
+- Comparisons (`equals()`, `isSameAs()`)
+
+**TDD Workflow:**
+
+1. RED: Write test for entity behavior first
+2. GREEN: Implement minimal code to pass test
+3. REFACTOR: Clean up while tests stay green
+
+---
+
+#### ❌ SKIP TESTS When Domain Entities Are Simple Data Containers:
+
+**Current state (pokemon-list example):**
+
+```typescript
+// ❌ NO BEHAVIOR → NO TESTS (YAGNI)
+export class PokemonListItem {
+  constructor(
+    public readonly id: string,
+    public readonly name: string,
+    public readonly height: number,
+    public readonly imageUrl: string
+  ) {}
+  // No methods, no logic, just data storage
+}
+```
+
+**Entities without tests:**
+
+- `PokemonListItem` - Plain data container (no methods)
+- `PokemonType` - Simple validation only (no behavior methods)
+- `PokemonByType` - Plain data container (no methods)
+- `PokemonByName` - Plain data container (no methods)
+
+**Why no domain tests:**
+
+- Entities are plain data containers (only constructor + readonly fields)
+- No methods beyond constructor
+- No business logic to test
+- Constructors only assign properties
+- Tests would only verify TypeScript's type system
+- YAGNI applies: don't test what doesn't exist
+
+**When entities are this simple:**
+
+- Skip domain tests entirely
+- Tests START at Repository layer (first place with actual logic: HTTP calls, DTO mapping, error handling)
+
+---
+
+#### 📋 Decision Table: Should I Test This Entity?
+
+| Entity Characteristic              | Has Tests? | Why?                                   |
+| ---------------------------------- | ---------- | -------------------------------------- |
+| Only constructor + readonly fields | ❌ No      | No behavior to test (YAGNI)            |
+| Has validation in constructor      | ❌ No\*    | TypeScript already enforces types      |
+| Has methods with conditionals      | ✅ Yes     | Behavior needs verification (TDD)      |
+| Has business rule methods          | ✅ Yes     | Logic correctness is critical (TDD)    |
+| Has calculations                   | ✅ Yes     | Math needs edge case testing (TDD)     |
+| Has derived properties (getters)   | ✅ Yes     | Transformation logic needs tests (TDD) |
+
+\*Exception: Complex validation (e.g., DNI check digit, email format with normalization) DOES need tests.
+
+---
+
+#### 🔄 Evolution Path: From Simple to Rich Entities
+
+Entities can evolve from simple to rich as features grow:
+
+```typescript
+// PHASE 1: Simple entity (NO tests)
+export class PokemonListItem {
+  constructor(
+    public readonly id: string,
+    public readonly name: string,
+    public readonly height: number,
+    public readonly imageUrl: string
+  ) {}
+}
+
+// ⬇️ NEW FEATURE REQUEST: "Show size badge on each Pokemon card"
+
+// PHASE 2: Rich entity (NOW needs tests - write FIRST)
+export class PokemonListItem {
+  constructor(
+    public readonly id: string,
+    public readonly name: string,
+    public readonly height: number,
+    public readonly imageUrl: string
+  ) {}
+
+  // NEW: Added behavior → Write test FIRST (TDD)
+  getSizeCategory(): "small" | "medium" | "large" {
+    if (this.height < 10) return "small";
+    if (this.height <= 20) return "medium";
+    return "large";
+  }
+}
+
+// Test written FIRST (RED), then implementation (GREEN)
+it("returns correct size category for small pokemon", () => {
+  const pikachu = new PokemonListItem("1", "pikachu", 4, "url");
+  expect(pikachu.getSizeCategory()).toBe("small");
+});
+```
+
+**Key Principle:** Start simple (no tests), add behavior with TDD when needed (test first).
+
+---
+
+**Summary:**
+
+- ✅ Domain entities with **behavior** (methods with logic) → Write tests FIRST (TDD)
+- ❌ Domain entities as **data containers** (no methods) → Skip tests (YAGNI)
+- 🔄 When adding behavior to simple entity → Write test FIRST, then add method (TDD)
+- 📍 Tests always START at Repository layer for simple entities (first actual logic layer)
+
+### Critical Rules:
+
+1. **Page test MUST stay green** throughout the entire refactoring
+2. **Apply TDD selectively** - Test complex logic, skip simple data containers (YAGNI)
+3. **Don't skip tested layers** - Repository, Use Case, ViewModel, and Hook need tests
+4. **Start from domain** (innermost) and work outward to infrastructure
+5. **Hook is LAST** - only after repository and use case exist
+
+### Lean TDD Checklist: Refactoring to Hexagonal Architecture
+
+Use this checklist for a lean, practical refactoring approach:
+
+#### Phase 1: Domain Layer (No Tests - YAGNI)
+
+- [ ] Create simple entity class (data container only)
+- [ ] Define repository port (interface)
+- [ ] ⚠️ **Skip tests** - Entities are too simple
+
+#### Phase 2: Infrastructure (Repository) (RED → GREEN → REFACTOR)
+
+- [ ] RED: Write repository test with mocked HTTP client
+- [ ] GREEN: Implement repository (map DTOs to entities)
+- [ ] REFACTOR: Add error handling, edge cases
+
+#### Phase 3: Application Layer (Use Case) (RED → GREEN → REFACTOR)
+
+- [ ] RED: Write use case test with mocked repository
+- [ ] GREEN: Implement use case (orchestrate repository calls)
+- [ ] REFACTOR: Add error handling
+
+#### Phase 4: Application Layer (ViewModel - Optional)
+
+- [ ] RED: Write view model test (if needed for data transformation)
+- [ ] GREEN: Implement view model
+- [ ] REFACTOR: Simplify transformations
+
+#### Phase 5: Infrastructure (Hook) (RED → GREEN → REFACTOR)
+
+- [ ] RED: Write hook test with mocked repository
+- [ ] GREEN: Extract logic from view to hook
+- [ ] Update view to use hook
+- [ ] **VERIFY PAGE TEST STILL PASSES** ⚠️ (critical!)
+- [ ] REFACTOR: Simplify hook
+
+#### ✅ Post-Refactoring Verification:
+
+- [ ] Repository tests pass
+- [ ] Use case tests pass
+- [ ] ViewModel tests pass (if created)
+- [ ] Hook tests pass
+- [ ] Page integration test STILL passes
+- [ ] No regression in user-facing behavior
+
+### Real-World Example: pokemon-list Feature
+
+See `src/features/pokemon-list/` for a complete example of Hexagonal Architecture with selective TDD:
+
+**Domain Layer:**
+
+- ⚠️ **NO TESTS** - Entities are simple data containers (YAGNI)
+- `domain/entities/PokemonListItem.ts` - Simple class, no tests
+- `domain/value-objects/PokemonType.ts` - Simple validation, no tests
+
+**Infrastructure Layer (Repository):**
+
+- ✅ `infrastructure/http/__tests__/HttpPokemonRepository.test.ts` - Repository tests (HTTP adapter, DTO mapping)
+
+**Application Layer:**
+
+- ✅ `application/use-cases/get-pokemon-list/__tests__/GetPokemonListUseCase.test.ts` - Use case tests (orchestration)
+- ✅ `application/view-models/__tests__/PokemonListViewModel.test.ts` - View model tests (data preparation)
+
+**Infrastructure Layer (React):**
+
+- ✅ `infrastructure/react/hooks/__tests__/usePokemonList.test.ts` - Hook tests (React integration)
+- ✅ `infrastructure/react/hooks/__tests__/usePokemonList.isLoading.test.ts` - Hook tests (loading states)
+- ✅ `infrastructure/react/hooks/__tests__/usePokemonList.isError.test.ts` - Hook tests (error states)
+
+**UI Layer:**
+
+- ✅ `src/pages/Home/__tests__/Home.test.tsx` - Integration tests (user perspective)
+
+**Each file shows the RED-GREEN-REFACTOR cycle applied to that specific layer.**
+
+### Refactoring-Driven Development: Hook Extraction Workflow (Phase 5)
+
+**Important: This section describes ONLY Phase 5 (hook extraction). You must complete Phases 1-4 first.**
+
+**Critical: Hooks are extracted AFTER satisfying user stories AND after creating domain/repository/use-case layers.**
+
+We follow a **refactoring-driven approach** where logic is first implemented in views to satisfy user requirements, then extracted layer-by-layer (domain → repository → use case → hook).
+
+**The Hook Extraction Workflow (Assumes Phases 1-4 Complete):**
+
+```
+Prerequisites: Entity exists, Repository exists, Use Case exists
+↓
+Hook Test (RED) → Extract to Hook (GREEN) → View uses Hook → Refactor
 ```
 
 **Step-by-Step Process:**
 
 ```
-1. RED: Write page-level integration test (user story)
-   └─> Test fails because feature doesn't exist yet
+Prerequisites (Already Complete):
+✅ Domain entities exist with tests
+✅ Repository exists with tests
+✅ Use case exists with tests
+✅ Page test passes with logic in view
 
-2. GREEN: Implement logic directly in the view/component
-   └─> Page test passes
-   └─> Feature works for users
-
-3. RED: Write hook unit test for the logic you want to extract
+1. RED: Write hook unit test for extraction
    └─> Test fails because hook doesn't exist yet
    └─> Test describes the hook API and behavior
+   └─> Test uses mocked repository (from Phase 2)
 
-4. GREEN: Extract logic from view into hook
+2. GREEN: Extract logic from view into hook
    └─> Hook test passes
+   └─> Hook uses repository and use case (dependency injection)
+
+3. Update view to use hook
    └─> Page test STAYS GREEN (no regression)
    └─> Logic now reusable and testable in isolation
+
+4. REFACTOR: Simplify hook and view
+   └─> All tests stay green
 ```
 
 **Key Principle:** The page test must NEVER go RED during hook extraction. If it does, you've broken the feature.
+
+**Complete Example: Extracting usePokemonList Hook (Phase 5 Only)**
+
+**Prerequisites (Phases 1-4 Already Complete):**
+
+```typescript
+// ✅ Phase 1: Entity exists
+class PokemonListItem {
+  constructor(
+    public id: string,
+    public name: string,
+    public height: number
+  ) {}
+}
+
+// ✅ Phase 2: Repository exists
+interface PokemonRepository {
+  findAllByType(type: PokemonType): Promise<PokemonListItem[]>;
+}
+
+// ✅ Phase 3: Use case exists
+class GetPokemonListUseCase {
+  constructor(private repository: PokemonRepository) {}
+  async execute(type: string): Promise<PokemonListItem[]> {
+    /* ... */
+  }
+}
+
+// ✅ Page test passes with logic in view
+```
 
 **Example: Extracting usePokemonList Hook**
 
@@ -845,7 +1216,7 @@ it("displays pokemon list when user selects a type", async () => {
 });
 ```
 
-**Step 2: GREEN - Implement in view directly**
+**Step 2: GREEN - Implement in view directly with inline logic**
 
 ```typescript
 // src/pages/Home/Home.tsx
@@ -855,7 +1226,8 @@ export function Home() {
   const [pokemonList, setPokemonList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Logic implemented directly in component
+  // ✅ Logic implemented directly in component (works but violates architecture)
+
   useEffect(() => {
     const fetchPokemon = async () => {
       setIsLoading(true);
@@ -884,6 +1256,7 @@ export function Home() {
     </div>
   );
 }
+
 
 // ✅ Page test now PASSES - feature works for users
 ```
@@ -996,12 +1369,13 @@ export function Home() {
 
 ### Testing Patterns by Layer
 
-**Domain Layer** - Pure logic, no mocks needed:
+**Domain Layer** - Test behavior only (if it exists):
 
-- Test entities, value objects, and domain logic directly
-- No framework imports required
-- Tests run instantly
-- Example: `expect(entity.getSizeCategory()).toBe("large")`
+- ✅ **IF entity has behavior**: Test methods with logic directly (no mocks, no framework)
+- ❌ **IF entity is simple data container**: Skip tests (YAGNI)
+- Tests run instantly (pure functions)
+- Example (when entity HAS behavior): `expect(entity.getSizeCategory()).toBe("large")`
+- **Current project**: Domain entities are simple containers → No domain tests
 
 **Application Layer (Use Cases)** - Mock port interfaces:
 
@@ -1788,8 +2162,11 @@ Example:
 
 1. **Start with Domain Layer**:
 
-   - Define entities, value objects, and ports (interfaces)
+   - Define entities as simple data containers (classes with readonly properties)
+   - Define ports (repository interfaces)
    - Add domain constants if needed
+   - ⚠️ **Skip tests if entities have no behavior** (YAGNI - tests start at Repository layer)
+   - ✅ **Write tests FIRST if entities need behavior** (methods with logic - use TDD)
 
 2. **Create Use Cases**:
 
@@ -1884,6 +2261,179 @@ const { visibleItems, totalHeight } = useVirtualGridList(sortedList, config);
 const repository = new HttpPokemonRepository(httpClient); // ❌ Infrastructure in component
 const { pokemonList } = usePokemonList(type, repository);
 const sorted = viewModel.sortPokemonList(pokemonList); // ❌ Business logic in component
+```
+
+## React Hook Architecture: Dependency Injection Pattern
+
+### Hook Design: Overloads for Production and Testing
+
+**CRITICAL PATTERN:** All hooks that create infrastructure (repositories, clients, services) MUST support dependency injection for testing while remaining simple for production use.
+
+### Correct Pattern: Function Overloads
+
+```typescript
+// ✅ CORRECT: Overloaded hook with dependency injection
+
+interface UseFeatureResult {
+  data: DataType[];
+  isLoading: boolean;
+  isError: boolean;
+}
+
+// Overload 1: Production use (no parameters or simple flags)
+function useFeature(): UseFeatureResult;
+function useFeature(flag?: boolean): UseFeatureResult;
+
+// Overload 2: Testing use (inject repository)
+function useFeature(repository: FeatureRepository): UseFeatureResult;
+
+// Implementation
+function useFeature(
+  secondParam?: boolean | FeatureRepository
+): UseFeatureResult {
+  const [data, setData] = useState<DataType[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+
+  // Determine if repository was injected
+  const isRepositoryInjected =
+    secondParam && typeof secondParam === "object" && "findAll" in secondParam; // Check repository interface method
+
+  // Setup infrastructure (only if not injected)
+  const httpClient = useMemo(() => new FetchHttpClient(url.BASE), []);
+
+  const repository = useMemo(() => {
+    if (isRepositoryInjected) {
+      return secondParam as FeatureRepository;
+    }
+    return new HttpFeatureRepository(httpClient);
+  }, [httpClient, isRepositoryInjected, secondParam]);
+
+  const viewModel = useMemo(
+    () => new FeatureViewModel(repository),
+    [repository]
+  );
+
+  // Rest of hook logic...
+  useEffect(() => {
+    // Use viewModel to fetch data
+  }, [viewModel]);
+
+  return { data, isLoading, isError };
+}
+
+export default useFeature;
+```
+
+### Wrong Pattern: Force Injection from Component
+
+```typescript
+// ❌ WRONG: Component must create infrastructure
+
+// Hook forces repository injection
+export function useFeature(repository: FeatureRepository): UseFeatureResult {
+  // ...
+}
+
+// Component must create infrastructure
+const Component = () => {
+  // ❌ Component creates infrastructure (violates separation)
+  const repository = useMemo(() => new HttpFeatureRepository(url.BASE), []);
+
+  const { data } = useFeature(repository);
+  // ...
+};
+```
+
+### Benefits of Overload Pattern
+
+| Aspect          | With Overloads                                 | Without Overloads                          |
+| --------------- | ---------------------------------------------- | ------------------------------------------ |
+| **Production**  | Component calls `useFeature()` - simple        | Component must create repository - complex |
+| **Testing**     | Test calls `useFeature(mockRepo)` - injectable | Cannot inject, must mock fetch globally    |
+| **Separation**  | Infrastructure stays in hook                   | Infrastructure leaks to component          |
+| **Reusability** | Hook self-contained                            | Component must know infrastructure details |
+
+### When to Use This Pattern
+
+✅ **USE overloads when:**
+
+- Hook creates HTTP clients, repositories, or services
+- Hook needs different behavior in production vs testing
+- Hook orchestrates multiple infrastructure pieces
+
+❌ **DON'T USE overloads when:**
+
+- Hook only manages local state (useState, useReducer)
+- Hook has no external dependencies
+- Hook is pure UI logic (animations, refs, etc.)
+
+### Examples in Project
+
+**Correct implementations:**
+
+- `src/features/pokemon-list/infrastructure/react/hooks/usePokemonList.ts` (lines 14-26)
+- Pattern: Production accepts `selectedType` string, testing accepts `repository`
+
+**Reference implementation to copy:**
+
+```typescript
+// Overload for component usage (no repository)
+function usePokemonList(selectedType: string): UsePokemonListResult;
+
+// Overload for testing (with repository injection)
+function usePokemonList(
+  selectedType: string,
+  repository: PokemonRepository
+): UsePokemonListResult;
+
+// Implementation combines both
+function usePokemonList(
+  selectedType: string,
+  secondParam?: PokemonRepository
+): UsePokemonListResult {
+  const isRepositoryInjected =
+    secondParam &&
+    typeof secondParam === "object" &&
+    "findAllByType" in secondParam;
+
+  const httpClient = useMemo(() => new FetchHttpClient(url.BASE), []);
+
+  const repository = useMemo(() => {
+    if (isRepositoryInjected) {
+      return secondParam;
+    }
+    return new HttpPokemonRepository(httpClient, {
+      typeEndpoint: url.TYPE,
+      pokemonEndpoint: url.POKEMON,
+    });
+  }, [httpClient, isRepositoryInjected, secondParam]);
+
+  // Use repository...
+}
+```
+
+### Pre-Flight Checklist for New Hooks
+
+Before implementing a new hook that uses infrastructure:
+
+- [ ] Does this hook create repositories, clients, or services?
+- [ ] Will I need to test this hook in isolation?
+- [ ] Am I following the overload pattern from `usePokemonList`?
+- [ ] Does the component call the hook WITHOUT creating infrastructure?
+- [ ] Can I inject a mock repository in tests?
+
+If you answered YES to questions 1-2 and NO to questions 3-5, you're implementing the wrong pattern.
+
+### Quick Decision Tree
+
+```
+Does hook create infrastructure (repositories, clients)?
+├─ NO → Simple hook, no overloads needed
+└─ YES → Must use overload pattern
+    ├─ Production: Hook creates infrastructure internally
+    ├─ Testing: Inject mock repository
+    └─ Component: Calls hook with no infrastructure params
 ```
 
 ### Modifying Virtual Scrolling

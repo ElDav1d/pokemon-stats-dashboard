@@ -1,9 +1,15 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { vi, it, expect, beforeEach } from "vitest";
 import usePokemonList from "../usePokemonList";
-import { PokemonRepository } from "../../../../domain/ports/PokemonRepository";
 import * as reduxHooks from "../../../../../../infrastructure/redux/hooks";
+
 import { testData } from "./setupTests";
+import {
+  createMockPokemonRepositoryErrorThenSuccess,
+  createMockPokemonRepositoryWithError,
+  mockPokemonsByTypeForHookTests,
+  mockPokemonsByNameForHookTests,
+} from "../../../../__tests__/mocks";
 
 beforeEach(() => {
   vi.spyOn(reduxHooks, "useAppSelector").mockReturnValue(false);
@@ -32,17 +38,11 @@ it("remains false during successful fetch", async () => {
 });
 
 it("resets to false when successful fetch happens after error", async () => {
-  const errorThenSuccessRepository: PokemonRepository = {
-    findAllByType: vi
-      .fn()
-      .mockRejectedValueOnce(new Error("API Error"))
-      .mockResolvedValueOnce(testData.mockPokemonsByType),
-    findDetailsByName: vi
-      .fn()
-      .mockResolvedValueOnce(testData.mockPokemonsByName[0])
-      .mockResolvedValueOnce(testData.mockPokemonsByName[1])
-      .mockResolvedValueOnce(testData.mockPokemonsByName[2]),
-  };
+  const errorThenSuccessRepository =
+    createMockPokemonRepositoryErrorThenSuccess(
+      mockPokemonsByTypeForHookTests,
+      mockPokemonsByNameForHookTests
+    );
 
   const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
@@ -67,10 +67,9 @@ it("resets to false when successful fetch happens after error", async () => {
 });
 
 it("resets to false when selectedType becomes empty", async () => {
-  const errorRepository: PokemonRepository = {
-    findAllByType: vi.fn().mockRejectedValue(new Error("API Error")),
-    findDetailsByName: vi.fn(),
-  };
+  const errorRepository = createMockPokemonRepositoryWithError(
+    new Error("API Error")
+  );
 
   const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 

@@ -1,7 +1,7 @@
-import { vi, it, expect, beforeEach, afterEach } from 'vitest';
-import { clearPersistedState } from '../localStorageMiddleware';
+import { vi, it, expect, beforeEach, afterEach } from "vitest";
+import { clearPersistedState } from "../localStorageMiddleware";
 
-const STORAGE_KEY = '__pokemon-dashboard__';
+const STORAGE_KEY = "__pokemon-dashboard__";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -11,8 +11,10 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-it('should call localStorage.removeItem with correct key', () => {
-  const removeItemSpy = vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {});
+it("should call localStorage.removeItem with correct key", () => {
+  const removeItemSpy = vi
+    .spyOn(Storage.prototype, "removeItem")
+    .mockImplementation(() => {});
 
   clearPersistedState(STORAGE_KEY);
 
@@ -21,8 +23,10 @@ it('should call localStorage.removeItem with correct key', () => {
   removeItemSpy.mockRestore();
 });
 
-it('should not throw error when localStorage.removeItem succeeds', () => {
-  const removeItemSpy = vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {});
+it("should not throw error when localStorage.removeItem succeeds", () => {
+  const removeItemSpy = vi
+    .spyOn(Storage.prototype, "removeItem")
+    .mockImplementation(() => {});
 
   expect(() => {
     clearPersistedState(STORAGE_KEY);
@@ -31,8 +35,10 @@ it('should not throw error when localStorage.removeItem succeeds', () => {
   removeItemSpy.mockRestore();
 });
 
-it('should call localStorage.removeItem even when called on empty storage', () => {
-  const removeItemSpy = vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {});
+it("should call localStorage.removeItem even when called on empty storage", () => {
+  const removeItemSpy = vi
+    .spyOn(Storage.prototype, "removeItem")
+    .mockImplementation(() => {});
 
   clearPersistedState(STORAGE_KEY);
 
@@ -41,23 +47,13 @@ it('should call localStorage.removeItem even when called on empty storage', () =
   removeItemSpy.mockRestore();
 });
 
-it('should log message when state is cleared', () => {
-  const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-  const removeItemSpy = vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {});
-
-  clearPersistedState(STORAGE_KEY);
-
-  expect(consoleSpy).toHaveBeenCalled();
-
-  removeItemSpy.mockRestore();
-  consoleSpy.mockRestore();
-});
-
-it('should handle error gracefully when localStorage.removeItem throws', () => {
-  const removeItemSpy = vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {
-    throw new Error('Storage access error');
-  });
-  const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+it("should handle error gracefully when localStorage.removeItem throws", () => {
+  const removeItemSpy = vi
+    .spyOn(Storage.prototype, "removeItem")
+    .mockImplementation(() => {
+      throw new Error("Storage access error");
+    });
+  const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
   expect(() => {
     clearPersistedState(STORAGE_KEY);

@@ -1,8 +1,8 @@
-import { it, expect, vi } from "vitest";
-import { PokemonRepository } from "../../../domain/ports/PokemonRepository";
-import { PokemonType } from "../../../domain/value-objects/PokemonType";
+import { it, expect } from "vitest";
+import { PokemonType } from "../../../../../shared/domain/value-objects/PokemonType";
 import { PokemonListViewModel } from "../PokemonListViewModel";
 import {
+  createMockPokemonRepository,
   mockPokemonByTypeCharizard,
   mockPokemonByTypeVulpix,
   mockPokemonByNameCharizard,
@@ -13,18 +13,10 @@ import {
 } from "../../../__tests__/mocks";
 
 it("should load pokemon list by type", async () => {
-  const mockPokemonByType1 = mockPokemonByTypeCharizard;
-  const mockPokemonByType2 = mockPokemonByTypeVulpix;
-
-  const mockPokemonByName1 = mockPokemonByNameCharizard;
-  const mockPokemonByName2 = mockPokemonByNameVulpix;
-
-  const mockRepository: PokemonRepository = {
-    findAllByType: vi.fn().mockResolvedValue([mockPokemonByType1, mockPokemonByType2]),
-    findDetailsByName: vi.fn()
-      .mockResolvedValueOnce(mockPokemonByName1)
-      .mockResolvedValueOnce(mockPokemonByName2),
-  };
+  const mockRepository = createMockPokemonRepository(
+    [mockPokemonByTypeCharizard, mockPokemonByTypeVulpix],
+    [mockPokemonByNameCharizard, mockPokemonByNameVulpix]
+  );
 
   const viewModel = new PokemonListViewModel(mockRepository);
 
@@ -39,10 +31,7 @@ it("should load pokemon list by type", async () => {
 });
 
 it("should return empty array when type is empty", async () => {
-  const mockRepository: PokemonRepository = {
-    findAllByType: vi.fn(),
-    findDetailsByName: vi.fn(),
-  };
+  const mockRepository = createMockPokemonRepository([], []);
 
   const viewModel = new PokemonListViewModel(mockRepository);
 
@@ -53,10 +42,7 @@ it("should return empty array when type is empty", async () => {
 });
 
 it("should sort pokemon list by height", () => {
-  const mockRepository: PokemonRepository = {
-    findAllByType: vi.fn(),
-    findDetailsByName: vi.fn(),
-  };
+  const mockRepository = createMockPokemonRepository([], []);
 
   const unsortedList = [
     mockPokemonListItemCharizard,

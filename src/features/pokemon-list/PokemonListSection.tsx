@@ -1,7 +1,7 @@
 import { useSearchParams } from "react-router-dom";
 import usePokemonList from "./infrastructure/react/hooks/usePokemonList";
+import { useVirtualGridList } from "../../shared/infrastructure/react/hooks/useVirtualGridList";
 import { useListControls } from "./infrastructure/react/hooks/useListControls";
-import { useVirtualGridList } from "../../infrastructure/react/hooks/useVirtualGridList";
 import { pokemonListConfig, responsiveBreakpoints } from "./domain/constants";
 import { LoadingMessage, ErrorMessage } from "../../ui";
 import PokemonListControls from "./PokemonListControls";
@@ -10,19 +10,17 @@ import PokemonListGrid from "./PokemonListGrid";
 const PokemonListSection = () => {
   const [searchParams] = useSearchParams();
   const selectedTypeParam = searchParams.get("type");
-  const { sortByHeight: isSortedByHeight, handleToggleSortByHeight } = useListControls();
+  const { sortByHeight: isSortedByHeight, handleToggleSortByHeight } =
+    useListControls();
 
   const { pokemonList, isLoading, isError } = usePokemonList(
     selectedTypeParam ?? ""
   );
 
-  const { visibleItems, totalHeight } = useVirtualGridList(
-    pokemonList,
-    {
-      config: pokemonListConfig,
-      breakpoints: responsiveBreakpoints,
-    }
-  );
+  const { visibleItems, totalHeight } = useVirtualGridList(pokemonList, {
+    config: pokemonListConfig,
+    breakpoints: responsiveBreakpoints,
+  });
 
   if (isLoading) {
     return (

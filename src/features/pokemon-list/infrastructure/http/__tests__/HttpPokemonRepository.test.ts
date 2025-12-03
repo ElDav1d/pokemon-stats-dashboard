@@ -1,8 +1,8 @@
 import { it, expect, vi, beforeEach } from "vitest";
 import { HttpPokemonRepository } from "../HttpPokemonRepository";
-import { PokemonType } from "../../../domain/value-objects/PokemonType";
+import { PokemonType } from "../../../../../shared/domain/value-objects/PokemonType";
 import { pokemonByNameResponseMock, pokemonByTypeResponseMock } from "./mocks";
-import { FetchHttpClient } from "../../../../../infrastructure/client/fetch/FetchHttpClient";
+import { FetchHttpClient } from "../../../../../shared/infrastructure/client/fetch/FetchHttpClient";
 import { PokemonByType } from "../../../domain/value-objects/PokemonByType";
 import { PokemonByName } from "../../../domain/value-objects/PokemonByName";
 
@@ -21,7 +21,10 @@ beforeEach(() => {
   httpClientStub = new HttpClientStub();
   // Patch the repository to use the stub instead of fetch
   const httpClient = new FetchHttpClient("https://pokeapi.co/api/v2/");
-  repo = new HttpPokemonRepository(httpClient);
+  repo = new HttpPokemonRepository(httpClient, {
+    typeEndpoint: "type/",
+    pokemonEndpoint: "pokemon/",
+  });
   // @ts-ignore
   repo.fetch = httpClientStub.get.bind(httpClientStub);
   // @ts-ignore
@@ -81,7 +84,9 @@ it("should call fetch with the correct URL", async () => {
 
   // Ensure no duplication of base URL
   const actualUrl = (globalThis.fetch as any).mock.calls[0][0];
-  const baseUrlCount = (actualUrl.match(/https:\/\/pokeapi\.co\/api\/v2/g) || []).length;
+  const baseUrlCount = (
+    actualUrl.match(/https:\/\/pokeapi\.co\/api\/v2/g) || []
+  ).length;
   expect(baseUrlCount).toBe(1);
 });
 
@@ -102,6 +107,8 @@ it("should call fetch with correct URL for pokemon details", async () => {
 
   // Ensure no duplication of base URL
   const actualUrl = (globalThis.fetch as any).mock.calls[0][0];
-  const baseUrlCount = (actualUrl.match(/https:\/\/pokeapi\.co\/api\/v2/g) || []).length;
+  const baseUrlCount = (
+    actualUrl.match(/https:\/\/pokeapi\.co\/api\/v2/g) || []
+  ).length;
   expect(baseUrlCount).toBe(1);
 });

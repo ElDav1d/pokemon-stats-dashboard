@@ -9,14 +9,24 @@ beforeEach(() => {
   // Suppress console.error for these tests since we're testing error states
   vi.spyOn(console, "error").mockImplementation(() => {});
 
-  // Mock fetch to return an error
-  global.fetch = vi.fn(() =>
-    Promise.resolve({
-      ok: false,
-      status: 500,
-      json: async () => ({}),
-    } as Response)
-  );
+  // Mock fetch to return an error only for pokemon list endpoints
+  global.fetch = vi.fn((url: string) => {
+    // Only fail pokemon list endpoints (type/{type} and pokemon/{name})
+    if (url.includes("/type/") || url.includes("/pokemon/")) {
+      return Promise.resolve({
+        ok: false,
+        status: 500,
+        json: async () => ({}),
+      } as Response);
+    }
+    // SelectPokemonType's /type endpoint responds successfully
+    return Promise.resolve({
+      ok: true,
+      json: async () => ({
+        results: [],
+      }),
+    } as Response);
+  });
 });
 
 afterEach(() => {

@@ -3,7 +3,7 @@ import { PokemonListItem } from "../../../domain/entities/PokemonListItem";
 import { PokemonRepository } from "../../../domain/ports/PokemonRepository";
 import { PokemonListViewModel } from "../../../application/view-models/PokemonListViewModel";
 import { HttpPokemonRepository } from "../../http/HttpPokemonRepository";
-import { FetchHttpClient } from "../../../../../infrastructure/client/fetch/FetchHttpClient";
+import { FetchHttpClient } from "../../../../../shared/infrastructure/client/fetch/FetchHttpClient";
 import { useAppSelector } from "../../../../../infrastructure/redux/hooks";
 
 interface UsePokemonListResult {
@@ -45,7 +45,10 @@ function usePokemonList(
     if (isRepositoryInjected) {
       return repository!;
     }
-    return new HttpPokemonRepository(httpClient);
+    return new HttpPokemonRepository(httpClient, {
+      typeEndpoint: "type/",
+      pokemonEndpoint: "pokemon/",
+    });
   }, [httpClient, isRepositoryInjected, repository]);
 
   const viewModel = useMemo(

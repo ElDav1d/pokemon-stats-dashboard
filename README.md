@@ -70,6 +70,7 @@ The application implements clean architecture principles with clear separation o
 #### **Testing Strategy:**
 
 - **TDD Approach with Layered Tests**
+
   - **Unit Tests (Foundation)** - Domain, Application, and Infrastructure layers
     - Pure logic testing without framework dependencies
     - Fast execution, 100% coverage target
@@ -78,6 +79,7 @@ The application implements clean architecture principles with clear separation o
     - HTTP responses mocked, not external E2E tools
 
 - **Mock Organization**
+
   - **Feature-level mocks** - Centralized in `__tests__/mocks.ts` at feature root
   - **Page-level mocks** - Scoped to `pages/{page}/__tests__/mocks.ts` for HTTP responses
   - **Consistent test data** - All tests within a feature use the same mock instances
@@ -167,6 +169,13 @@ This is an **intentional overengineering exercise** to study and understand Clea
 
 #### **✅ Fully Refactored to Hexagonal Architecture:**
 
+- **`pokemon-list` Feature** - Complete hexagonal architecture:
+
+  - ✅ Domain and application layers implemented
+  - ✅ Repository pattern and HTTP adapters
+  - ✅ DI pattern with function overloads for testing
+  - ✅ Comprehensive testing across all layers
+
 - **`select-pokemon-type` Feature** - Complete end-to-end implementation:
   - ✅ Domain layer: Entities and value objects
   - ✅ Application layer: Use cases for business logic
@@ -181,15 +190,13 @@ This is an **intentional overengineering exercise** to study and understand Clea
 
 #### **⚠️ Partially Refactored:**
 
-- **`pokemon-list` Feature** - Partial hexagonal architecture:
-  - ✅ Domain and application layers implemented
-  - ✅ Repository pattern and HTTP adapters
-  - ⚠️ DI pattern and comprehensive testing in progress
+- NONE
 
 #### **❌ Not Yet Refactored:**
 
-- **Other features** - Still using legacy patterns
-- **Shared infrastructure** - Mixed concerns
+- **`pokemon-detail` Feature** - fetch directo en componentes, sin separación de capas
+- **`PokemonEvolutions`** - lógica de evolución acoplada al componente
+- **`PokemonStats`** / **`PokemonDetailTypes`** - componentes legacy
 
 #### **Definition of "Fully Refactored" (Our Criteria):**
 

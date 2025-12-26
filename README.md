@@ -194,8 +194,9 @@ This is an **intentional overengineering exercise** to study and understand Clea
 
 #### **❌ Not Yet Refactored:**
 
-- **Other features** - Still using legacy patterns
-- **Shared infrastructure** - Mixed concerns
+- **`pokemon-detail` Feature** - fetch directo en componentes, sin separación de capas
+- **`PokemonEvolutions`** - lógica de evolución acoplada al componente
+- **`PokemonStats`** / **`PokemonDetailTypes`** - componentes legacy
 
 #### **Definition of "Fully Refactored" (Our Criteria):**
 

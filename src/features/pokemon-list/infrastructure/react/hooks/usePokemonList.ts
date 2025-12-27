@@ -4,7 +4,7 @@ import { PokemonRepository } from "../../../domain/ports/PokemonRepository";
 import { PokemonListViewModel } from "../../../application/view-models/PokemonListViewModel";
 import { HttpPokemonRepository } from "../../http/HttpPokemonRepository";
 import { FetchHttpClient } from "../../../../../shared/infrastructure/client/fetch/FetchHttpClient";
-import { useAppSelector } from "../../../../../infrastructure/redux/hooks";
+import { useAppSelector } from "../../../../../shared/infrastructure/redux/hooks";
 
 interface UsePokemonListResult {
   pokemonList: PokemonListItem[];
@@ -13,9 +13,7 @@ interface UsePokemonListResult {
 }
 
 // Overload for component usage (Redux internally reads sortByHeight)
-function usePokemonList(
-  selectedType: string
-): UsePokemonListResult;
+function usePokemonList(selectedType: string): UsePokemonListResult;
 
 // Overload for testing (with repository injection)
 function usePokemonList(
@@ -32,7 +30,9 @@ function usePokemonList(
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
 
-  const sortByHeight = useAppSelector((state) => state.listControls.sortByHeight);
+  const sortByHeight = useAppSelector(
+    (state) => state.listControls.sortByHeight
+  );
 
   const isRepositoryInjected = repository !== undefined;
 

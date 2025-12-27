@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { vi, it, expect, beforeEach } from "vitest";
 import usePokemonList from "../usePokemonList";
-import * as reduxHooks from "../../../../../../infrastructure/redux/hooks";
+import * as reduxHooks from "../../../../../../shared/infrastructure/redux/hooks";
 import { PokemonByType } from "../../../../domain/value-objects/PokemonByType";
 import { PokemonByName } from "../../../../domain/value-objects/PokemonByName";
 import { testData } from "./setupTests";

@@ -3,7 +3,7 @@ import { expect, it, vi } from "vitest";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { Provider } from "react-redux";
 import Home from "../Home";
-import { store } from "../../../infrastructure/redux/store";
+import { store } from "../../../shared/infrastructure/redux/store";
 
 it("shows loading message when fetching pokemon list", async () => {
   // Mock a delayed fetch to simulate loading

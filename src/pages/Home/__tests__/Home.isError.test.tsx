@@ -3,7 +3,7 @@ import { expect, it, vi, beforeEach, afterEach } from "vitest";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { Provider } from "react-redux";
 import Home from "../Home";
-import { store } from "../../../infrastructure/redux/store";
+import { store } from "../../../shared/infrastructure/redux/store";
 
 beforeEach(() => {
   // Suppress console.error for these tests since we're testing error states

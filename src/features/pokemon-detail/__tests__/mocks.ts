@@ -1,5 +1,6 @@
 import { vi } from "vitest";
 import { PokemonDetail } from "../domain/entities/PokemonDetail";
+import { EvolutionChain } from "../domain/entities/EvolutionChain";
 import { PokemonStat } from "../domain/value-objects/PokemonStat";
 import { PokemonDetailRepository } from "../domain/ports/PokemonDetailRepository";
 
@@ -23,12 +24,19 @@ export const mockBulbasaurDetail = new PokemonDetail(
   "https://pokeapi.co/api/v2/pokemon-species/1/"
 );
 
+export const mockBulbasaurEvolutionChain = new EvolutionChain([
+  "bulbasaur",
+  "ivysaur",
+  "venusaur",
+]);
+
 export const createMockPokemonDetailRepository = (
-  detail: PokemonDetail = mockBulbasaurDetail
+  detail: PokemonDetail = mockBulbasaurDetail,
+  evolutionChain: EvolutionChain = mockBulbasaurEvolutionChain
 ): PokemonDetailRepository => ({
   findByName: vi.fn().mockResolvedValue(detail),
   findEvolutionChainUrl: vi.fn().mockResolvedValue("https://pokeapi.co/api/v2/evolution-chain/1/"),
-  findEvolutionChain: vi.fn(),
+  findEvolutionChain: vi.fn().mockResolvedValue(evolutionChain),
   findAllByType: vi.fn(),
 });
 

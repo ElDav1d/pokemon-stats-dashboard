@@ -1,5 +1,5 @@
 import { beforeEach, vi, afterEach } from "vitest";
-import { store } from "../../../infrastructure/redux/store";
+import { store } from "../../../shared/infrastructure/redux/store";
 import { toggleSortByHeight } from "../../../features/pokemon-list/infrastructure/redux/slices/listControlsSlice";
 import {
   listByTypeNormalMock,

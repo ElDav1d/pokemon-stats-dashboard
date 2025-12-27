@@ -3,7 +3,7 @@ import { expect, it } from "vitest";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { Provider } from "react-redux";
 import Home from "../Home";
-import { store } from "../../../infrastructure/redux/store";
+import { store } from "../../../shared/infrastructure/redux/store";
 
 it("renders the initial elements", async () => {
   render(

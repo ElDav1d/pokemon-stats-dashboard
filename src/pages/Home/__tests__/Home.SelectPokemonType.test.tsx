@@ -3,7 +3,7 @@ import { expect, it, beforeEach, afterEach, vi } from "vitest";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { Provider } from "react-redux";
 import Home from "../Home";
-import { store } from "../../../infrastructure/redux/store";
+import { store } from "../../../shared/infrastructure/redux/store";
 import { clickButtonFireType } from "./helpers";
 
 beforeEach(() => {

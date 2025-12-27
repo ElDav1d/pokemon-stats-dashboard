@@ -120,6 +120,90 @@ src/
 
 ---
 
+## 📦 Layer-Level Index Exports (Required Pattern)
+
+Each layer within a feature **MUST** have an `index.ts` file that re-exports all public modules. This is a mandatory pattern for all features.
+
+### Why Index Files?
+
+- **Clean imports**: `import { Entity, ValueObject } from "../domain"` instead of deep paths
+- **Encapsulation**: Internal structure can change without breaking external imports
+- **Discoverability**: Single entry point shows all public APIs
+- **Refactoring safety**: Move files within layer without updating consumers
+
+### Required Structure
+
+```
+src/features/{feature-name}/
+├── domain/
+│   ├── index.ts              ← Aggregates all domain exports
+│   ├── entities/
+│   │   ├── index.ts          ← Exports all entities
+│   │   ├── EntityA.ts
+│   │   └── EntityB.ts
+│   ├── value-objects/
+│   │   ├── index.ts          ← Exports all value objects
+│   │   ├── ValueObjectA.ts
+│   │   └── ValueObjectB.ts
+│   ├── ports/
+│   │   ├── index.ts          ← Exports all ports (interfaces)
+│   │   └── RepositoryPort.ts
+│   └── constants.ts
+```
+
+### Index File Patterns
+
+**Entities index (`domain/entities/index.ts`):**
+```typescript
+export { FavoritePokemon } from "./FavoritePokemon";
+export { PokemonDetail } from "./PokemonDetail";
+```
+
+**Value Objects index (`domain/value-objects/index.ts`):**
+```typescript
+export { FavoritePokemonId } from "./FavoritePokemonId";
+export { PokemonStat } from "./PokemonStat";
+```
+
+**Ports index (`domain/ports/index.ts`):**
+```typescript
+// ⚠️ Use `export type` for interfaces
+export type { FavoritesRepository } from "./FavoritesRepository";
+export type { PokemonDetailRepository } from "./PokemonDetailRepository";
+```
+
+**Domain root index (`domain/index.ts`):**
+```typescript
+// Re-export from all sublayers
+export * from "./entities";
+export * from "./value-objects";
+export * from "./ports";
+export * from "./constants";
+```
+
+### Rules
+
+| Rule | Example |
+|------|---------|
+| ✅ Use `export type` for interfaces | `export type { Repository } from "./Repository"` |
+| ✅ Use regular `export` for classes | `export { Entity } from "./Entity"` |
+| ✅ Domain index aggregates sublayers | `export * from "./entities"` |
+| ❌ Never export private/internal code | Don't export helpers meant for internal use |
+| ❌ Avoid circular dependencies | Index A should not import from Index B if B imports from A |
+
+### Consumer Usage
+
+```typescript
+// ✅ GOOD: Clean import from layer root
+import { FavoritePokemon, FavoritePokemonId, FavoritesRepository } from "../domain";
+
+// ❌ BAD: Deep imports (couples to internal structure)
+import { FavoritePokemon } from "../domain/entities/FavoritePokemon";
+import { FavoritePokemonId } from "../domain/value-objects/FavoritePokemonId";
+```
+
+---
+
 ## 🚀 Step by Step: Developing a New Feature
 
 Let's develop a hypothetical feature: **"Pokemon Favorites"** (marking Pokemon as favorites).

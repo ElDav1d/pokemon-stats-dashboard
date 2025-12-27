@@ -2,7 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Provider } from "react-redux";
 import { paths } from "./lib/constants";
 import { lazy, Suspense } from "react";
-import { store } from "./infrastructure/redux/store";
+import { store } from "./shared/infrastructure/redux/store";
 
 // React's lazy() expects the imported module to have a default export
 const Home = lazy(() => import("./pages/Home/Home"));

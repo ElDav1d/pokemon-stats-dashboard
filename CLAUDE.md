@@ -295,6 +295,64 @@ const persistenceMiddleware = createPersistenceMiddleware({
 - **Scalability**: Adding new features doesn't modify shared infrastructure
 - **Clean Architecture**: Respects Dependency Rule
 
+**9. Layer-Level Index Exports**
+
+Each layer within a feature MUST have an `index.ts` file that re-exports all public modules. This provides clean import paths and encapsulates internal structure.
+
+**Required index files per feature:**
+
+```
+src/features/{feature-name}/
+├── domain/
+│   ├── index.ts              ← Re-exports all domain sublayers
+│   ├── entities/
+│   │   ├── index.ts          ← Re-exports all entities
+│   │   └── EntityName.ts
+│   ├── value-objects/
+│   │   ├── index.ts          ← Re-exports all value objects
+│   │   └── ValueObjectName.ts
+│   ├── ports/
+│   │   ├── index.ts          ← Re-exports all ports (use `export type` for interfaces)
+│   │   └── RepositoryName.ts
+│   └── constants.ts
+```
+
+**Pattern for each index file:**
+
+```typescript
+// domain/entities/index.ts
+export { PokemonDetail } from "./PokemonDetail";
+export { EvolutionChain } from "./EvolutionChain";
+
+// domain/value-objects/index.ts
+export { PokemonStat } from "./PokemonStat";
+export { PokemonByType } from "./PokemonByType";
+
+// domain/ports/index.ts (use `export type` for interfaces)
+export type { PokemonDetailRepository } from "./PokemonDetailRepository";
+
+// domain/index.ts (aggregates all sublayers)
+export * from "./entities";
+export * from "./value-objects";
+export * from "./ports";
+export * from "./constants";
+```
+
+**Benefits:**
+
+- **Clean imports**: `import { PokemonDetail, PokemonStat } from "../domain"` instead of deep paths
+- **Encapsulation**: Internal file structure can change without breaking imports
+- **Discoverability**: Single entry point shows all public APIs
+- **Refactoring safety**: Move files within layer without updating external imports
+
+**Rules:**
+
+- ✅ Always use `export type` for interfaces (ports)
+- ✅ Export classes and constants with regular `export`
+- ✅ Domain index re-exports from all sublayer indexes
+- ❌ Never export internal/private implementations
+- ❌ Never have circular dependencies between index files
+
 ## Pre-Flight Checklists
 
 Use these checklists BEFORE implementing code to ensure compliance with project constraints.

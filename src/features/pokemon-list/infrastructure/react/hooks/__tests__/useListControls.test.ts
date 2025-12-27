@@ -1,7 +1,7 @@
 import { renderHook } from "@testing-library/react";
 import { vi, it, expect, beforeEach } from "vitest";
 import { useListControls } from "../useListControls";
-import * as reduxHooks from "../../../../../../infrastructure/redux/hooks";
+import * as reduxHooks from "../../../../../../shared/infrastructure/redux/hooks";
 
 beforeEach(() => {
   vi.clearAllMocks();

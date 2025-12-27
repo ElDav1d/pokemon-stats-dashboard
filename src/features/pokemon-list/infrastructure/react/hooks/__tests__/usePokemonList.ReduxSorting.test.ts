@@ -2,7 +2,7 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { vi, it, expect, beforeEach, afterEach } from "vitest";
 import usePokemonList from "../usePokemonList";
 import { testData } from "./setupTests";
-import * as reduxHooks from "../../../../../../infrastructure/redux/hooks";
+import * as reduxHooks from "../../../../../../shared/infrastructure/redux/hooks";
 
 beforeEach(() => {
   vi.spyOn(reduxHooks, "useAppSelector").mockReturnValue(false);
@@ -43,7 +43,9 @@ it("returns sorted list when sortByHeight is true", async () => {
 });
 
 it("re-sorts list when sortByHeight changes from false to true", async () => {
-  const mockSelector = vi.spyOn(reduxHooks, "useAppSelector").mockReturnValue(false);
+  const mockSelector = vi
+    .spyOn(reduxHooks, "useAppSelector")
+    .mockReturnValue(false);
 
   const { result, rerender } = renderHook(() =>
     usePokemonList("grass", testData.mockRepository!)

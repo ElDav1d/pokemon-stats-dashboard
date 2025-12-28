@@ -1,68 +1,26 @@
 import { useEffect } from "react";
-import * as d3 from "d3";
-import { graphConfig } from "../../../../../lib/constants";
 import { PokemonStat } from "../../../domain/value-objects/PokemonStat";
+import { renderStatsChart } from "../../d3/renderStatsChart";
+import { graphConfig } from "../../../../../lib/constants";
 
 export const useStatsGraph = (
   ref: React.RefObject<SVGSVGElement | null>,
   stats: PokemonStat[]
-) => {
+): void => {
   useEffect(() => {
     if (!ref.current) return;
-    const svg = d3.select(ref.current);
-    svg.selectAll("*").remove();
 
-    const innerWidth = graphConfig.WIDTH;
-    const innerHeight = graphConfig.HEIGHT;
-    const margin = {
-      top: graphConfig.MARGIN_TOP,
-      right: graphConfig.MARGIN_RIGHT,
-      bottom: graphConfig.MARGIN_BOTTOM,
-      left: graphConfig.MARGIN_LEFT,
-    };
-
-    const chartWidth = innerWidth - margin.left - margin.right;
-    const chartHeight = innerHeight - margin.top - margin.bottom;
-
-    const y = d3
-      .scaleBand()
-      .domain(stats.map((d) => d.name))
-      .range([0, chartHeight])
-      .padding(0.3);
-
-    const x = d3
-      .scaleLinear()
-      .domain([0, d3.max(stats, (d) => d.baseStat)!])
-      .nice()
-      .range([0, chartWidth]);
-
-    const chartGroup = svg
-      .append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`);
-
-    chartGroup
-      .selectAll("rect")
-      .data(stats)
-      .join("rect")
-      .attr("y", (d) => y(d.name)!)
-      .attr("x", 0)
-      .attr("height", y.bandwidth())
-      .attr("width", 0)
-      .attr("fill", "#60a5fa")
-      .transition()
-      .duration(800)
-      .attr("width", (d) => x(d.baseStat));
-
-    chartGroup
-      .append("g")
-      .attr("transform", `translate(0,${chartHeight})`)
-      .call(d3.axisBottom(x).ticks(5));
-
-    chartGroup
-      .append("g")
-      .call(d3.axisLeft(y))
-      .selectAll("text")
-      .style("font-size", "0.85rem")
-      .style("text-transform", "capitalize");
+    renderStatsChart(ref.current, stats, {
+      width: graphConfig.WIDTH,
+      height: graphConfig.HEIGHT,
+      margin: {
+        top: graphConfig.MARGIN_TOP,
+        right: graphConfig.MARGIN_RIGHT,
+        bottom: graphConfig.MARGIN_BOTTOM,
+        left: graphConfig.MARGIN_LEFT,
+      },
+      barColor: "#60a5fa",
+      animationDuration: 800,
+    });
   }, [ref, stats]);
 };

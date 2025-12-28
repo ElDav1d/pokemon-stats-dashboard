@@ -1439,7 +1439,11 @@ npm run build must pass.
 
 ### **Important Architectural Decision:**
 
-`useStatsGraph` is a **visualization adapter** (not a UI layer hook). It bridges D3 (third-party library) with React's effects and transforms stat data into visualization configuration. This makes it an **infrastructure adapter** with algorithmic logic that needs testing.
+`useStatsGraph` is a **visualization adapter** (not a UI layer hook). It bridges D3 (third-party library) with React's effects and translates domain objects into visualization configuration.
+
+**CRITICAL PRINCIPLE: Infrastructure adapters consume domain language directly.**
+
+The adapter's job is to translate **FROM** domain objects **TO** external libraries (D3), never the other way around. This means the hook accepts `PokemonStat[]` (domain) and internally converts it to what D3 needs. This keeps the UI component truly humble with ZERO transformation logic.
 
 ### **Prompt for the agent:**
 
@@ -1452,18 +1456,11 @@ CONTENT:
 import { useEffect } from "react";
 import * as d3 from "d3";
 import { graphConfig } from "../../../../../lib/constants";
-
-interface StatForGraph {
-  base_stat: number;
-  effort: number;
-  stat: {
-    name: string;
-  };
-}
+import { PokemonStat } from "../../../domain/value-objects/PokemonStat";
 
 export const useStatsGraph = (
   ref: React.RefObject<SVGSVGElement | null>,
-  stats: StatForGraph[]
+  stats: PokemonStat[]
 ) => {
   useEffect(() => {
     if (!ref.current) return;
@@ -1484,13 +1481,13 @@ export const useStatsGraph = (
 
     const y = d3
       .scaleBand()
-      .domain(stats.map((d) => d.stat.name))
+      .domain(stats.map((d) => d.name))
       .range([0, chartHeight])
       .padding(0.3);
 
     const x = d3
       .scaleLinear()
-      .domain([0, d3.max(stats, (d) => d.base_stat)!])
+      .domain([0, d3.max(stats, (d) => d.baseStat)!])
       .nice()
       .range([0, chartWidth]);
 
@@ -1502,14 +1499,14 @@ export const useStatsGraph = (
       .selectAll("rect")
       .data(stats)
       .join("rect")
-      .attr("y", (d) => y(d.stat.name)!)
+      .attr("y", (d) => y(d.name)!)
       .attr("x", 0)
       .attr("height", y.bandwidth())
       .attr("width", 0)
       .attr("fill", "#60a5fa")
       .transition()
       .duration(800)
-      .attr("width", (d) => x(d.base_stat));
+      .attr("width", (d) => x(d.baseStat));
 
     chartGroup
       .append("g")
@@ -1525,7 +1522,7 @@ export const useStatsGraph = (
   }, [ref, stats]);
 };
 
-IMPORTANT: Tests must verify OUR logic (data transformation, scale configuration, animation), not D3 library behavior.
+IMPORTANT: Tests must verify OUR logic (scale configuration, animation timing, domain calculations), not D3 library behavior.
 
 TEST FILE: src/features/pokemon-detail/infrastructure/react/hooks/__tests__/useStatsGraph.test.ts
 
@@ -1569,13 +1566,7 @@ interface PokemonStatsProps {
 const PokemonStats = ({ stats }: PokemonStatsProps) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
 
-  const statsForGraph = stats.map((stat) => ({
-    base_stat: stat.baseStat,
-    effort: stat.effort,
-    stat: { name: stat.name },
-  }));
-
-  useStatsGraph(svgRef, statsForGraph);
+  useStatsGraph(svgRef, stats);
 
   return (
     <>
@@ -1595,6 +1586,20 @@ const PokemonStats = ({ stats }: PokemonStatsProps) => {
 };
 
 export default PokemonStats;
+
+### **Important Architectural Principle:**
+
+This component demonstrates the **humble component pattern** at its finest. Notice what's NOT here:
+
+- ❌ No data transformation (`statsForGraph` mapping)
+- ❌ No D3-specific data structures
+- ❌ No business logic
+
+The component receives `PokemonStat[]` (domain language) and passes it DIRECTLY to the hook. The hook (`useStatsGraph`) is the **visualization adapter** that handles the translation from domain objects to D3 library structures.
+
+**WHY THIS MATTERS:**
+
+Infrastructure adapters (like D3 hooks) consume domain language directly. The adapter's job is to translate **FROM** domain objects **TO** external libraries, never the other way around. This keeps UI components truly humble with zero transformation logic.
 
 VERIFICATION:
 npm run build must pass.

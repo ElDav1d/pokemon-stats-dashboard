@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import * as d3 from "d3";
-import { graphConfig } from "../../../lib/constants";
+import { graphConfig } from "../../../../../lib/constants";
 
 interface StatForGraph {
   base_stat: number;

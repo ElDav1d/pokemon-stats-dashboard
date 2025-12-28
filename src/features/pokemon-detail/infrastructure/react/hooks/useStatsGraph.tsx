@@ -1,18 +1,11 @@
 import { useEffect } from "react";
 import * as d3 from "d3";
 import { graphConfig } from "../../../../../lib/constants";
-
-interface StatForGraph {
-  base_stat: number;
-  effort: number;
-  stat: {
-    name: string;
-  };
-}
+import { PokemonStat } from "../../../domain/value-objects/PokemonStat";
 
 export const useStatsGraph = (
   ref: React.RefObject<SVGSVGElement | null>,
-  stats: StatForGraph[]
+  stats: PokemonStat[]
 ) => {
   useEffect(() => {
     if (!ref.current) return;
@@ -33,13 +26,13 @@ export const useStatsGraph = (
 
     const y = d3
       .scaleBand()
-      .domain(stats.map((d) => d.stat.name))
+      .domain(stats.map((d) => d.name))
       .range([0, chartHeight])
       .padding(0.3);
 
     const x = d3
       .scaleLinear()
-      .domain([0, d3.max(stats, (d) => d.base_stat)!])
+      .domain([0, d3.max(stats, (d) => d.baseStat)!])
       .nice()
       .range([0, chartWidth]);
 
@@ -51,14 +44,14 @@ export const useStatsGraph = (
       .selectAll("rect")
       .data(stats)
       .join("rect")
-      .attr("y", (d) => y(d.stat.name)!)
+      .attr("y", (d) => y(d.name)!)
       .attr("x", 0)
       .attr("height", y.bandwidth())
       .attr("width", 0)
       .attr("fill", "#60a5fa")
       .transition()
       .duration(800)
-      .attr("width", (d) => x(d.base_stat));
+      .attr("width", (d) => x(d.baseStat));
 
     chartGroup
       .append("g")

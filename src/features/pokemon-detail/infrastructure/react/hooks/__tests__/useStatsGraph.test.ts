@@ -2,6 +2,7 @@ import { renderHook } from "@testing-library/react";
 import { vi, it, expect, beforeEach, describe } from "vitest";
 import * as d3Module from "d3";
 import { useStatsGraph } from "../useStatsGraph";
+import { PokemonStat } from "../../../../domain/value-objects/PokemonStat";
 
 vi.mock("d3");
 
@@ -47,21 +48,21 @@ describe("useStatsGraph", () => {
       range: vi.fn().mockReturnThis(),
     });
 
-    mockAxisBottom = vi.fn().mockReturnValue({
-      ticks: vi.fn().mockReturnValue({}),
-    });
+    mockAxisBottom = {
+      ticks: vi.fn().mockReturnThis(),
+    };
 
-    mockAxisLeft = vi.fn().mockReturnValue({
+    mockAxisLeft = {
       selectAll: vi.fn().mockReturnThis(),
       style: vi.fn().mockReturnThis(),
-    });
+    };
 
     vi.mocked(d3Module.select).mockReturnValue(mockSvg as any);
     vi.mocked(d3Module.scaleBand).mockImplementation(mockScaleBand);
     vi.mocked(d3Module.scaleLinear).mockImplementation(mockScaleLinear);
     (vi.mocked(d3Module.max) as any).mockImplementation(
       (
-        arr: Array<{ base_stat: number }>,
+        arr: Array<any>,
         accessor: (d: any, i?: number, a?: any[]) => number
       ) => {
         const values = arr.map(accessor);
@@ -79,9 +80,9 @@ describe("useStatsGraph", () => {
 
   it("extracts stat names and passes them to scaleBand domain", () => {
     const stats = [
-      { base_stat: 45, effort: 0, stat: { name: "hp" } },
-      { base_stat: 49, effort: 0, stat: { name: "attack" } },
-      { base_stat: 50, effort: 0, stat: { name: "defense" } },
+      new PokemonStat("hp", 45, 0),
+      new PokemonStat("attack", 49, 0),
+      new PokemonStat("defense", 50, 0),
     ];
 
     renderHook(() => useStatsGraph(mockRef, stats));
@@ -92,10 +93,10 @@ describe("useStatsGraph", () => {
     expect(domainCall).toEqual(["hp", "attack", "defense"]);
   });
 
-  it("calls d3.max with accessor that extracts base_stat", () => {
+  it("calls d3.max with accessor that extracts baseStat", () => {
     const stats = [
-      { base_stat: 45, effort: 0, stat: { name: "hp" } },
-      { base_stat: 100, effort: 0, stat: { name: "attack" } },
+      new PokemonStat("hp", 45, 0),
+      new PokemonStat("attack", 100, 0),
     ];
 
     renderHook(() => useStatsGraph(mockRef, stats));
@@ -103,19 +104,15 @@ describe("useStatsGraph", () => {
     const maxCall = vi.mocked(d3Module.max).mock.calls[0];
     const accessor = maxCall[1] as any;
 
-    expect(accessor({ base_stat: 100, effort: 0, stat: { name: "hp" } })).toBe(
-      100
-    );
-    expect(
-      accessor({ base_stat: 45, effort: 0, stat: { name: "attack" } })
-    ).toBe(45);
+    expect(accessor(new PokemonStat("hp", 100, 0))).toBe(100);
+    expect(accessor(new PokemonStat("attack", 45, 0))).toBe(45);
   });
 
   it("sets scaleLinear domain with [0, maxStat] calculated from data", () => {
     const stats = [
-      { base_stat: 10, effort: 0, stat: { name: "low" } },
-      { base_stat: 200, effort: 0, stat: { name: "high" } },
-      { base_stat: 50, effort: 0, stat: { name: "mid" } },
+      new PokemonStat("low", 10, 0),
+      new PokemonStat("high", 200, 0),
+      new PokemonStat("mid", 50, 0),
     ];
 
     renderHook(() => useStatsGraph(mockRef, stats));
@@ -129,7 +126,7 @@ describe("useStatsGraph", () => {
   });
 
   it("applies transition with 800ms duration to bar rectangles", () => {
-    const stats = [{ base_stat: 45, effort: 0, stat: { name: "hp" } }];
+    const stats = [new PokemonStat("hp", 45, 0)];
 
     renderHook(() => useStatsGraph(mockRef, stats));
 
@@ -138,7 +135,7 @@ describe("useStatsGraph", () => {
   });
 
   it("configures scaleBand with 0.3 padding", () => {
-    const stats = [{ base_stat: 45, effort: 0, stat: { name: "hp" } }];
+    const stats = [new PokemonStat("hp", 45, 0)];
 
     renderHook(() => useStatsGraph(mockRef, stats));
 
@@ -147,10 +144,10 @@ describe("useStatsGraph", () => {
   });
 
   it("re-executes chart when stats array changes", () => {
-    const stats1 = [{ base_stat: 45, effort: 0, stat: { name: "hp" } }];
+    const stats1 = [new PokemonStat("hp", 45, 0)];
     const stats2 = [
-      { base_stat: 45, effort: 0, stat: { name: "hp" } },
-      { base_stat: 49, effort: 0, stat: { name: "attack" } },
+      new PokemonStat("hp", 45, 0),
+      new PokemonStat("attack", 49, 0),
     ];
 
     const { rerender } = renderHook(
@@ -167,8 +164,8 @@ describe("useStatsGraph", () => {
     );
   });
 
-  it("handles single stat correctly by extracting base_stat value", () => {
-    const stats = [{ base_stat: 100, effort: 1, stat: { name: "speed" } }];
+  it("handles single stat correctly by extracting baseStat value", () => {
+    const stats = [new PokemonStat("speed", 100, 1)];
 
     renderHook(() => useStatsGraph(mockRef, stats));
 
@@ -180,8 +177,8 @@ describe("useStatsGraph", () => {
 
   it("calculates domain correctly with extreme stat values", () => {
     const stats = [
-      { base_stat: 1, effort: 0, stat: { name: "low" } },
-      { base_stat: 255, effort: 3, stat: { name: "high" } },
+      new PokemonStat("low", 1, 0),
+      new PokemonStat("high", 255, 3),
     ];
 
     renderHook(() => useStatsGraph(mockRef, stats));
@@ -195,7 +192,7 @@ describe("useStatsGraph", () => {
   });
 
   it("removes previous chart content before rendering new one", () => {
-    const stats = [{ base_stat: 45, effort: 0, stat: { name: "hp" } }];
+    const stats = [new PokemonStat("hp", 45, 0)];
 
     renderHook(() => useStatsGraph(mockRef, stats));
 

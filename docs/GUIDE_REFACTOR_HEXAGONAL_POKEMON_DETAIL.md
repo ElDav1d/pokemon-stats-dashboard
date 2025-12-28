@@ -1435,19 +1435,23 @@ npm run build must pass.
 
 ---
 
-### **6.2 Create useStatsGraph.tsx in ui/**
+### **6.2 Create useStatsGraph hook in infrastructure layer (WITH tests)**
+
+### **Important Architectural Decision:**
+
+`useStatsGraph` is a **visualization adapter** (not a UI layer hook). It bridges D3 (third-party library) with React's effects and transforms stat data into visualization configuration. This makes it an **infrastructure adapter** with algorithmic logic that needs testing.
 
 ### **Prompt for the agent:**
 
 ```
-Create useStatsGraph.tsx in the ui folder.
+Create useStatsGraph.tsx in the infrastructure hooks folder with comprehensive tests.
 
-FILE: src/features/pokemon-detail/ui/useStatsGraph.tsx
+FILE: src/features/pokemon-detail/infrastructure/react/hooks/useStatsGraph.tsx
 
 CONTENT:
 import { useEffect } from "react";
 import * as d3 from "d3";
-import { graphConfig } from "../../../lib/constants";
+import { graphConfig } from "../../../../../lib/constants";
 
 interface StatForGraph {
   base_stat: number;
@@ -1521,8 +1525,25 @@ export const useStatsGraph = (
   }, [ref, stats]);
 };
 
+IMPORTANT: Tests must verify OUR logic (data transformation, scale configuration, animation), not D3 library behavior.
+
+TEST FILE: src/features/pokemon-detail/infrastructure/react/hooks/__tests__/useStatsGraph.test.ts
+
+Key test scenarios (verify our implementation decisions):
+- Stat names extracted and passed to scaleBand domain correctly
+- d3.max called with accessor that extracts base_stat
+- scaleLinear domain set as [0, maxStatValue]
+- scaleBand configured with 0.3 padding
+- Transition with 800ms duration applied
+- Previous chart content cleared before rendering
+- Hook handles null ref without calling d3
+- Hook re-executes when stats array changes
+- Correct behavior with extreme stat values (1-255)
+
 VERIFICATION:
 npm run build must pass.
+npm test src/features/pokemon-detail/infrastructure/react/hooks/__tests__/useStatsGraph.test.ts
+All tests must verify our logic, not blackbox testing.
 ```
 
 ---
@@ -1532,14 +1553,14 @@ npm run build must pass.
 ### **Prompt for the agent:**
 
 ```
-Create PokemonStats.tsx in the ui folder.
+Create PokemonStats.tsx in the ui folder as a humble component.
 
 FILE: src/features/pokemon-detail/ui/PokemonStats.tsx
 
 CONTENT:
 import { useRef } from "react";
 import { PokemonStat } from "../domain/value-objects/PokemonStat";
-import { useStatsGraph } from "./useStatsGraph";
+import { useStatsGraph } from "../infrastructure/react/hooks/useStatsGraph";
 
 interface PokemonStatsProps {
   stats: PokemonStat[];

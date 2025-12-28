@@ -53,9 +53,14 @@ src/features/pokemon-detail/
 │   │   ├── HttpPokemonDetailRepository.ts
 │   │   ├── dto/
 │   │   └── __tests__/
+│   ├── d3/
+│   │   ├── renderStatsChart.ts      # Pure D3 adapter (framework-agnostic)
+│   │   ├── __tests__/
+│   │   └── index.ts
 │   └── react/
 │       └── hooks/
 │           ├── usePokemonDetail.ts
+│           ├── useStatsGraph.ts     # Thin React lifecycle adapter
 │           ├── usePokemonsByType.ts   # NEW: For PokemonDetailTypes
 │           └── __tests__/
 ├── ui/
@@ -1435,91 +1440,33 @@ npm run build must pass.
 
 ---
 
-### **6.2 Create useStatsGraph.tsx in ui/**
+### **6.2 Create D3 rendering adapter (pure function)**
+
+### **Important Architectural Decision:**
+
+D3 rendering logic is a **visualization adapter** that should be framework-agnostic. We separate it from React lifecycle management so that:
+- D3 logic can be tested without React testing utilities
+- The same rendering function works with React, Svelte, Vue, or vanilla JS
+- Each adapter has a single responsibility
 
 ### **Prompt for the agent:**
 
 ```
-Create useStatsGraph.tsx in the ui folder.
+Create the pure D3 rendering adapter for stats chart.
 
-FILE: src/features/pokemon-detail/ui/useStatsGraph.tsx
+FILE: src/features/pokemon-detail/infrastructure/d3/renderStatsChart.ts
 
-CONTENT:
-import { useEffect } from "react";
-import * as d3 from "d3";
-import { graphConfig } from "../../../lib/constants";
+This is a pure function that:
+- Receives an SVG element, domain data (PokemonStat[]), and configuration
+- Renders the chart using D3
+- Has no framework dependencies (no React, no hooks)
 
-interface StatForGraph {
-  base_stat: number;
-  effort: number;
-  stat: {
-    name: string;
-  };
-}
+[Pure function implementation provided in user request]
 
-export const useStatsGraph = (
-  ref: React.RefObject<SVGSVGElement | null>,
-  stats: StatForGraph[]
-) => {
-  useEffect(() => {
-    if (!ref.current) return;
-    const svg = d3.select(ref.current);
-    svg.selectAll("*").remove();
+FILE: src/features/pokemon-detail/infrastructure/d3/index.ts
 
-    const innerWidth = graphConfig.WIDTH;
-    const innerHeight = graphConfig.HEIGHT;
-    const margin = {
-      top: graphConfig.MARGIN_TOP,
-      right: graphConfig.MARGIN_RIGHT,
-      bottom: graphConfig.MARGIN_BOTTOM,
-      left: graphConfig.MARGIN_LEFT,
-    };
-
-    const chartWidth = innerWidth - margin.left - margin.right;
-    const chartHeight = innerHeight - margin.top - margin.bottom;
-
-    const y = d3
-      .scaleBand()
-      .domain(stats.map((d) => d.stat.name))
-      .range([0, chartHeight])
-      .padding(0.3);
-
-    const x = d3
-      .scaleLinear()
-      .domain([0, d3.max(stats, (d) => d.base_stat)!])
-      .nice()
-      .range([0, chartWidth]);
-
-    const chartGroup = svg
-      .append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`);
-
-    chartGroup
-      .selectAll("rect")
-      .data(stats)
-      .join("rect")
-      .attr("y", (d) => y(d.stat.name)!)
-      .attr("x", 0)
-      .attr("height", y.bandwidth())
-      .attr("width", 0)
-      .attr("fill", "#60a5fa")
-      .transition()
-      .duration(800)
-      .attr("width", (d) => x(d.base_stat));
-
-    chartGroup
-      .append("g")
-      .attr("transform", `translate(0,${chartHeight})`)
-      .call(d3.axisBottom(x).ticks(5));
-
-    chartGroup
-      .append("g")
-      .call(d3.axisLeft(y))
-      .selectAll("text")
-      .style("font-size", "0.85rem")
-      .style("text-transform", "capitalize");
-  }, [ref, stats]);
-};
+export { renderStatsChart, DEFAULT_STATS_CHART_CONFIG } from "./renderStatsChart";
+export type { StatsChartConfig } from "./renderStatsChart";
 
 VERIFICATION:
 npm run build must pass.
@@ -1527,19 +1474,86 @@ npm run build must pass.
 
 ---
 
-### **6.3 Create PokemonStats.tsx in ui/**
+### **6.3 Create tests for D3 adapter**
 
 ### **Prompt for the agent:**
 
 ```
-Create PokemonStats.tsx in the ui folder.
+Create tests for the D3 rendering adapter.
+
+FILE: src/features/pokemon-detail/infrastructure/d3/__tests__/renderStatsChart.test.ts
+
+These tests verify OUR rendering decisions (scale configuration, data binding, animation settings) without needing React testing utilities.
+
+[Test implementation provided in user request]
+
+VERIFICATION:
+npm test src/features/pokemon-detail/infrastructure/d3/__tests__/renderStatsChart.test.ts
+All tests must PASS.
+```
+
+---
+
+### **6.4 Create React hook as thin lifecycle adapter**
+
+### **Prompt for the agent:**
+
+```
+Create useStatsGraph hook that only manages React lifecycle.
+
+FILE: src/features/pokemon-detail/infrastructure/react/hooks/useStatsGraph.ts
+
+This hook:
+- Manages React useEffect lifecycle
+- Delegates all rendering to the D3 adapter
+- Is trivially simple (~10 lines)
+
+[Hook implementation provided in user request]
+
+VERIFICATION:
+npm run build must pass.
+```
+
+---
+
+### **6.5 Create tests for React hook (lifecycle only)**
+
+### **Prompt for the agent:**
+
+```
+Create tests for useStatsGraph hook.
+
+FILE: src/features/pokemon-detail/infrastructure/react/hooks/__tests__/useStatsGraph.test.ts
+
+These tests ONLY verify React-specific behavior:
+- Hook calls D3 adapter when ref is available
+- Hook doesn't call D3 adapter when ref is null
+- Hook re-renders when dependencies change
+
+We mock the D3 adapter since its logic is tested separately.
+
+[Test implementation provided in user request]
+
+VERIFICATION:
+npm test src/features/pokemon-detail/infrastructure/react/hooks/__tests__/useStatsGraph.test.ts
+All tests must PASS.
+```
+
+---
+
+### **6.6 Create PokemonStats.tsx in ui/**
+
+### **Prompt for the agent:**
+
+```
+Create PokemonStats.tsx in the ui folder as a humble component.
 
 FILE: src/features/pokemon-detail/ui/PokemonStats.tsx
 
 CONTENT:
 import { useRef } from "react";
 import { PokemonStat } from "../domain/value-objects/PokemonStat";
-import { useStatsGraph } from "./useStatsGraph";
+import { useStatsGraph } from "../infrastructure/react/hooks/useStatsGraph";
 
 interface PokemonStatsProps {
   stats: PokemonStat[];
@@ -1548,13 +1562,7 @@ interface PokemonStatsProps {
 const PokemonStats = ({ stats }: PokemonStatsProps) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
 
-  const statsForGraph = stats.map((stat) => ({
-    base_stat: stat.baseStat,
-    effort: stat.effort,
-    stat: { name: stat.name },
-  }));
-
-  useStatsGraph(svgRef, statsForGraph);
+  useStatsGraph(svgRef, stats);
 
   return (
     <>
@@ -1575,13 +1583,27 @@ const PokemonStats = ({ stats }: PokemonStatsProps) => {
 
 export default PokemonStats;
 
+### **Important Architectural Principle:**
+
+This component demonstrates the **humble component pattern** at its finest. Notice what's NOT here:
+
+- ❌ No data transformation (`statsForGraph` mapping)
+- ❌ No D3-specific data structures
+- ❌ No business logic
+
+The component receives `PokemonStat[]` (domain language) and passes it DIRECTLY to the hook. The hook (`useStatsGraph`) is the **visualization adapter** that handles the translation from domain objects to D3 library structures.
+
+**WHY THIS MATTERS:**
+
+Infrastructure adapters (like D3 hooks) consume domain language directly. The adapter's job is to translate **FROM** domain objects **TO** external libraries, never the other way around. This keeps UI components truly humble with zero transformation logic.
+
 VERIFICATION:
 npm run build must pass.
 ```
 
 ---
 
-### **6.4 Create PokemonDetail.tsx in ui/ (partial - without PokemonDetailTypes for now)**
+### **6.7 Create PokemonDetail.tsx in ui/ (partial - without PokemonDetailTypes for now)**
 
 ### **Prompt for the agent:**
 
@@ -2435,6 +2457,68 @@ After completing this refactor, review if `PokemonByType` and `findAllByType` sh
 
 ---
 
-**Author:** Ricardo  
-**Date:** 2025-12-26  
-**Version:** 3.0 (Complete hexagonal refactor - no exceptions)
+## 🏗️ Infrastructure Adapter Separation Pattern
+
+When an infrastructure adapter mixes framework lifecycle (React hooks) with external library logic (D3), separate them into layers:
+
+```
+UI Component → Framework Adapter (React hook) → Library Adapter (D3 function)
+```
+
+### **Example: Stats Chart Visualization**
+
+**Problem:** One hook mixing concerns
+```typescript
+// ❌ BEFORE: React lifecycle + D3 logic combined
+const useStatsGraph = (ref, stats) => {
+  useEffect(() => {
+    // D3 rendering logic here (500+ lines)
+    const svg = d3.select(ref.current);
+    svg.selectAll("rect").data(stats).join("rect")...
+  }, [ref, stats]);
+};
+```
+
+**Solution:** Separate into two adapters
+```typescript
+// ✅ AFTER: Clear separation of concerns
+
+// Infrastructure Layer 1: Pure D3 adapter (framework-agnostic)
+export function renderStatsChart(svgElement, stats, config) {
+  const svg = d3.select(svgElement);
+  // D3 logic here
+}
+
+// Infrastructure Layer 2: React lifecycle adapter (thin)
+const useStatsGraph = (ref, stats) => {
+  useEffect(() => {
+    if (!ref.current) return;
+    renderStatsChart(ref.current, stats, config);
+  }, [ref, stats]);
+};
+```
+
+### **Benefits:**
+
+1. **Testability**: Test D3 logic without React testing utilities
+   - D3 tests: Direct function calls with mock D3
+   - React tests: Mock D3 adapter, verify lifecycle
+
+2. **Reusability**: Same D3 logic works across frameworks
+   - React: `useStatsGraph` hook
+   - Vue: `useStatsGraphVue.ts` hook
+   - Svelte: D3 logic is unchanged
+
+3. **Clarity**: Each adapter has single responsibility
+   - D3 adapter: "Render chart to DOM"
+   - React adapter: "Manage effect lifecycle"
+
+4. **Maintenance**: Changes isolated by concern
+   - D3 library update? Only touch D3 adapter
+   - React pattern change? Only touch React adapter
+
+---
+
+**Author:** Ricardo
+**Date:** 2025-12-28
+**Version:** 3.1 (Infrastructure adapter separation pattern added)

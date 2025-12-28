@@ -1,2 +1,2 @@
-export { renderStatsChart, DEFAULT_STATS_CHART_CONFIG } from "./renderStatsChart";
+export { renderStatsChart } from "./renderStatsChart";
 export type { StatsChartConfig } from "./renderStatsChart";

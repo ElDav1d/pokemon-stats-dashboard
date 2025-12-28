@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { PokemonStat } from "../../../domain/value-objects/PokemonStat";
+import { STATS_CHART_CONFIG } from "../../../domain/constants";
 import { renderStatsChart } from "../../d3/renderStatsChart";
-import { graphConfig } from "../../../../../lib/constants";
 
 export const useStatsGraph = (
   ref: React.RefObject<SVGSVGElement | null>,
@@ -11,16 +11,19 @@ export const useStatsGraph = (
     if (!ref.current) return;
 
     renderStatsChart(ref.current, stats, {
-      width: graphConfig.WIDTH,
-      height: graphConfig.HEIGHT,
+      width: STATS_CHART_CONFIG.WIDTH,
+      height: STATS_CHART_CONFIG.HEIGHT,
       margin: {
-        top: graphConfig.MARGIN_TOP,
-        right: graphConfig.MARGIN_RIGHT,
-        bottom: graphConfig.MARGIN_BOTTOM,
-        left: graphConfig.MARGIN_LEFT,
+        top: STATS_CHART_CONFIG.MARGIN.TOP,
+        right: STATS_CHART_CONFIG.MARGIN.RIGHT,
+        bottom: STATS_CHART_CONFIG.MARGIN.BOTTOM,
+        left: STATS_CHART_CONFIG.MARGIN.LEFT,
       },
-      barColor: "#60a5fa",
-      animationDuration: 800,
+      barColor: STATS_CHART_CONFIG.BAR_COLOR,
+      animationDurationMs: STATS_CHART_CONFIG.ANIMATION_DURATION_MS,
+      axisFontSize: STATS_CHART_CONFIG.AXIS_FONT_SIZE,
+      scalePadding: STATS_CHART_CONFIG.SCALE_PADDING,
+      axisTicks: STATS_CHART_CONFIG.AXIS_TICKS,
     });
   }, [ref, stats]);
 };

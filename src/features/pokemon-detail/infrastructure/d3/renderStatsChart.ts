@@ -11,21 +11,16 @@ export interface StatsChartConfig {
     left: number;
   };
   barColor: string;
-  animationDuration: number;
+  animationDurationMs: number;
+  axisFontSize: string;
+  scalePadding: number;
+  axisTicks: number;
 }
-
-export const DEFAULT_STATS_CHART_CONFIG: StatsChartConfig = {
-  width: 500,
-  height: 300,
-  margin: { top: 20, right: 30, bottom: 40, left: 90 },
-  barColor: "#60a5fa",
-  animationDuration: 800,
-};
 
 export function renderStatsChart(
   svgElement: SVGSVGElement,
   stats: PokemonStat[],
-  config: StatsChartConfig = DEFAULT_STATS_CHART_CONFIG
+  config: StatsChartConfig
 ): void {
   const svg = d3.select(svgElement);
   svg.selectAll("*").remove();
@@ -37,7 +32,7 @@ export function renderStatsChart(
     .scaleBand()
     .domain(stats.map((d) => d.name))
     .range([0, chartHeight])
-    .padding(0.3);
+    .padding(config.scalePadding);
 
   const x = d3
     .scaleLinear()
@@ -59,18 +54,18 @@ export function renderStatsChart(
     .attr("width", 0)
     .attr("fill", config.barColor)
     .transition()
-    .duration(config.animationDuration)
+    .duration(config.animationDurationMs)
     .attr("width", (d) => x(d.baseStat));
 
   chartGroup
     .append("g")
     .attr("transform", `translate(0,${chartHeight})`)
-    .call(d3.axisBottom(x).ticks(5));
+    .call(d3.axisBottom(x).ticks(config.axisTicks));
 
   chartGroup
     .append("g")
     .call(d3.axisLeft(y))
     .selectAll("text")
-    .style("font-size", "0.85rem")
+    .style("font-size", config.axisFontSize)
     .style("text-transform", "capitalize");
 }

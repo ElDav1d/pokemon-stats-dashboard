@@ -1,9 +1,20 @@
 import { it, expect, vi, beforeEach } from "vitest";
 import * as d3Module from "d3";
-import { renderStatsChart, DEFAULT_STATS_CHART_CONFIG } from "../renderStatsChart";
+import { renderStatsChart, type StatsChartConfig } from "../renderStatsChart";
 import { PokemonStat } from "../../../domain/value-objects/PokemonStat";
 
 vi.mock("d3");
+
+const testConfig: StatsChartConfig = {
+  width: 500,
+  height: 300,
+  margin: { top: 20, right: 30, bottom: 40, left: 90 },
+  barColor: "#60a5fa",
+  animationDurationMs: 800,
+  axisFontSize: "0.85rem",
+  scalePadding: 0.3,
+  axisTicks: 5,
+};
 
 let mockSvgElement: SVGSVGElement;
 let mockSvg: any;
@@ -65,7 +76,7 @@ beforeEach(() => {
 it("clears previous chart content before rendering", () => {
   const stats = [new PokemonStat("hp", 45, 0)];
 
-  renderStatsChart(mockSvgElement, stats);
+  renderStatsChart(mockSvgElement, stats, testConfig);
 
   expect(mockSvg.selectAll).toHaveBeenCalledWith("*");
   expect(mockSvg.remove).toHaveBeenCalled();
@@ -78,7 +89,7 @@ it("extracts stat names for scaleBand domain", () => {
     new PokemonStat("defense", 50, 0),
   ];
 
-  renderStatsChart(mockSvgElement, stats);
+  renderStatsChart(mockSvgElement, stats, testConfig);
 
   expect(mockScaleBand.domain).toHaveBeenCalledWith(["hp", "attack", "defense"]);
 });
@@ -90,44 +101,40 @@ it("calculates max baseStat for scaleLinear domain", () => {
     new PokemonStat("mid", 50, 0),
   ];
 
-  renderStatsChart(mockSvgElement, stats);
+  renderStatsChart(mockSvgElement, stats, testConfig);
 
   expect(mockScaleLinear.domain).toHaveBeenCalledWith([0, 200]);
 });
 
-it("configures scaleBand with 0.3 padding", () => {
-  const stats = [new PokemonStat("hp", 45, 0)];
-
-  renderStatsChart(mockSvgElement, stats);
-
-  expect(mockScaleBand.padding).toHaveBeenCalledWith(0.3);
-});
-
-it("applies transition with default 800ms duration", () => {
-  const stats = [new PokemonStat("hp", 45, 0)];
-
-  renderStatsChart(mockSvgElement, stats);
-
-  expect(mockChartGroup.transition).toHaveBeenCalled();
-  expect(mockChartGroup.duration).toHaveBeenCalledWith(800);
-});
-
-it("uses custom config when provided", () => {
+it("uses scale padding from config", () => {
   const stats = [new PokemonStat("hp", 45, 0)];
   const customConfig = {
-    ...DEFAULT_STATS_CHART_CONFIG,
-    animationDuration: 500,
+    ...testConfig,
+    scalePadding: 0.5,
   };
 
   renderStatsChart(mockSvgElement, stats, customConfig);
 
+  expect(mockScaleBand.padding).toHaveBeenCalledWith(0.5);
+});
+
+it("applies transition with custom animation duration from config", () => {
+  const stats = [new PokemonStat("hp", 45, 0)];
+  const customConfig = {
+    ...testConfig,
+    animationDurationMs: 500,
+  };
+
+  renderStatsChart(mockSvgElement, stats, customConfig);
+
+  expect(mockChartGroup.transition).toHaveBeenCalled();
   expect(mockChartGroup.duration).toHaveBeenCalledWith(500);
 });
 
 it("handles single stat correctly", () => {
   const stats = [new PokemonStat("speed", 100, 1)];
 
-  renderStatsChart(mockSvgElement, stats);
+  renderStatsChart(mockSvgElement, stats, testConfig);
 
   expect(mockScaleBand.domain).toHaveBeenCalledWith(["speed"]);
   expect(mockScaleLinear.domain).toHaveBeenCalledWith([0, 100]);
@@ -139,7 +146,7 @@ it("handles extreme stat values (Pokemon max is 255)", () => {
     new PokemonStat("max", 255, 3),
   ];
 
-  renderStatsChart(mockSvgElement, stats);
+  renderStatsChart(mockSvgElement, stats, testConfig);
 
   expect(mockScaleLinear.domain).toHaveBeenCalledWith([0, 255]);
 });

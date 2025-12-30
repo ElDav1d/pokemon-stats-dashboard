@@ -3,7 +3,7 @@ import { HttpPokemonRepository } from "../HttpPokemonRepository";
 import { PokemonType } from "../../../../../shared/domain/value-objects/PokemonType";
 import { pokemonByNameResponseMock, pokemonByTypeResponseMock } from "./mocks";
 import { FetchHttpClient } from "../../../../../shared/infrastructure/client/fetch/FetchHttpClient";
-import { PokemonByType } from "../../../../../shared/domain/value-objects";
+import { PokemonReference } from "../../../../../shared/domain/value-objects";
 import { PokemonByName } from "../../../domain/value-objects/PokemonByName";
 
 class HttpClientStub {
@@ -43,10 +43,10 @@ it("should return a list of pokemons by type", async () => {
 
   const [pokemon1, pokemon2] = await repo.findAllByType(type);
 
-  expect(pokemon1).toBeInstanceOf(PokemonByType);
+  expect(pokemon1).toBeInstanceOf(PokemonReference);
   expect(pokemon1.name).toBe("charmander");
 
-  expect(pokemon2).toBeInstanceOf(PokemonByType);
+  expect(pokemon2).toBeInstanceOf(PokemonReference);
   expect(pokemon2.name).toBe("vulpix");
 });
 

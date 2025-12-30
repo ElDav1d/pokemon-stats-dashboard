@@ -1,12 +1,12 @@
 import { vi, beforeEach } from "vitest";
 import { PokemonRepository } from "../../../../domain/ports/PokemonRepository";
-import { PokemonByType } from "../../../../../../shared/domain/value-objects";
+import { PokemonReference } from "../../../../../../shared/domain/value-objects";
 import { PokemonByName } from "../../../../domain/value-objects/PokemonByName";
 
 // Global test data and mocks
 export const testData = {
   mockRepository: null as PokemonRepository | null,
-  mockPokemonsByType: [] as PokemonByType[],
+  mockPokemonReferences: [] as PokemonReference[],
   mockPokemonsByName: [] as PokemonByName[],
 };
 
@@ -17,10 +17,10 @@ export const createDelayedPromise = (data: any, delay = 100) => {
 };
 
 beforeEach(() => {
-  testData.mockPokemonsByType = [
-    new PokemonByType("bulbasaur"),
-    new PokemonByType("ivysaur"),
-    new PokemonByType("venusaur"),
+  testData.mockPokemonReferences = [
+    new PokemonReference("bulbasaur"),
+    new PokemonReference("ivysaur"),
+    new PokemonReference("venusaur"),
   ];
 
   testData.mockPokemonsByName = [
@@ -42,7 +42,7 @@ beforeEach(() => {
   ];
 
   testData.mockRepository = {
-    findAllByType: vi.fn().mockResolvedValue(testData.mockPokemonsByType),
+    findAllByType: vi.fn().mockResolvedValue(testData.mockPokemonReferences),
     findDetailsByName: vi.fn().mockImplementation((name: string) => {
       const detail = testData.mockPokemonsByName.find((p) => p.name === name);
       return Promise.resolve(detail);

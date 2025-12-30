@@ -1,2 +1,2 @@
 export { PokemonType } from "./PokemonType";
-export { PokemonByType } from "./PokemonByType";
+export { PokemonReference } from "./PokemonReference";

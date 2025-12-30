@@ -1,16 +1,16 @@
 import type { PokemonRepository } from "./ports/PokemonRepository.ts";
 import { PokemonType } from "../../../shared/domain/value-objects/PokemonType";
-import { PokemonByType } from "../../../shared/domain/value-objects";
+import { PokemonReference } from "../../../shared/domain/value-objects";
 import { PokemonByName } from "./value-objects/PokemonByName.ts";
 
 class SmokeTestPokemonRepository implements PokemonRepository {
-  private readonly pokemonList: PokemonByType[] = [
-    new PokemonByType("charmander"),
-    new PokemonByType("squirtle"),
-    new PokemonByType("bulbasaur"),
+  private readonly pokemonList: PokemonReference[] = [
+    new PokemonReference("charmander"),
+    new PokemonReference("squirtle"),
+    new PokemonReference("bulbasaur"),
   ];
 
-  async findAllByType(type: PokemonType): Promise<PokemonByType[]> {
+  async findAllByType(type: PokemonType): Promise<PokemonReference[]> {
     console.log(`SMOKE TEST Finding Pokémon by type: ${type.value}`);
     return this.pokemonList;
   }

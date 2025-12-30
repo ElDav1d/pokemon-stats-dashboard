@@ -3,14 +3,14 @@ import { vi, it, expect, beforeEach } from "vitest";
 import usePokemonList from "../usePokemonList";
 import * as reduxHooks from "../../../../../../shared/infrastructure/redux/hooks";
 
-import { PokemonByType } from "../../../../../../shared/domain/value-objects";
+import { PokemonReference } from "../../../../../../shared/domain/value-objects";
 import { PokemonByName } from "../../../../domain/value-objects/PokemonByName";
 import { testData } from "./setupTests";
 import {
   createMockPokemonRepositoryWithDelay,
   createMockPokemonRepositoryWithError,
   createMockPokemonRepositoryWithChangingData,
-  mockPokemonsByTypeForHookTests,
+  mockPokemonReferencesForHookTests,
   mockPokemonsByNameForHookTests,
 } from "../../../../__tests__/mocks";
 
@@ -28,7 +28,7 @@ it("starts as false when no selectedType is provided", () => {
 
 it("shows loading state during fetch", async () => {
   const delayedRepository = createMockPokemonRepositoryWithDelay(
-    mockPokemonsByTypeForHookTests,
+    mockPokemonReferencesForHookTests,
     mockPokemonsByNameForHookTests,
     100
   );
@@ -75,7 +75,7 @@ it("sets loading to false after failed fetch", async () => {
 });
 
 it("shows loading state when selectedType changes", async () => {
-  const newMockPokemonsByType = [new PokemonByType("charmander")];
+  const newMockPokemonReferences = [new PokemonReference("charmander")];
   const newMockPokemonByName = new PokemonByName(
     "charmander",
     60,
@@ -83,9 +83,9 @@ it("shows loading state when selectedType changes", async () => {
   );
 
   const repoWithChangingData = createMockPokemonRepositoryWithChangingData(
-    mockPokemonsByTypeForHookTests,
+    mockPokemonReferencesForHookTests,
     mockPokemonsByNameForHookTests,
-    newMockPokemonsByType,
+    newMockPokemonReferences,
     [newMockPokemonByName]
   );
 

@@ -1,7 +1,7 @@
 import { PokemonDetail } from "../../domain/entities/PokemonDetail";
 import { EvolutionChain } from "../../domain/entities/EvolutionChain";
 import { PokemonStat } from "../../domain/value-objects/PokemonStat";
-import { PokemonByType } from "../../../../shared/domain/value-objects";
+import { PokemonReference } from "../../../../shared/domain/value-objects";
 import { PokemonDetailRepository } from "../../domain/ports/PokemonDetailRepository";
 import {
   PokemonDetailResponse,
@@ -71,7 +71,7 @@ export class HttpPokemonDetailRepository implements PokemonDetailRepository {
     return new EvolutionChain(pokemonNames);
   }
 
-  async findAllByType(typeName: string): Promise<PokemonByType[]> {
+  async findAllByType(typeName: string): Promise<PokemonReference[]> {
     const response = await fetch(
       `${this.baseUrl}${this.config.typeEndpoint}${typeName}`
     );
@@ -83,7 +83,7 @@ export class HttpPokemonDetailRepository implements PokemonDetailRepository {
     const data: PokemonByTypeResponse = await response.json();
 
     return data.pokemon.map(
-      (slot) => new PokemonByType(slot.pokemon.name)
+      (slot) => new PokemonReference(slot.pokemon.name)
     );
   }
 

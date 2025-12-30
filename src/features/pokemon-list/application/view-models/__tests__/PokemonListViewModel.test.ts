@@ -3,8 +3,8 @@ import { PokemonType } from "../../../../../shared/domain/value-objects/PokemonT
 import { PokemonListViewModel } from "../PokemonListViewModel";
 import {
   createMockPokemonRepository,
-  mockPokemonByTypeCharizard,
-  mockPokemonByTypeVulpix,
+  mockPokemonReferenceCharizard,
+  mockPokemonReferenceVulpix,
   mockPokemonByNameCharizard,
   mockPokemonByNameVulpix,
   mockPokemonListItemCharizard,
@@ -14,7 +14,7 @@ import {
 
 it("should load pokemon list by type", async () => {
   const mockRepository = createMockPokemonRepository(
-    [mockPokemonByTypeCharizard, mockPokemonByTypeVulpix],
+    [mockPokemonReferenceCharizard, mockPokemonReferenceVulpix],
     [mockPokemonByNameCharizard, mockPokemonByNameVulpix]
   );
 

@@ -1,6 +1,6 @@
 import { PokemonDetail } from "../entities/PokemonDetail";
 import { EvolutionChain } from "../entities/EvolutionChain";
-import { PokemonByType } from "../../../../shared/domain/value-objects";
+import { PokemonReference } from "../../../../shared/domain/value-objects";
 
 export interface PokemonDetailRepository {
   /**
@@ -21,5 +21,5 @@ export interface PokemonDetailRepository {
   /**
    * Gets all pokemon of a specific type
    */
-  findAllByType(typeName: string): Promise<PokemonByType[]>;
+  findAllByType(typeName: string): Promise<PokemonReference[]>;
 }

@@ -116,7 +116,7 @@ The codebase implements **Hexagonal Architecture** (Ports & Adapters) with clear
 **3. Value Objects**
 
 - Immutable domain concepts that prevent "primitive obsession"
-- Examples: `PokemonType`, `PokemonByType`, `PokemonByName`
+- Examples: `PokemonType`, `PokemonReference`, `PokemonByName`
 - Self-validating with encapsulated business rules
 
 **4. Rich Domain Entities (Classes, not Interfaces)**
@@ -326,7 +326,7 @@ export { EvolutionChain } from "./EvolutionChain";
 
 // domain/value-objects/index.ts
 export { PokemonStat } from "./PokemonStat";
-export { PokemonByType } from "./PokemonByType";
+export { PokemonReference } from "./PokemonReference";
 
 // domain/ports/index.ts (use `export type` for interfaces)
 export type { PokemonDetailRepository } from "./PokemonDetailRepository";
@@ -1009,7 +1009,7 @@ export class PokemonListItem {
 
 - `PokemonListItem` - Plain data container (no methods)
 - `PokemonType` - Simple validation only (no behavior methods)
-- `PokemonByType` - Plain data container (no methods)
+- `PokemonReference` - Plain data container (no methods)
 - `PokemonByName` - Plain data container (no methods)
 
 **Why no domain tests:**

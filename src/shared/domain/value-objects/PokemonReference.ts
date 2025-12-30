@@ -1,4 +1,4 @@
-export class PokemonByType {
+export class PokemonReference {
   public readonly name: string;
 
   constructor(name: string) {

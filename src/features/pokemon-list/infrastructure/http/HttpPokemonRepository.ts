@@ -3,7 +3,7 @@ import { PokemonRepository } from "../../domain/ports/PokemonRepository";
 import { PokemonType } from "../../../../shared/domain/value-objects/PokemonType";
 import { HttpClient } from "../../../../shared/infrastructure/client/http/HttpClient";
 import {
-  RawPokemonByType,
+  RawPokemonReference,
   RawPokemonTypeResponse,
   RawPokemonDetailResponse,
 } from "./dto/PokemonDTO";
@@ -29,7 +29,7 @@ export class HttpPokemonRepository implements PokemonRepository {
     );
 
     return data.pokemon.map(
-      (rawItem: RawPokemonByType) => new PokemonByType(rawItem.pokemon.name)
+      (rawItem: RawPokemonReference) => new PokemonByType(rawItem.pokemon.name)
     );
   }
 

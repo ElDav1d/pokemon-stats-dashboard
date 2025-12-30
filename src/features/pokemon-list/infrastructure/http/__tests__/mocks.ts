@@ -1,5 +1,5 @@
 import {
-  RawPokemonDetailResponse,
+  RawPokemonListItem,
   RawPokemonTypeResponse,
 } from "../dto/PokemonDTO";
 
@@ -59,7 +59,7 @@ export const pokemonByTypeResponseMock: RawPokemonTypeResponse = {
   sprites: {},
 };
 
-export const pokemonByNameResponseMock: RawPokemonDetailResponse = {
+export const pokemonByNameResponseMock: RawPokemonListItem = {
   abilities: [],
   base_experience: 0,
   cries: {

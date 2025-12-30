@@ -5,7 +5,7 @@ import { HttpClient } from "../../../../shared/infrastructure/client/http/HttpCl
 import {
   RawPokemonReference,
   RawPokemonTypeResponse,
-  RawPokemonDetailResponse,
+  RawPokemonListItem,
 } from "./dto/PokemonDTO";
 import { PokemonByName } from "../../domain/value-objects/PokemonByName";
 
@@ -34,7 +34,7 @@ export class HttpPokemonRepository implements PokemonRepository {
   }
 
   async findDetailsByName(name: string): Promise<PokemonByName> {
-    const data = await this.http.get<RawPokemonDetailResponse>(
+    const data = await this.http.get<RawPokemonListItem>(
       `${this.config.pokemonEndpoint}${name}`
     );
 

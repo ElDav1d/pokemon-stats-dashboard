@@ -4,7 +4,7 @@ import { PokemonType } from "../../../../../shared/domain/value-objects/PokemonT
 import { pokemonByNameResponseMock, pokemonByTypeResponseMock } from "./mocks";
 import { FetchHttpClient } from "../../../../../shared/infrastructure/client/fetch/FetchHttpClient";
 import { PokemonReference } from "../../../../../shared/domain/value-objects";
-import { PokemonByName } from "../../../domain/value-objects/PokemonByName";
+import { PokemonItem } from "../../../domain/value-objects/PokemonItem";
 
 class HttpClientStub {
   public getMock = vi.fn();
@@ -61,7 +61,7 @@ it("should return the details of a pokemon by name", async () => {
 
   const pokemonDetails = await repo.findDetailsByName(pokemonName);
 
-  expect(pokemonDetails).toBeInstanceOf(PokemonByName);
+  expect(pokemonDetails).toBeInstanceOf(PokemonItem);
   expect(pokemonDetails?.name).toBe("charmander");
   expect(pokemonDetails?.height).toBe(6);
   expect(pokemonDetails?.imageUrl).toBe("sprite-url");

@@ -34,7 +34,7 @@ src/features/pokemon-list/
 │   ├── value-objects/
 │   │   ├── PokemonType.ts           # VO: Pokemon Type
 │   │   ├── PokemonReference.ts         # VO: Pokemon in type list
-│   │   └── PokemonByName.ts         # VO: Pokemon Details
+│   │   └── PokemonItem.ts         # VO: Pokemon Details
 │   ├── ports/
 │   │   └── PokemonRepository.ts     # Port (interface) to fetch data
 │   └── constants.ts                 # Domain configuration
@@ -115,7 +115,7 @@ Infrastructure implements ADAPTERS (concrete implementations)
 // Domain defines the PORT
 export interface PokemonRepository {
   findAllByType(type: PokemonType): Promise<PokemonReference[]>;
-  findDetailsByName(name: string): Promise<PokemonByName>;
+  findDetailsByName(name: string): Promise<PokemonItem>;
 }
 
 // Infrastructure implements the ADAPTER
@@ -474,12 +474,12 @@ export class PokemonReference {
 - We need a second call to get complete details
 - This VO represents the intermediate step
 
-#### **`PokemonByName.ts`**
+#### **`PokemonItem.ts`**
 
 Represents the details of an individual Pokemon.
 
 ```typescript
-export class PokemonByName {
+export class PokemonItem {
   public readonly name: string;
   public readonly height: number;
   public readonly imageUrl: string;
@@ -501,13 +501,13 @@ export class PokemonByName {
 Defines the contract for obtaining Pokemon data, without specifying how.
 
 ```typescript
-import { PokemonByName } from "../value-objects/PokemonByName.ts";
+import { PokemonItem } from "../value-objects/PokemonItem.ts";
 import { PokemonReference } from "../value-objects/PokemonReference.ts";
 import { PokemonType } from "../value-objects/PokemonType";
 
 export interface PokemonRepository {
   findAllByType(type: PokemonType): Promise<PokemonReference[]>;
-  findDetailsByName(name: string): Promise<PokemonByName>;
+  findDetailsByName(name: string): Promise<PokemonItem>;
 }
 ```
 
@@ -713,7 +713,7 @@ Transforms DTOs into domain entities.
 ```typescript
 export function mapToDomainList(
   list: PokemonReference[],
-  details: PokemonByName[],
+  details: PokemonItem[],
   idGenerator: IdGenerator
 ): PokemonListItem[] {
   return list.map((item, index) => {
@@ -769,12 +769,12 @@ export class HttpPokemonRepository implements PokemonRepository {
     );
   }
 
-  async findDetailsByName(name: string): Promise<PokemonByName> {
+  async findDetailsByName(name: string): Promise<PokemonItem> {
     const data = await this.http.get<RawPokemonListItem>(
       `${url.POKEMON}${name}`
     );
 
-    return new PokemonByName(
+    return new PokemonItem(
       data.name,
       data.height,
       data.sprites.front_default
@@ -1193,8 +1193,8 @@ const PokemonListItem = memo(
 │    - Calls: http.get("/type/fire") → RawPokemonTypeResponse     │
 │    - Maps: RawDTO → PokemonReference[]                             │
 │    - Calls: http.get("/pokemon/charmander") → RawDetailResponse │
-│    - Maps: RawDTO → PokemonByName                               │
-│    - Returns: PokemonReference[] + PokemonByName[]                 │
+│    - Maps: RawDTO → PokemonItem                               │
+│    - Returns: PokemonReference[] + PokemonItem[]                 │
 └─────────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐

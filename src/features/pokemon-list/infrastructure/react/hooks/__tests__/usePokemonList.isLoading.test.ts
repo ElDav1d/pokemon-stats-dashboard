@@ -4,7 +4,7 @@ import usePokemonList from "../usePokemonList";
 import * as reduxHooks from "../../../../../../shared/infrastructure/redux/hooks";
 
 import { PokemonReference } from "../../../../../../shared/domain/value-objects";
-import { PokemonByName } from "../../../../domain/value-objects/PokemonByName";
+import { PokemonItem } from "../../../../domain/value-objects/PokemonItem";
 import { testData } from "./setupTests";
 import {
   createMockPokemonRepositoryWithDelay,
@@ -76,7 +76,7 @@ it("sets loading to false after failed fetch", async () => {
 
 it("shows loading state when selectedType changes", async () => {
   const newMockPokemonReferences = [new PokemonReference("charmander")];
-  const newMockPokemonByName = new PokemonByName(
+  const newMockPokemonItem = new PokemonItem(
     "charmander",
     60,
     "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png"
@@ -86,7 +86,7 @@ it("shows loading state when selectedType changes", async () => {
     mockPokemonReferencesForHookTests,
     mockPokemonsByNameForHookTests,
     newMockPokemonReferences,
-    [newMockPokemonByName]
+    [newMockPokemonItem]
   );
 
   const { result, rerender } = renderHook(

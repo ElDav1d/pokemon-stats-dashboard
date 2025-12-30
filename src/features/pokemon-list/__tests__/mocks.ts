@@ -1,6 +1,6 @@
 import { vi } from "vitest";
 import { PokemonReference } from "../../../shared/domain/value-objects";
-import { PokemonByName } from "../domain/value-objects/PokemonByName";
+import { PokemonItem } from "../domain/value-objects/PokemonItem";
 import { PokemonListItem } from "../domain/entities/PokemonListItem";
 import { PokemonRepository } from "../domain/ports/PokemonRepository";
 
@@ -8,13 +8,13 @@ import { PokemonRepository } from "../domain/ports/PokemonRepository";
 export const mockPokemonReferenceCharmander = new PokemonReference("charmander");
 export const mockPokemonReferenceVulpixForGetUseCase = new PokemonReference("vulpix");
 
-// Mock PokemonByName instances for GetPokemonListUseCase tests
-export const mockPokemonByNameCharmanderForGetUseCase = new PokemonByName(
+// Mock PokemonItem instances for GetPokemonListUseCase tests
+export const mockPokemonItemCharmanderForGetUseCase = new PokemonItem(
   "charmander",
   5,
   "imgUrl1"
 );
-export const mockPokemonByNameVulpixForGetUseCase = new PokemonByName(
+export const mockPokemonItemVulpixForGetUseCase = new PokemonItem(
   "vulpix",
   6,
   "imgUrl2"
@@ -26,9 +26,9 @@ export const createMockPokemonRepository = (
     mockPokemonReferenceCharmander,
     mockPokemonReferenceVulpixForGetUseCase,
   ],
-  detailsList: PokemonByName[] = [
-    mockPokemonByNameCharmanderForGetUseCase,
-    mockPokemonByNameVulpixForGetUseCase,
+  detailsList: PokemonItem[] = [
+    mockPokemonItemCharmanderForGetUseCase,
+    mockPokemonItemVulpixForGetUseCase,
   ]
 ): PokemonRepository => {
   const findDetailsByName = vi.fn();
@@ -60,7 +60,7 @@ export const createDelayedPromise = <T>(value: T, delay = 50): Promise<T> => {
 
 export const createMockPokemonRepositoryWithDelay = (
   pokemonReferences: PokemonReference[],
-  detailsList: PokemonByName[],
+  detailsList: PokemonItem[],
   delay = 50
 ): PokemonRepository => {
   const findDetailsByName = vi.fn();
@@ -80,7 +80,7 @@ export const createMockPokemonRepositoryWithDelay = (
 // Mock repository factory for error-then-success scenarios
 export const createMockPokemonRepositoryErrorThenSuccess = (
   pokemonReferences: PokemonReference[],
-  detailsList: PokemonByName[]
+  detailsList: PokemonItem[]
 ): PokemonRepository => {
   const findDetailsByName = vi.fn();
 
@@ -100,9 +100,9 @@ export const createMockPokemonRepositoryErrorThenSuccess = (
 // Mock repository factory for changing data scenarios (rerender tests)
 export const createMockPokemonRepositoryWithChangingData = (
   firstPokemonReferences: PokemonReference[],
-  firstDetailsList: PokemonByName[],
+  firstDetailsList: PokemonItem[],
   secondPokemonReferences: PokemonReference[],
-  secondDetailsList: PokemonByName[]
+  secondDetailsList: PokemonItem[]
 ): PokemonRepository => {
   const mockFindAllByType = vi
     .fn()
@@ -132,20 +132,20 @@ export const mockPokemonReferenceCharizard = new PokemonReference("charizard");
 
 export const mockPokemonReferenceVulpix = new PokemonReference("vulpix");
 
-// Mock PokemonByName instances for PokemonListViewModel tests
-export const mockPokemonByNameCharizard = new PokemonByName(
+// Mock PokemonItem instances for PokemonListViewModel tests
+export const mockPokemonItemCharizard = new PokemonItem(
   "charizard",
   17,
   "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png"
 );
 
-export const mockPokemonByNameVulpix = new PokemonByName(
+export const mockPokemonItemVulpix = new PokemonItem(
   "vulpix",
   6,
   "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/37.png"
 );
 
-export const mockPokemonByNameCharmander = new PokemonByName(
+export const mockPokemonItemCharmander = new PokemonItem(
   "charmander",
   6,
   "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png"
@@ -203,17 +203,17 @@ export const mockPokemonReferencesForHookTests = [
 ];
 
 export const mockPokemonsByNameForHookTests = [
-  new PokemonByName(
+  new PokemonItem(
     "bulbasaur",
     7,
     "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png"
   ),
-  new PokemonByName(
+  new PokemonItem(
     "ivysaur",
     10,
     "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/2.png"
   ),
-  new PokemonByName(
+  new PokemonItem(
     "venusaur",
     20,
     "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/3.png"

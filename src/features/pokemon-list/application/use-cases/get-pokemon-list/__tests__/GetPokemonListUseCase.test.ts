@@ -5,8 +5,8 @@ import { PokemonListItem } from "../../../../domain/entities/PokemonListItem";
 import {
   mockPokemonReferenceCharmander,
   mockPokemonReferenceVulpixForGetUseCase,
-  mockPokemonByNameCharmanderForGetUseCase,
-  mockPokemonByNameVulpixForGetUseCase,
+  mockPokemonItemCharmanderForGetUseCase,
+  mockPokemonItemVulpixForGetUseCase,
   createMockPokemonRepository,
   createMockPokemonRepositoryWithError,
 } from "../../../../__tests__/mocks";
@@ -20,8 +20,8 @@ it("returns a list of Pokemon items with the required values", async () => {
   ];
 
   const fakeDetails = [
-    mockPokemonByNameCharmanderForGetUseCase,
-    mockPokemonByNameVulpixForGetUseCase,
+    mockPokemonItemCharmanderForGetUseCase,
+    mockPokemonItemVulpixForGetUseCase,
   ];
 
   const repoMock = createMockPokemonRepository(fakePokemonReferences, fakeDetails);

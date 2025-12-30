@@ -3,7 +3,7 @@ import { vi, it, expect, beforeEach } from "vitest";
 import usePokemonList from "../usePokemonList";
 import * as reduxHooks from "../../../../../../shared/infrastructure/redux/hooks";
 import { PokemonReference } from "../../../../../../shared/domain/value-objects";
-import { PokemonByName } from "../../../../domain/value-objects/PokemonByName";
+import { PokemonItem } from "../../../../domain/value-objects/PokemonItem";
 import { testData } from "./setupTests";
 import {
   createMockPokemonRepositoryWithChangingData,
@@ -43,7 +43,7 @@ it("returns empty array when selectedType is empty", async () => {
 
 it("updates pokemon list when selectedType changes", async () => {
   const newMockPokemonReferences = [new PokemonReference("charmander")];
-  const newMockPokemonByName = new PokemonByName(
+  const newMockPokemonItem = new PokemonItem(
     "charmander",
     60,
     "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png"
@@ -53,7 +53,7 @@ it("updates pokemon list when selectedType changes", async () => {
     mockPokemonReferencesForHookTests,
     mockPokemonsByNameForHookTests,
     newMockPokemonReferences,
-    [newMockPokemonByName]
+    [newMockPokemonItem]
   );
 
   const { result, rerender } = renderHook(

@@ -7,7 +7,7 @@ import {
   RawPokemonTypeResponse,
   RawPokemonListItem,
 } from "./dto/PokemonDTO";
-import { PokemonByName } from "../../domain/value-objects/PokemonByName";
+import { PokemonItem } from "../../domain/value-objects/PokemonItem";
 
 /**
  * Configuration for HttpPokemonRepository
@@ -33,12 +33,12 @@ export class HttpPokemonRepository implements PokemonRepository {
     );
   }
 
-  async findDetailsByName(name: string): Promise<PokemonByName> {
+  async findDetailsByName(name: string): Promise<PokemonItem> {
     const data = await this.http.get<RawPokemonListItem>(
       `${this.config.pokemonEndpoint}${name}`
     );
 
-    return new PokemonByName(
+    return new PokemonItem(
       data.name,
       data.height,
       data.sprites.front_default

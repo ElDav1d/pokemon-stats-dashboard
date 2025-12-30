@@ -1,4 +1,4 @@
-export class PokemonByName {
+export class PokemonItem {
   public readonly name: string;
   public readonly height: number;
   public readonly imageUrl: string;

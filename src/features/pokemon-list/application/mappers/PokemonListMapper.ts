@@ -1,11 +1,11 @@
 import { PokemonListItem } from "../../domain/entities/PokemonListItem";
-import { PokemonByName } from "../../domain/value-objects/PokemonByName";
+import { PokemonItem } from "../../domain/value-objects/PokemonItem";
 import { PokemonReference } from "../../../../shared/domain/value-objects";
 import { IdGenerator } from "../../../../lib/IdGenerator";
 
 export function mapToDomainList(
   list: PokemonReference[],
-  details: PokemonByName[],
+  details: PokemonItem[],
   idGenerator: IdGenerator
 ): PokemonListItem[] {
   return list.map((item, index) => {

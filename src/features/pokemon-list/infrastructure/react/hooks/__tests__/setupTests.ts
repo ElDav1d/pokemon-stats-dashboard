@@ -1,13 +1,13 @@
 import { vi, beforeEach } from "vitest";
 import { PokemonRepository } from "../../../../domain/ports/PokemonRepository";
 import { PokemonReference } from "../../../../../../shared/domain/value-objects";
-import { PokemonByName } from "../../../../domain/value-objects/PokemonByName";
+import { PokemonItem } from "../../../../domain/value-objects/PokemonItem";
 
 // Global test data and mocks
 export const testData = {
   mockRepository: null as PokemonRepository | null,
   mockPokemonReferences: [] as PokemonReference[],
-  mockPokemonsByName: [] as PokemonByName[],
+  mockPokemonsByName: [] as PokemonItem[],
 };
 
 export const createDelayedPromise = (data: any, delay = 100) => {
@@ -24,17 +24,17 @@ beforeEach(() => {
   ];
 
   testData.mockPokemonsByName = [
-    new PokemonByName(
+    new PokemonItem(
       "bulbasaur",
       20,
       "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png"
     ),
-    new PokemonByName(
+    new PokemonItem(
       "ivysaur",
       10,
       "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/2.png"
     ),
-    new PokemonByName(
+    new PokemonItem(
       "venusaur",
       7,
       "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/3.png"

@@ -1,7 +1,7 @@
 import { PokemonDetail } from "../../domain/entities/PokemonDetail";
 import { EvolutionChain } from "../../domain/entities/EvolutionChain";
 import { PokemonStat } from "../../domain/value-objects/PokemonStat";
-import { PokemonByType } from "../../domain/value-objects/PokemonByType";
+import { PokemonByType } from "../../../../shared/domain/value-objects";
 import { PokemonDetailRepository } from "../../domain/ports/PokemonDetailRepository";
 import {
   PokemonDetailResponse,

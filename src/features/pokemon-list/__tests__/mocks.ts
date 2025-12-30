@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import { PokemonByType } from "../domain/value-objects/PokemonByType";
+import { PokemonByType } from "../../../shared/domain/value-objects";
 import { PokemonByName } from "../domain/value-objects/PokemonByName";
 import { PokemonListItem } from "../domain/entities/PokemonListItem";
 import { PokemonRepository } from "../domain/ports/PokemonRepository";

@@ -1,2 +1,2 @@
 export { PokemonByName } from "./PokemonByName";
-export { PokemonByType } from "./PokemonByType";
+export { PokemonByType } from "../../../../shared/domain/value-objects";

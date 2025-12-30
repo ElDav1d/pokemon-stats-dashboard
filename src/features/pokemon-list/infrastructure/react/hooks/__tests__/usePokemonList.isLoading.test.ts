@@ -3,7 +3,7 @@ import { vi, it, expect, beforeEach } from "vitest";
 import usePokemonList from "../usePokemonList";
 import * as reduxHooks from "../../../../../../shared/infrastructure/redux/hooks";
 
-import { PokemonByType } from "../../../../domain/value-objects/PokemonByType";
+import { PokemonByType } from "../../../../../../shared/domain/value-objects";
 import { PokemonByName } from "../../../../domain/value-objects/PokemonByName";
 import { testData } from "./setupTests";
 import {

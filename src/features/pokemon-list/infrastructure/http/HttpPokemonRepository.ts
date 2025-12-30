@@ -1,4 +1,4 @@
-import { PokemonByType } from "../../domain/value-objects/PokemonByType";
+import { PokemonByType } from "../../../../shared/domain/value-objects";
 import { PokemonRepository } from "../../domain/ports/PokemonRepository";
 import { PokemonType } from "../../../../shared/domain/value-objects/PokemonType";
 import { HttpClient } from "../../../../shared/infrastructure/client/http/HttpClient";

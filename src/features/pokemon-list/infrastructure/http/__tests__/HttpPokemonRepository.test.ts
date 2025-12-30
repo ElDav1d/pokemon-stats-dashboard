@@ -3,7 +3,7 @@ import { HttpPokemonRepository } from "../HttpPokemonRepository";
 import { PokemonType } from "../../../../../shared/domain/value-objects/PokemonType";
 import { pokemonByNameResponseMock, pokemonByTypeResponseMock } from "./mocks";
 import { FetchHttpClient } from "../../../../../shared/infrastructure/client/fetch/FetchHttpClient";
-import { PokemonByType } from "../../../domain/value-objects/PokemonByType";
+import { PokemonByType } from "../../../../../shared/domain/value-objects";
 import { PokemonByName } from "../../../domain/value-objects/PokemonByName";
 
 class HttpClientStub {

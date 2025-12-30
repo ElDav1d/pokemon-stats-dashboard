@@ -1,6 +1,6 @@
 import { PokemonDetail } from "../entities/PokemonDetail";
 import { EvolutionChain } from "../entities/EvolutionChain";
-import { PokemonByType } from "../value-objects/PokemonByType";
+import { PokemonByType } from "../../../../shared/domain/value-objects";
 
 export interface PokemonDetailRepository {
   /**

@@ -1,6 +1,6 @@
 import type { PokemonRepository } from "./ports/PokemonRepository.ts";
 import { PokemonType } from "../../../shared/domain/value-objects/PokemonType";
-import { PokemonByType } from "./value-objects/PokemonByType.ts";
+import { PokemonByType } from "../../../shared/domain/value-objects";
 import { PokemonByName } from "./value-objects/PokemonByName.ts";
 
 class SmokeTestPokemonRepository implements PokemonRepository {

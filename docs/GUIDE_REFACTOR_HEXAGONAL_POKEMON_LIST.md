@@ -770,7 +770,7 @@ export class HttpPokemonRepository implements PokemonRepository {
   }
 
   async findDetailsByName(name: string): Promise<PokemonItem> {
-    const data = await this.http.get<RawPokemonListItem>(
+    const data = await this.http.get<RawPokemonItem>(
       `${url.POKEMON}${name}`
     );
 

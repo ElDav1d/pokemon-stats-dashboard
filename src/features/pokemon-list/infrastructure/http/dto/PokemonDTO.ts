@@ -37,7 +37,7 @@ export interface RawPokemonReference {
   slot: number;
 }
 
-export interface RawPokemonListItem {
+export interface RawPokemonItem {
   abilities: Ability[];
   base_experience: number;
   cries: Cries;

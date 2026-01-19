@@ -7,6 +7,8 @@ import {
   speciesResponseMock,
   evolutionChainResponseMock,
   evolutionChainNoEvolutionsResponseMock,
+  pokemonByTypeGrassResponseMock,
+  pokemonByTypeEmptyResponseMock,
 } from "./mocks";
 
 let mockFetch: ReturnType<typeof vi.fn>;
@@ -76,4 +78,29 @@ it("handles pokemon with no evolutions", async () => {
   );
 
   expect(result.pokemonNames).toEqual(["ditto"]);
+});
+
+it("finds all pokemon by type", async () => {
+  mockFetch.mockResolvedValueOnce({
+    ok: true,
+    json: async () => pokemonByTypeGrassResponseMock,
+  });
+
+  const result = await repository.findAllByType("grass");
+
+  expect(result).toHaveLength(2);
+  expect(result[0].name).toBe("bulbasaur");
+  expect(result[1].name).toBe("ivysaur");
+  expect(mockFetch).toHaveBeenCalledWith("https://pokeapi.co/api/v2/type/grass");
+});
+
+it("returns empty array when type has no pokemon", async () => {
+  mockFetch.mockResolvedValueOnce({
+    ok: true,
+    json: async () => pokemonByTypeEmptyResponseMock,
+  });
+
+  const result = await repository.findAllByType("unknown");
+
+  expect(result).toEqual([]);
 });

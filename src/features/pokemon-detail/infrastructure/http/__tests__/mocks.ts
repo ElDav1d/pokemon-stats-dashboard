@@ -2,6 +2,7 @@ import {
   PokemonDetailResponse,
   EvolutionChainResponse,
   SpeciesResponse,
+  PokemonByTypeResponse,
 } from "../dto";
 
 export const pokemonDetailResponseMock: PokemonDetailResponse = {
@@ -47,4 +48,15 @@ export const evolutionChainNoEvolutionsResponseMock: EvolutionChainResponse = {
     species: { name: "ditto", url: "" },
     evolves_to: [],
   },
+};
+
+export const pokemonByTypeGrassResponseMock: PokemonByTypeResponse = {
+  pokemon: [
+    { pokemon: { name: "bulbasaur", url: "https://pokeapi.co/api/v2/pokemon/1/" }, slot: 1 },
+    { pokemon: { name: "ivysaur", url: "https://pokeapi.co/api/v2/pokemon/2/" }, slot: 2 },
+  ],
+};
+
+export const pokemonByTypeEmptyResponseMock: PokemonByTypeResponse = {
+  pokemon: [],
 };

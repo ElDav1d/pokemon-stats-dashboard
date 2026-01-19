@@ -1669,14 +1669,57 @@ npm run build must pass.
 
 ---
 
-## ✅ PHASE 7: Domain Layer (PokemonsByType)
+## ✅ PHASE 7: Domain Layer (Simplified - YAGNI Applied)
+
+### **7.1 Architectural Decision: Use Shared `PokemonReference`**
+
+### **Update (Post-Implementation Clarification):**
+
+**IMPORTANT:** PHASE 7 was simplified during implementation based on YAGNI principle.
+
+#### **What Was Originally Planned:**
+```typescript
+// ❌ Original plan: Feature-specific value objects
+export class PokemonsByType { /* ... */ }
+export class PokemonByType { /* ... */ }
+```
+
+#### **What Was Actually Implemented:**
+```typescript
+// ✅ Implemented: Shared value object
+export class PokemonReference {
+  constructor(public readonly name: string) {}
+}
+```
+
+### **Why This Decision:**
+
+1. **No Feature-Specific Behavior**: `PokemonReference` is a generic concept (name + url)
+2. **Used Across Features**: Used by:
+   - `pokemon-list` feature
+   - `pokemon-detail` feature
+   - `select-pokemon-type` feature
+3. **YAGNI Principle**: Avoid premature abstraction without clear benefits
+4. **Established Precedent**: `PokemonType` is also shared across features
+
+### **Consistency with Shared Layer:**
+
+Since `PokemonReference` is a generic domain concept used by multiple features, it belongs in:
+```
+src/shared/domain/value-objects/PokemonReference.ts
+```
+
+However, during the refactor of `pokemon-detail`, it was kept feature-local to maintain self-containment. If extracting to shared in the future, do so ONLY when:
+- Both features are stable and complete
+- The pattern is proven across 3+ features
+- No feature-specific variations exist
 
 ### **7.1 Create Value Object: PokemonReference (Data Container - NO tests)**
 
 ### **Prompt for the agent:**
 
 ```
-Create the PokemonReference Value Object.
+Create the PokemonReference Value Object in the feature domain.
 
 FILE: src/features/pokemon-detail/domain/value-objects/PokemonReference.ts
 
@@ -1685,7 +1728,10 @@ export class PokemonReference {
   constructor(public readonly name: string) {}
 }
 
-IMPORTANT: This is a DATA CONTAINER without behavior. DO NOT create tests (YAGNI).
+NOTE: This is a DATA CONTAINER without behavior. DO NOT create tests (YAGNI).
+
+NOTE: This value object is currently feature-local but may be shared with other features
+in the future if needed. Keep it here for now to maintain feature independence.
 
 VERIFICATION:
 npm run build must pass.

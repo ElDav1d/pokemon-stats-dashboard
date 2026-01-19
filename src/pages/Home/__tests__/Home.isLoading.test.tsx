@@ -65,7 +65,7 @@ it("does not show loading message when no type is selected", async () => {
       ok: true,
       json: async () => {
         // Handle the pokemon types list fetch
-        if (url.includes("/type/") && !url.match(/\/type\/\w+$/)) {
+        if (url.endsWith("/type")) {
           return { results: [] };
         }
         // This shouldn't be called when no type is selected

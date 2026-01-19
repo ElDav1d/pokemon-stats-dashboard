@@ -20,7 +20,7 @@ beforeEach(() => {
 
 it("starts as false when no selectedType is provided", () => {
   const { result } = renderHook(() =>
-    usePokemonList("", testData.mockRepository!)
+    usePokemonList("", testData.mockRepository!),
   );
 
   expect(result.current.isLoading).toBe(false);
@@ -30,11 +30,11 @@ it("shows loading state during fetch", async () => {
   const delayedRepository = createMockPokemonRepositoryWithDelay(
     mockPokemonReferencesForHookTests,
     mockPokemonsByNameForHookTests,
-    100
+    100,
   );
 
   const { result } = renderHook(() =>
-    usePokemonList("grass", delayedRepository)
+    usePokemonList("grass", delayedRepository),
   );
 
   await waitFor(() => {
@@ -48,7 +48,7 @@ it("shows loading state during fetch", async () => {
 
 it("sets loading to false after successful fetch", async () => {
   const { result } = renderHook(() =>
-    usePokemonList("grass", testData.mockRepository!)
+    usePokemonList("grass", testData.mockRepository!),
   );
 
   await waitFor(() => {
@@ -58,8 +58,12 @@ it("sets loading to false after successful fetch", async () => {
 });
 
 it("sets loading to false after failed fetch", async () => {
+  const consoleErrorSpy = vi
+    .spyOn(console, "error")
+    .mockImplementation(() => {});
+
   const errorRepository = createMockPokemonRepositoryWithError(
-    new Error("API Error")
+    new Error("API Error"),
   );
 
   const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -72,6 +76,7 @@ it("sets loading to false after failed fetch", async () => {
   });
 
   consoleSpy.mockRestore();
+  consoleErrorSpy.mockRestore();
 });
 
 it("shows loading state when selectedType changes", async () => {
@@ -79,19 +84,19 @@ it("shows loading state when selectedType changes", async () => {
   const newMockPokemonItem = new PokemonItem(
     "charmander",
     60,
-    "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png"
+    "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png",
   );
 
   const repoWithChangingData = createMockPokemonRepositoryWithChangingData(
     mockPokemonReferencesForHookTests,
     mockPokemonsByNameForHookTests,
     newMockPokemonReferences,
-    [newMockPokemonItem]
+    [newMockPokemonItem],
   );
 
   const { result, rerender } = renderHook(
     ({ selectedType }) => usePokemonList(selectedType, repoWithChangingData),
-    { initialProps: { selectedType: "grass" } }
+    { initialProps: { selectedType: "grass" } },
   );
 
   await waitFor(() => {

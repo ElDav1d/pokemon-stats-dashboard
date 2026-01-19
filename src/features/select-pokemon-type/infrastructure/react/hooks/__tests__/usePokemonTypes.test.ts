@@ -32,6 +32,10 @@ it("should load pokemon types on mount", async () => {
 });
 
 it("should handle errors when repository fails", async () => {
+  const consoleErrorSpy = vi
+    .spyOn(console, "error")
+    .mockImplementation(() => {});
+
   mockRepository.findAll = vi
     .fn()
     .mockRejectedValue(new Error("Network error"));
@@ -42,6 +46,8 @@ it("should handle errors when repository fails", async () => {
 
   expect(result.current.typeNames).toEqual([]);
   expect(result.current.isError).toBe(true);
+
+  consoleErrorSpy.mockRestore();
 });
 
 it("should handle empty list from repository", async () => {

@@ -2494,6 +2494,24 @@ Does hook create infrastructure (repositories, clients)?
     └─ Component: Calls hook with no infrastructure params
 ```
 
+### Reference Implementation ("Golden Hook")
+
+**ALWAYS use `usePokemonList` as your reference when creating hooks with infrastructure.**
+
+Before implementing a new hook that manages external dependencies:
+
+- [ ] Read `src/features/pokemon-list/infrastructure/react/hooks/usePokemonList.ts`
+- [ ] Copy the overload pattern exactly (production + testing signatures)
+- [ ] Use the same dependency injection detection logic
+- [ ] Verify your tests cover: happy path, loading state, error state (minimum 3 test scenarios)
+
+**Why this approach matters:**
+
+- **Consistency**: All infrastructure hooks follow the same proven pattern
+- **Testability**: Isolated unit testing becomes straightforward with overloads
+- **Maintainability**: New team members have a clear reference to follow
+- **Quality**: Built-in reminder to test error states, not just happy paths
+
 ### Modifying Virtual Scrolling
 
 - Core logic in `VirtualGridCalculator` (framework-agnostic)

@@ -77,7 +77,7 @@ beforeEach(() => {
     }
 
     // Generic type list endpoint
-    if (url.includes("/type/")) {
+    if (url.endsWith("/type")) {
       return Promise.resolve({
         ok: true,
         json: async () => ({ results: typesMock }),

@@ -2,13 +2,13 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { vi, it, expect, beforeEach } from "vitest";
 import usePokemonList from "../usePokemonList";
 import * as reduxHooks from "../../../../../../shared/infrastructure/redux/hooks";
-import { PokemonByType } from "../../../../domain/value-objects/PokemonByType";
-import { PokemonByName } from "../../../../domain/value-objects/PokemonByName";
+import { PokemonReference } from "../../../../../../shared/domain/value-objects";
+import { PokemonItem } from "../../../../domain/value-objects/PokemonItem";
 import { testData } from "./setupTests";
 import {
   createMockPokemonRepositoryWithChangingData,
   createMockPokemonRepositoryWithError,
-  mockPokemonsByTypeForHookTests,
+  mockPokemonReferencesForHookTests,
   mockPokemonsByNameForHookTests,
 } from "../../../../__tests__/mocks";
 
@@ -27,7 +27,7 @@ it("returns a list of Pokemon items with the required values", async () => {
 
   result.current.pokemonList.forEach((pokemon, index) => {
     expect(pokemon.id).toBeDefined();
-    expect(pokemon.name).toBe(testData.mockPokemonsByType[index].name);
+    expect(pokemon.name).toBe(testData.mockPokemonReferences[index].name);
     expect(pokemon.height).toBe(testData.mockPokemonsByName[index].height);
     expect(pokemon.imageUrl).toBe(testData.mockPokemonsByName[index].imageUrl);
   });
@@ -42,18 +42,18 @@ it("returns empty array when selectedType is empty", async () => {
 });
 
 it("updates pokemon list when selectedType changes", async () => {
-  const newMockPokemonsByType = [new PokemonByType("charmander")];
-  const newMockPokemonByName = new PokemonByName(
+  const newMockPokemonReferences = [new PokemonReference("charmander")];
+  const newMockPokemonItem = new PokemonItem(
     "charmander",
     60,
     "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png"
   );
 
   const repoWithChangingData = createMockPokemonRepositoryWithChangingData(
-    mockPokemonsByTypeForHookTests,
+    mockPokemonReferencesForHookTests,
     mockPokemonsByNameForHookTests,
-    newMockPokemonsByType,
-    [newMockPokemonByName]
+    newMockPokemonReferences,
+    [newMockPokemonItem]
   );
 
   const { result, rerender } = renderHook(

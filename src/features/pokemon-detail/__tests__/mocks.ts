@@ -2,7 +2,7 @@ import { vi } from "vitest";
 import { PokemonDetail } from "../domain/entities/PokemonDetail";
 import { EvolutionChain } from "../domain/entities/EvolutionChain";
 import { PokemonStat } from "../domain/value-objects/PokemonStat";
-import { PokemonByType } from "../domain/value-objects/PokemonByType";
+import { PokemonReference } from "../../../shared/domain/value-objects";
 import { PokemonDetailRepository } from "../domain/ports/PokemonDetailRepository";
 
 export const mockBulbasaurStats: PokemonStat[] = [
@@ -31,22 +31,22 @@ export const mockBulbasaurEvolutionChain = new EvolutionChain([
   "venusaur",
 ]);
 
-export const mockGrassPokemonList: PokemonByType[] = [
-  new PokemonByType("bulbasaur"),
-  new PokemonByType("ivysaur"),
-  new PokemonByType("venusaur"),
-  new PokemonByType("oddish"),
+export const mockGrassPokemonList: PokemonReference[] = [
+  new PokemonReference("bulbasaur"),
+  new PokemonReference("ivysaur"),
+  new PokemonReference("venusaur"),
+  new PokemonReference("oddish"),
 ];
 
 export const createMockPokemonDetailRepository = (
   detail: PokemonDetail = mockBulbasaurDetail,
   evolutionChain: EvolutionChain = mockBulbasaurEvolutionChain,
-  pokemonByType: PokemonByType[] = mockGrassPokemonList
+  pokemonReferences: PokemonReference[] = mockGrassPokemonList
 ): PokemonDetailRepository => ({
   findByName: vi.fn().mockResolvedValue(detail),
   findEvolutionChainUrl: vi.fn().mockResolvedValue("https://pokeapi.co/api/v2/evolution-chain/1/"),
   findEvolutionChain: vi.fn().mockResolvedValue(evolutionChain),
-  findAllByType: vi.fn().mockResolvedValue(pokemonByType),
+  findAllByType: vi.fn().mockResolvedValue(pokemonReferences),
 });
 
 export const createMockPokemonDetailRepositoryWithError = (

@@ -1,2 +1,2 @@
 export { PokemonStat } from "./PokemonStat";
-export { PokemonByType } from "./PokemonByType";
+export { PokemonReference } from "../../../../shared/domain/value-objects";

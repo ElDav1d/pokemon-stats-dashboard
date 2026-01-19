@@ -3,10 +3,10 @@ import { GetPokemonListUseCase } from "../GetPokemonListUseCase";
 import { PokemonType } from "../../../../../../shared/domain/value-objects/PokemonType";
 import { PokemonListItem } from "../../../../domain/entities/PokemonListItem";
 import {
-  mockPokemonByTypeCharmander,
-  mockPokemonByTypeVulpixForGetUseCase,
-  mockPokemonByNameCharmanderForGetUseCase,
-  mockPokemonByNameVulpixForGetUseCase,
+  mockPokemonReferenceCharmander,
+  mockPokemonReferenceVulpixForGetUseCase,
+  mockPokemonItemCharmanderForGetUseCase,
+  mockPokemonItemVulpixForGetUseCase,
   createMockPokemonRepository,
   createMockPokemonRepositoryWithError,
 } from "../../../../__tests__/mocks";
@@ -14,19 +14,19 @@ import {
 it("returns a list of Pokemon items with the required values", async () => {
   const fakeType = new PokemonType("fire");
 
-  const fakePokemons = [
-    mockPokemonByTypeCharmander,
-    mockPokemonByTypeVulpixForGetUseCase,
+  const fakePokemonReferences = [
+    mockPokemonReferenceCharmander,
+    mockPokemonReferenceVulpixForGetUseCase,
   ];
 
   const fakeDetails = [
-    mockPokemonByNameCharmanderForGetUseCase,
-    mockPokemonByNameVulpixForGetUseCase,
+    mockPokemonItemCharmanderForGetUseCase,
+    mockPokemonItemVulpixForGetUseCase,
   ];
 
-  const repoMock = createMockPokemonRepository(fakePokemons, fakeDetails);
+  const repoMock = createMockPokemonRepository(fakePokemonReferences, fakeDetails);
 
-  const expectedPokemons = fakePokemons.map((pokemon, index) => {
+  const expectedPokemons = fakePokemonReferences.map((pokemon, index) => {
     return new PokemonListItem(
       `test-id-${index}`,
       pokemon.name,

@@ -23,7 +23,7 @@ export interface RawPokemonTypeResponse {
     name: string;
   }[];
   past_damage_relations: RawPokemonTypeDamageRelations[];
-  pokemon: RawPokemonByType[];
+  pokemon: RawPokemonReference[];
   sprites: {
     [generation: string]: {
       [game: string]: {
@@ -32,12 +32,12 @@ export interface RawPokemonTypeResponse {
     };
   };
 }
-export interface RawPokemonByType {
+export interface RawPokemonReference {
   pokemon: { name: string; url: string };
   slot: number;
 }
 
-export interface RawPokemonDetailResponse {
+export interface RawPokemonItem {
   abilities: Ability[];
   base_experience: number;
   cries: Cries;

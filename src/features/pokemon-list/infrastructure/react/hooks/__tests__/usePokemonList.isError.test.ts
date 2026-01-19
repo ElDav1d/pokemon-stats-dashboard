@@ -7,7 +7,7 @@ import { testData } from "./setupTests";
 import {
   createMockPokemonRepositoryErrorThenSuccess,
   createMockPokemonRepositoryWithError,
-  mockPokemonsByTypeForHookTests,
+  mockPokemonReferencesForHookTests,
   mockPokemonsByNameForHookTests,
 } from "../../../../__tests__/mocks";
 
@@ -40,7 +40,7 @@ it("remains false during successful fetch", async () => {
 it("resets to false when successful fetch happens after error", async () => {
   const errorThenSuccessRepository =
     createMockPokemonRepositoryErrorThenSuccess(
-      mockPokemonsByTypeForHookTests,
+      mockPokemonReferencesForHookTests,
       mockPokemonsByNameForHookTests
     );
 

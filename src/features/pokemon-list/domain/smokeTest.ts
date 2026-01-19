@@ -1,34 +1,34 @@
 import type { PokemonRepository } from "./ports/PokemonRepository.ts";
 import { PokemonType } from "../../../shared/domain/value-objects/PokemonType";
-import { PokemonByType } from "./value-objects/PokemonByType.ts";
-import { PokemonByName } from "./value-objects/PokemonByName.ts";
+import { PokemonReference } from "../../../shared/domain/value-objects";
+import { PokemonItem } from "./value-objects/PokemonItem.ts";
 
 class SmokeTestPokemonRepository implements PokemonRepository {
-  private readonly pokemonList: PokemonByType[] = [
-    new PokemonByType("charmander"),
-    new PokemonByType("squirtle"),
-    new PokemonByType("bulbasaur"),
+  private readonly pokemonList: PokemonReference[] = [
+    new PokemonReference("charmander"),
+    new PokemonReference("squirtle"),
+    new PokemonReference("bulbasaur"),
   ];
 
-  async findAllByType(type: PokemonType): Promise<PokemonByType[]> {
+  async findAllByType(type: PokemonType): Promise<PokemonReference[]> {
     console.log(`SMOKE TEST Finding Pokémon by type: ${type.value}`);
     return this.pokemonList;
   }
 
-  async findDetailsByName(name: string): Promise<PokemonByName> {
+  async findDetailsByName(name: string): Promise<PokemonItem> {
     // Fake details for each Pokémon
-    const details: Record<string, PokemonByName> = {
-      charmander: new PokemonByName(
+    const details: Record<string, PokemonItem> = {
+      charmander: new PokemonItem(
         "charmander",
         6,
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png"
       ),
-      squirtle: new PokemonByName(
+      squirtle: new PokemonItem(
         "squirtle",
         5,
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png"
       ),
-      bulbasaur: new PokemonByName(
+      bulbasaur: new PokemonItem(
         "bulbasaur",
         7,
         "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png"

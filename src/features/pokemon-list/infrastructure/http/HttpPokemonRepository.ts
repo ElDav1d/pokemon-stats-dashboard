@@ -1,13 +1,13 @@
-import { PokemonByType } from "../../domain/value-objects/PokemonByType";
+import { PokemonReference } from "../../../../shared/domain/value-objects";
 import { PokemonRepository } from "../../domain/ports/PokemonRepository";
 import { PokemonType } from "../../../../shared/domain/value-objects/PokemonType";
 import { HttpClient } from "../../../../shared/infrastructure/client/http/HttpClient";
 import {
-  RawPokemonByType,
+  RawPokemonReference,
   RawPokemonTypeResponse,
-  RawPokemonDetailResponse,
+  RawPokemonItem,
 } from "./dto/PokemonDTO";
-import { PokemonByName } from "../../domain/value-objects/PokemonByName";
+import { PokemonItem } from "../../domain/value-objects/PokemonItem";
 
 /**
  * Configuration for HttpPokemonRepository
@@ -23,22 +23,22 @@ export class HttpPokemonRepository implements PokemonRepository {
     private readonly config: HttpPokemonRepositoryConfig
   ) {}
 
-  async findAllByType(type: PokemonType): Promise<PokemonByType[]> {
+  async findAllByType(type: PokemonType): Promise<PokemonReference[]> {
     const data = await this.http.get<RawPokemonTypeResponse>(
       `${this.config.typeEndpoint}${type.value}`
     );
 
     return data.pokemon.map(
-      (rawItem: RawPokemonByType) => new PokemonByType(rawItem.pokemon.name)
+      (rawItem: RawPokemonReference) => new PokemonReference(rawItem.pokemon.name)
     );
   }
 
-  async findDetailsByName(name: string): Promise<PokemonByName> {
-    const data = await this.http.get<RawPokemonDetailResponse>(
+  async findDetailsByName(name: string): Promise<PokemonItem> {
+    const data = await this.http.get<RawPokemonItem>(
       `${this.config.pokemonEndpoint}${name}`
     );
 
-    return new PokemonByName(
+    return new PokemonItem(
       data.name,
       data.height,
       data.sprites.front_default

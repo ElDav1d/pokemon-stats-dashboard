@@ -35,7 +35,7 @@ src/features/pokemon-detail/
 │   │   └── EvolutionChain.ts         # WITH behavior → tests
 │   ├── value-objects/
 │   │   ├── PokemonStat.ts            # Data container (no behavior)
-│   │   └── PokemonByType.ts          # Data container (no behavior)
+│   │   └── PokemonReference.ts          # Data container (no behavior)
 │   ├── ports/
 │   │   └── PokemonDetailRepository.ts
 │   └── constants.ts
@@ -296,7 +296,7 @@ Create the Port (interface) PokemonDetailRepository in src/features/pokemon-deta
 CONTENT:
 import { PokemonDetail } from "../entities/PokemonDetail";
 import { EvolutionChain } from "../entities/EvolutionChain";
-import { PokemonByType } from "../value-objects/PokemonByType";
+import { PokemonReference } from "../value-objects/PokemonReference";
 
 export interface PokemonDetailRepository {
   /**
@@ -317,11 +317,11 @@ export interface PokemonDetailRepository {
   /**
    * Gets all pokemon of a specific type
    */
-  findAllByType(typeName: string): Promise<PokemonByType[]>;
+  findAllByType(typeName: string): Promise<PokemonReference[]>;
 }
 
 VERIFICATION:
-npm run build must pass (will fail until PokemonByType exists - that's expected).
+npm run build must pass (will fail until PokemonReference exists - that's expected).
 ```
 
 ---
@@ -339,7 +339,7 @@ export { EvolutionChain } from "./EvolutionChain";
 
 FILE 2: src/features/pokemon-detail/domain/value-objects/index.ts
 export { PokemonStat } from "./PokemonStat";
-export { PokemonByType } from "./PokemonByType";
+export { PokemonReference } from "./PokemonReference";
 
 FILE 3: src/features/pokemon-detail/domain/ports/index.ts
 export type { PokemonDetailRepository } from "./PokemonDetailRepository";
@@ -350,7 +350,7 @@ export * from "./value-objects";
 export * from "./ports";
 export * from "./constants";
 
-NOTE: Build will fail until PokemonByType is created in Phase 7. Continue to Phase 2.
+NOTE: Build will fail until PokemonReference is created in Phase 7. Continue to Phase 2.
 
 VERIFICATION:
 Structure exists without syntax errors.
@@ -422,10 +422,10 @@ export interface SpeciesResponse {
   };
 }
 
-FILE 3: src/features/pokemon-detail/infrastructure/http/dto/PokemonByTypeDTO.ts
+FILE 3: src/features/pokemon-detail/infrastructure/http/dto/PokemonReferenceDTO.ts
 
 CONTENT:
-export interface PokemonByTypeResponse {
+export interface PokemonReferenceResponse {
   pokemon: PokemonSlot[];
 }
 
@@ -440,7 +440,7 @@ export interface PokemonSlot {
 FILE 4: src/features/pokemon-detail/infrastructure/http/dto/index.ts
 export * from "./PokemonDetailDTO";
 export * from "./EvolutionChainDTO";
-export * from "./PokemonByTypeDTO";
+export * from "./PokemonReferenceDTO";
 
 VERIFICATION:
 npm run build must pass.
@@ -589,14 +589,14 @@ CONTENT:
 import { PokemonDetail } from "../../domain/entities/PokemonDetail";
 import { EvolutionChain } from "../../domain/entities/EvolutionChain";
 import { PokemonStat } from "../../domain/value-objects/PokemonStat";
-import { PokemonByType } from "../../domain/value-objects/PokemonByType";
+import { PokemonReference } from "../../domain/value-objects/PokemonReference";
 import { PokemonDetailRepository } from "../../domain/ports/PokemonDetailRepository";
 import {
   PokemonDetailResponse,
   EvolutionChainResponse,
   EvolutionChainLink,
   SpeciesResponse,
-  PokemonByTypeResponse,
+  PokemonReferenceResponse,
 } from "./dto";
 
 interface HttpPokemonDetailRepositoryConfig {
@@ -659,7 +659,7 @@ export class HttpPokemonDetailRepository implements PokemonDetailRepository {
     return new EvolutionChain(pokemonNames);
   }
 
-  async findAllByType(typeName: string): Promise<PokemonByType[]> {
+  async findAllByType(typeName: string): Promise<PokemonReference[]> {
     const response = await fetch(
       `${this.baseUrl}${this.config.typeEndpoint}${typeName}`
     );
@@ -668,10 +668,10 @@ export class HttpPokemonDetailRepository implements PokemonDetailRepository {
       throw new Error(`Failed to fetch pokemon by type: ${typeName}`);
     }
 
-    const data: PokemonByTypeResponse = await response.json();
+    const data: PokemonReferenceResponse = await response.json();
 
     return data.pokemon.map(
-      (slot) => new PokemonByType(slot.pokemon.name)
+      (slot) => new PokemonReference(slot.pokemon.name)
     );
   }
 
@@ -686,7 +686,7 @@ export class HttpPokemonDetailRepository implements PokemonDetailRepository {
   }
 }
 
-NOTE: Build will fail until PokemonByType is created in Phase 7. Tests for core methods should pass.
+NOTE: Build will fail until PokemonReference is created in Phase 7. Tests for core methods should pass.
 
 VERIFICATION:
 npm test src/features/pokemon-detail/infrastructure/http/__tests__/HttpPokemonDetailRepository.test.ts
@@ -1096,7 +1096,7 @@ import { vi } from "vitest";
 import { PokemonDetail } from "../domain/entities/PokemonDetail";
 import { EvolutionChain } from "../domain/entities/EvolutionChain";
 import { PokemonStat } from "../domain/value-objects/PokemonStat";
-import { PokemonByType } from "../domain/value-objects/PokemonByType";
+import { PokemonReference } from "../domain/value-objects/PokemonReference";
 import { PokemonDetailRepository } from "../domain/ports/PokemonDetailRepository";
 
 export const mockBulbasaurStats: PokemonStat[] = [
@@ -1125,17 +1125,17 @@ export const mockBulbasaurEvolutionChain = new EvolutionChain([
   "venusaur",
 ]);
 
-export const mockGrassPokemonList: PokemonByType[] = [
-  new PokemonByType("bulbasaur"),
-  new PokemonByType("ivysaur"),
-  new PokemonByType("venusaur"),
-  new PokemonByType("oddish"),
+export const mockGrassPokemonList: PokemonReference[] = [
+  new PokemonReference("bulbasaur"),
+  new PokemonReference("ivysaur"),
+  new PokemonReference("venusaur"),
+  new PokemonReference("oddish"),
 ];
 
 export const createMockPokemonDetailRepository = (
   detail: PokemonDetail = mockBulbasaurDetail,
   evolutionChain: EvolutionChain = mockBulbasaurEvolutionChain,
-  pokemonByType: PokemonByType[] = mockGrassPokemonList
+  pokemonByType: PokemonReference[] = mockGrassPokemonList
 ): PokemonDetailRepository => ({
   findByName: vi.fn().mockResolvedValue(detail),
   findEvolutionChainUrl: vi.fn().mockResolvedValue("https://pokeapi.co/api/v2/evolution-chain/1/"),
@@ -1152,7 +1152,7 @@ export const createMockPokemonDetailRepositoryWithError = (
   findAllByType: vi.fn().mockRejectedValue(error),
 });
 
-NOTE: Build will fail until PokemonByType is created in Phase 7.
+NOTE: Build will fail until PokemonReference is created in Phase 7.
 
 VERIFICATION:
 File created without syntax errors.
@@ -1669,27 +1669,73 @@ npm run build must pass.
 
 ---
 
-## ✅ PHASE 7: Domain Layer (PokemonsByType)
+## ✅ PHASE 7: Domain Layer (Simplified - YAGNI Applied)
 
-### **7.1 Create Value Object: PokemonByType (Data Container - NO tests)**
+### **7.1 Architectural Decision: Use Shared `PokemonReference`**
+
+### **Update (Post-Implementation Clarification):**
+
+**IMPORTANT:** PHASE 7 was simplified during implementation based on YAGNI principle.
+
+#### **What Was Originally Planned:**
+```typescript
+// ❌ Original plan: Feature-specific value objects
+export class PokemonsByType { /* ... */ }
+export class PokemonByType { /* ... */ }
+```
+
+#### **What Was Actually Implemented:**
+```typescript
+// ✅ Implemented: Shared value object
+export class PokemonReference {
+  constructor(public readonly name: string) {}
+}
+```
+
+### **Why This Decision:**
+
+1. **No Feature-Specific Behavior**: `PokemonReference` is a generic concept (name + url)
+2. **Used Across Features**: Used by:
+   - `pokemon-list` feature
+   - `pokemon-detail` feature
+   - `select-pokemon-type` feature
+3. **YAGNI Principle**: Avoid premature abstraction without clear benefits
+4. **Established Precedent**: `PokemonType` is also shared across features
+
+### **Consistency with Shared Layer:**
+
+Since `PokemonReference` is a generic domain concept used by multiple features, it belongs in:
+```
+src/shared/domain/value-objects/PokemonReference.ts
+```
+
+However, during the refactor of `pokemon-detail`, it was kept feature-local to maintain self-containment. If extracting to shared in the future, do so ONLY when:
+- Both features are stable and complete
+- The pattern is proven across 3+ features
+- No feature-specific variations exist
+
+### **7.1 Create Value Object: PokemonReference (Data Container - NO tests)**
 
 ### **Prompt for the agent:**
 
 ```
-Create the PokemonByType Value Object.
+Create the PokemonReference Value Object in the feature domain.
 
-FILE: src/features/pokemon-detail/domain/value-objects/PokemonByType.ts
+FILE: src/features/pokemon-detail/domain/value-objects/PokemonReference.ts
 
 CONTENT:
-export class PokemonByType {
+export class PokemonReference {
   constructor(public readonly name: string) {}
 }
 
-IMPORTANT: This is a DATA CONTAINER without behavior. DO NOT create tests (YAGNI).
+NOTE: This is a DATA CONTAINER without behavior. DO NOT create tests (YAGNI).
+
+NOTE: This value object is currently feature-local but may be shared with other features
+in the future if needed. Keep it here for now to maintain feature independence.
 
 VERIFICATION:
 npm run build must pass.
-Update the index.ts in value-objects to export PokemonByType if not already done.
+Update the index.ts in value-objects to export PokemonReference if not already done.
 ```
 
 ---
@@ -1760,7 +1806,7 @@ FILE: src/features/pokemon-detail/application/use-cases/get-pokemons-by-type/__t
 CONTENT:
 import { it, expect, vi } from "vitest";
 import { GetPokemonsByTypeUseCase } from "../GetPokemonsByTypeUseCase";
-import { PokemonByType } from "../../../../domain/value-objects/PokemonByType";
+import { PokemonReference } from "../../../../domain/value-objects/PokemonReference";
 import { PokemonDetailRepository } from "../../../../domain/ports/PokemonDetailRepository";
 
 const createMockRepository = (): PokemonDetailRepository => ({
@@ -1773,8 +1819,8 @@ const createMockRepository = (): PokemonDetailRepository => ({
 it("returns pokemon list for a type", async () => {
   const mockRepository = createMockRepository();
   const mockPokemonList = [
-    new PokemonByType("bulbasaur"),
-    new PokemonByType("ivysaur"),
+    new PokemonReference("bulbasaur"),
+    new PokemonReference("ivysaur"),
   ];
   (mockRepository.findAllByType as ReturnType<typeof vi.fn>).mockResolvedValue(mockPokemonList);
 
@@ -1820,13 +1866,13 @@ Implement GetPokemonsByTypeUseCase.
 FILE: src/features/pokemon-detail/application/use-cases/get-pokemons-by-type/GetPokemonsByTypeUseCase.ts
 
 CONTENT:
-import { PokemonByType } from "../../../domain/value-objects/PokemonByType";
+import { PokemonReference } from "../../../domain/value-objects/PokemonReference";
 import { PokemonDetailRepository } from "../../../domain/ports/PokemonDetailRepository";
 
 export class GetPokemonsByTypeUseCase {
   constructor(private readonly repository: PokemonDetailRepository) {}
 
-  async execute(typeName: string): Promise<PokemonByType[]> {
+  async execute(typeName: string): Promise<PokemonReference[]> {
     if (!typeName || typeName.trim() === "") {
       throw new Error("Type name is required");
     }
@@ -1856,7 +1902,7 @@ FILE: src/features/pokemon-detail/application/view-models/__tests__/PokemonsByTy
 CONTENT:
 import { it, expect, vi } from "vitest";
 import { PokemonsByTypeViewModel } from "../PokemonsByTypeViewModel";
-import { PokemonByType } from "../../../domain/value-objects/PokemonByType";
+import { PokemonReference } from "../../../domain/value-objects/PokemonReference";
 import { PokemonDetailRepository } from "../../../domain/ports/PokemonDetailRepository";
 
 const createMockRepository = (): PokemonDetailRepository => ({
@@ -1869,8 +1915,8 @@ const createMockRepository = (): PokemonDetailRepository => ({
 it("loads pokemon list by type", async () => {
   const mockRepository = createMockRepository();
   const mockPokemonList = [
-    new PokemonByType("bulbasaur"),
-    new PokemonByType("ivysaur"),
+    new PokemonReference("bulbasaur"),
+    new PokemonReference("ivysaur"),
   ];
   (mockRepository.findAllByType as ReturnType<typeof vi.fn>).mockResolvedValue(mockPokemonList);
 
@@ -1902,8 +1948,8 @@ it("returns empty array when type is null", async () => {
 it("extracts pokemon names from list", () => {
   const mockRepository = createMockRepository();
   const pokemonList = [
-    new PokemonByType("bulbasaur"),
-    new PokemonByType("ivysaur"),
+    new PokemonReference("bulbasaur"),
+    new PokemonReference("ivysaur"),
   ];
 
   const viewModel = new PokemonsByTypeViewModel(mockRepository);
@@ -1929,7 +1975,7 @@ Implement PokemonsByTypeViewModel.
 FILE: src/features/pokemon-detail/application/view-models/PokemonsByTypeViewModel.ts
 
 CONTENT:
-import { PokemonByType } from "../../domain/value-objects/PokemonByType";
+import { PokemonReference } from "../../domain/value-objects/PokemonReference";
 import { PokemonDetailRepository } from "../../domain/ports/PokemonDetailRepository";
 import { GetPokemonsByTypeUseCase } from "../use-cases/get-pokemons-by-type/GetPokemonsByTypeUseCase";
 
@@ -1940,14 +1986,14 @@ export class PokemonsByTypeViewModel {
     this.getPokemonsByTypeUseCase = new GetPokemonsByTypeUseCase(repository);
   }
 
-  async loadPokemonsByType(typeName: string | null): Promise<PokemonByType[]> {
+  async loadPokemonsByType(typeName: string | null): Promise<PokemonReference[]> {
     if (!typeName || typeName.trim() === "") {
       return [];
     }
     return await this.getPokemonsByTypeUseCase.execute(typeName);
   }
 
-  getPokemonNames(pokemonList: PokemonByType[]): string[] {
+  getPokemonNames(pokemonList: PokemonReference[]): string[] {
     return pokemonList.map((pokemon) => pokemon.name);
   }
 }
@@ -2369,7 +2415,7 @@ FINAL STRUCTURE:
 src/features/pokemon-detail/
 ├── domain/
 │   ├── entities/ (PokemonDetail, EvolutionChain)
-│   ├── value-objects/ (PokemonStat, PokemonByType)
+│   ├── value-objects/ (PokemonStat, PokemonReference)
 │   ├── ports/ (PokemonDetailRepository)
 │   └── constants.ts
 ├── application/
@@ -2401,20 +2447,20 @@ Every component is now a humble component with no direct fetch calls.
 | ---------------- | ----------------------------- | ------ |
 | `PokemonStat`    | ❌ Data container             | ❌ NO  |
 | `PokemonDetail`  | ❌ Data container             | ❌ NO  |
-| `PokemonByType`  | ❌ Data container             | ❌ NO  |
+| `PokemonReference`  | ❌ Data container             | ❌ NO  |
 | `EvolutionChain` | ✅ `getEvolutionsExcluding()` | ✅ YES |
 
 ### **Feature Independence**
 
 This feature is completely self-contained:
 
-- Has its own `PokemonByType` value object (not imported from `pokemon-list`)
+- Has its own `PokemonReference` value object (not imported from `pokemon-list`)
 - Has its own `findAllByType` in repository (not shared)
 - If `pokemon-list` feature is deleted, this feature continues working
 
 ### **Pattern Emergence**
 
-After completing this refactor, review if `PokemonByType` and `findAllByType` should be abstracted to `src/shared/`:
+After completing this refactor, review if `PokemonReference` and `findAllByType` should be abstracted to `src/shared/`:
 
 - Both `pokemon-list` and `pokemon-detail` have similar patterns
 - This is a candidate for shared domain extraction in a future iteration
@@ -2426,7 +2472,7 @@ After completing this refactor, review if `PokemonByType` and `findAllByType` sh
 
 ### **Domain Layer:**
 
-- [x] Create Value Objects (PokemonStat, PokemonByType - data containers)
+- [x] Create Value Objects (PokemonStat, PokemonReference - data containers)
 - [x] Create Entities (PokemonDetail - data container, EvolutionChain - with behavior)
 - [x] Create Ports (PokemonDetailRepository with all methods)
 - [x] Tests for Entities with behavior (EvolutionChain)

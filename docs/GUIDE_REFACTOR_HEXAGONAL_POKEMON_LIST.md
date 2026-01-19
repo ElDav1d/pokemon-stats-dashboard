@@ -33,8 +33,8 @@ src/features/pokemon-list/
 │   │   └── PokemonListItem.ts       # Main domain entity
 │   ├── value-objects/
 │   │   ├── PokemonType.ts           # VO: Pokemon Type
-│   │   ├── PokemonByType.ts         # VO: Pokemon in type list
-│   │   └── PokemonByName.ts         # VO: Pokemon Details
+│   │   ├── PokemonReference.ts         # VO: Pokemon in type list
+│   │   └── PokemonItem.ts         # VO: Pokemon Details
 │   ├── ports/
 │   │   └── PokemonRepository.ts     # Port (interface) to fetch data
 │   └── constants.ts                 # Domain configuration
@@ -114,8 +114,8 @@ Infrastructure implements ADAPTERS (concrete implementations)
 ```typescript
 // Domain defines the PORT
 export interface PokemonRepository {
-  findAllByType(type: PokemonType): Promise<PokemonByType[]>;
-  findDetailsByName(name: string): Promise<PokemonByName>;
+  findAllByType(type: PokemonType): Promise<PokemonReference[]>;
+  findDetailsByName(name: string): Promise<PokemonItem>;
 }
 
 // Infrastructure implements the ADAPTER
@@ -454,12 +454,12 @@ export class PokemonType {
 - Makes explicit the concept of "Pokemon type"
 - Avoids using `string` directly (primitive obsession)
 
-#### **`PokemonByType.ts`**
+#### **`PokemonReference.ts`**
 
 Represents a partial Pokemon obtained when searching by type.
 
 ```typescript
-export class PokemonByType {
+export class PokemonReference {
   public readonly name: string;
 
   constructor(name: string) {
@@ -474,12 +474,12 @@ export class PokemonByType {
 - We need a second call to get complete details
 - This VO represents the intermediate step
 
-#### **`PokemonByName.ts`**
+#### **`PokemonItem.ts`**
 
 Represents the details of an individual Pokemon.
 
 ```typescript
-export class PokemonByName {
+export class PokemonItem {
   public readonly name: string;
   public readonly height: number;
   public readonly imageUrl: string;
@@ -501,13 +501,13 @@ export class PokemonByName {
 Defines the contract for obtaining Pokemon data, without specifying how.
 
 ```typescript
-import { PokemonByName } from "../value-objects/PokemonByName.ts";
-import { PokemonByType } from "../value-objects/PokemonByType.ts";
+import { PokemonItem } from "../value-objects/PokemonItem.ts";
+import { PokemonReference } from "../value-objects/PokemonReference.ts";
 import { PokemonType } from "../value-objects/PokemonType";
 
 export interface PokemonRepository {
-  findAllByType(type: PokemonType): Promise<PokemonByType[]>;
-  findDetailsByName(name: string): Promise<PokemonByName>;
+  findAllByType(type: PokemonType): Promise<PokemonReference[]>;
+  findDetailsByName(name: string): Promise<PokemonItem>;
 }
 ```
 
@@ -712,8 +712,8 @@ Transforms DTOs into domain entities.
 
 ```typescript
 export function mapToDomainList(
-  list: PokemonByType[],
-  details: PokemonByName[],
+  list: PokemonReference[],
+  details: PokemonItem[],
   idGenerator: IdGenerator
 ): PokemonListItem[] {
   return list.map((item, index) => {
@@ -759,22 +759,22 @@ Implementation of the `PokemonRepository` port using HTTP.
 export class HttpPokemonRepository implements PokemonRepository {
   constructor(private readonly http: HttpClient) {}
 
-  async findAllByType(type: PokemonType): Promise<PokemonByType[]> {
+  async findAllByType(type: PokemonType): Promise<PokemonReference[]> {
     const data = await this.http.get<RawPokemonTypeResponse>(
       `${url.TYPE}${type.value}`
     );
 
     return data.pokemon.map(
-      (rawItem: RawPokemonByType) => new PokemonByType(rawItem.pokemon.name)
+      (rawItem: RawPokemonReference) => new PokemonReference(rawItem.pokemon.name)
     );
   }
 
-  async findDetailsByName(name: string): Promise<PokemonByName> {
-    const data = await this.http.get<RawPokemonDetailResponse>(
+  async findDetailsByName(name: string): Promise<PokemonItem> {
+    const data = await this.http.get<RawPokemonItem>(
       `${url.POKEMON}${name}`
     );
 
-    return new PokemonByName(
+    return new PokemonItem(
       data.name,
       data.height,
       data.sprites.front_default
@@ -802,7 +802,7 @@ it("should return a list of pokemons by type", async () => {
 
   const [pokemon1, pokemon2] = await repo.findAllByType(type);
 
-  expect(pokemon1).toBeInstanceOf(PokemonByType);
+  expect(pokemon1).toBeInstanceOf(PokemonReference);
   expect(pokemon1.name).toBe("charmander");
 });
 ```
@@ -1191,10 +1191,10 @@ const PokemonListItem = memo(
 │ 6. INFRASTRUCTURE LAYER (Repository)                            │
 │    HttpPokemonRepository.ts                                     │
 │    - Calls: http.get("/type/fire") → RawPokemonTypeResponse     │
-│    - Maps: RawDTO → PokemonByType[]                             │
+│    - Maps: RawDTO → PokemonReference[]                             │
 │    - Calls: http.get("/pokemon/charmander") → RawDetailResponse │
-│    - Maps: RawDTO → PokemonByName                               │
-│    - Returns: PokemonByType[] + PokemonByName[]                 │
+│    - Maps: RawDTO → PokemonItem                               │
+│    - Returns: PokemonReference[] + PokemonItem[]                 │
 └─────────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐
@@ -1484,7 +1484,7 @@ class CachedPokemonRepository implements PokemonRepository {
     private readonly cache: LocalStorageCache
   ) {}
 
-  async findAllByType(type: PokemonType): Promise<PokemonByType[]> {
+  async findAllByType(type: PokemonType): Promise<PokemonReference[]> {
     const cached = this.cache.get(type.value);
     if (cached) return cached;
 

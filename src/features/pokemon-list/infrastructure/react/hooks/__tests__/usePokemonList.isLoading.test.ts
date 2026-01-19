@@ -3,14 +3,14 @@ import { vi, it, expect, beforeEach } from "vitest";
 import usePokemonList from "../usePokemonList";
 import * as reduxHooks from "../../../../../../shared/infrastructure/redux/hooks";
 
-import { PokemonByType } from "../../../../domain/value-objects/PokemonByType";
-import { PokemonByName } from "../../../../domain/value-objects/PokemonByName";
+import { PokemonReference } from "../../../../../../shared/domain/value-objects";
+import { PokemonItem } from "../../../../domain/value-objects/PokemonItem";
 import { testData } from "./setupTests";
 import {
   createMockPokemonRepositoryWithDelay,
   createMockPokemonRepositoryWithError,
   createMockPokemonRepositoryWithChangingData,
-  mockPokemonsByTypeForHookTests,
+  mockPokemonReferencesForHookTests,
   mockPokemonsByNameForHookTests,
 } from "../../../../__tests__/mocks";
 
@@ -20,7 +20,7 @@ beforeEach(() => {
 
 it("starts as false when no selectedType is provided", () => {
   const { result } = renderHook(() =>
-    usePokemonList("", testData.mockRepository!)
+    usePokemonList("", testData.mockRepository!),
   );
 
   expect(result.current.isLoading).toBe(false);
@@ -28,13 +28,13 @@ it("starts as false when no selectedType is provided", () => {
 
 it("shows loading state during fetch", async () => {
   const delayedRepository = createMockPokemonRepositoryWithDelay(
-    mockPokemonsByTypeForHookTests,
+    mockPokemonReferencesForHookTests,
     mockPokemonsByNameForHookTests,
-    100
+    100,
   );
 
   const { result } = renderHook(() =>
-    usePokemonList("grass", delayedRepository)
+    usePokemonList("grass", delayedRepository),
   );
 
   await waitFor(() => {
@@ -48,7 +48,7 @@ it("shows loading state during fetch", async () => {
 
 it("sets loading to false after successful fetch", async () => {
   const { result } = renderHook(() =>
-    usePokemonList("grass", testData.mockRepository!)
+    usePokemonList("grass", testData.mockRepository!),
   );
 
   await waitFor(() => {
@@ -58,8 +58,12 @@ it("sets loading to false after successful fetch", async () => {
 });
 
 it("sets loading to false after failed fetch", async () => {
+  const consoleErrorSpy = vi
+    .spyOn(console, "error")
+    .mockImplementation(() => {});
+
   const errorRepository = createMockPokemonRepositoryWithError(
-    new Error("API Error")
+    new Error("API Error"),
   );
 
   const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -72,26 +76,27 @@ it("sets loading to false after failed fetch", async () => {
   });
 
   consoleSpy.mockRestore();
+  consoleErrorSpy.mockRestore();
 });
 
 it("shows loading state when selectedType changes", async () => {
-  const newMockPokemonsByType = [new PokemonByType("charmander")];
-  const newMockPokemonByName = new PokemonByName(
+  const newMockPokemonReferences = [new PokemonReference("charmander")];
+  const newMockPokemonItem = new PokemonItem(
     "charmander",
     60,
-    "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png"
+    "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png",
   );
 
   const repoWithChangingData = createMockPokemonRepositoryWithChangingData(
-    mockPokemonsByTypeForHookTests,
+    mockPokemonReferencesForHookTests,
     mockPokemonsByNameForHookTests,
-    newMockPokemonsByType,
-    [newMockPokemonByName]
+    newMockPokemonReferences,
+    [newMockPokemonItem],
   );
 
   const { result, rerender } = renderHook(
     ({ selectedType }) => usePokemonList(selectedType, repoWithChangingData),
-    { initialProps: { selectedType: "grass" } }
+    { initialProps: { selectedType: "grass" } },
   );
 
   await waitFor(() => {

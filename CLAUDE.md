@@ -116,7 +116,7 @@ The codebase implements **Hexagonal Architecture** (Ports & Adapters) with clear
 **3. Value Objects**
 
 - Immutable domain concepts that prevent "primitive obsession"
-- Examples: `PokemonType`, `PokemonByType`, `PokemonByName`
+- Examples: `PokemonType`, `PokemonReference`, `PokemonByName`
 - Self-validating with encapsulated business rules
 
 **4. Rich Domain Entities (Classes, not Interfaces)**
@@ -326,7 +326,7 @@ export { EvolutionChain } from "./EvolutionChain";
 
 // domain/value-objects/index.ts
 export { PokemonStat } from "./PokemonStat";
-export { PokemonByType } from "./PokemonByType";
+export { PokemonReference } from "./PokemonReference";
 
 // domain/ports/index.ts (use `export type` for interfaces)
 export type { PokemonDetailRepository } from "./PokemonDetailRepository";
@@ -352,6 +352,144 @@ export * from "./constants";
 - ✅ Domain index re-exports from all sublayer indexes
 - ❌ Never export internal/private implementations
 - ❌ Never have circular dependencies between index files
+
+## Naming Conventions
+
+Consistent naming patterns prevent confusion and improve code maintainability. Follow these conventions when creating new files and types.
+
+### DTO Naming Pattern
+
+**Rule:** Always use `Raw{Entity}` prefix for HTTP response DTOs (Data Transfer Objects).
+
+**Why:** The `Raw` prefix clearly indicates unmapped API data that needs transformation to domain entities. This distinguishes DTOs from domain entities and maintains consistency across features.
+
+**Examples:**
+
+✅ **Correct:**
+```typescript
+// infrastructure/http/dto/PokemonDTO.ts
+export interface RawPokemonItem {
+  id: number;
+  name: string;
+  height: number;
+}
+
+export interface RawPokemonReference {
+  name: string;
+  url: string;
+}
+```
+
+❌ **Incorrect:**
+```typescript
+// Don't use Response suffix
+export interface PokemonDetailResponse { ... }
+export interface StatResponse { ... }
+export interface TypeResponse { ... }
+```
+
+**When to apply:**
+- All HTTP response interfaces in `infrastructure/http/dto/` directories
+- Any data structure representing raw API responses before domain mapping
+
+### Hook Return Interface Naming
+
+**Rule:** Use `Use{HookName}Result` pattern for hook return type interfaces. Never use I-prefix.
+
+**Why:** Modern TypeScript convention avoids I-prefix for interfaces. The `Result` suffix clearly indicates this is the return type of a hook, not the hook itself.
+
+**Examples:**
+
+✅ **Correct:**
+```typescript
+interface UsePokemonListResult {
+  pokemonList: PokemonListItem[];
+  isLoading: boolean;
+  isError: boolean;
+}
+
+function usePokemonList(): UsePokemonListResult { ... }
+```
+
+```typescript
+interface UseSelectPokemonTypeResult {
+  selectedTypeParam: string | null;
+  selectType: (type: string) => void;
+}
+
+function useSelectPokemonType(): UseSelectPokemonTypeResult { ... }
+```
+
+❌ **Incorrect:**
+```typescript
+// Don't use I-prefix (old convention)
+interface IUsePokemonTypesReturn { ... }
+
+// Don't use inconsistent suffixes
+interface UsePokemonListData { ... }
+interface UsePokemonListOutput { ... }
+```
+
+**When to apply:**
+- All custom React hook return type interfaces
+- Located in `infrastructure/react/hooks/` directories
+
+### File Organization Rules
+
+**Rule:** All feature code must live in proper layer directories. No orphaned files at feature root.
+
+**Why:** Hexagonal architecture requires clear layer separation. Files at feature root violate this structure and create confusion about their purpose and dependencies.
+
+**Allowed at feature root:**
+- `index.ts` (public API exports)
+- `__tests__/` directory (feature-level mocks)
+- Layer directories: `domain/`, `application/`, `infrastructure/`, `ui/`
+
+**Not allowed at feature root:**
+- Entity files (`entities.ts`, `types.ts`)
+- Helper files (`helpers.ts`, `utils.ts`)
+- Any domain/application/infrastructure code
+
+**Examples:**
+
+✅ **Correct structure:**
+```
+src/features/pokemon-detail/
+├── index.ts                              ✅ Public API
+├── __tests__/                            ✅ Feature-level mocks
+│   └── mocks.ts
+├── domain/                               ✅ Layer directory
+│   ├── entities/
+│   │   └── EvolutionChain.ts
+│   └── value-objects/
+│       └── PokemonStat.ts
+├── application/                          ✅ Layer directory
+│   └── use-cases/
+└── infrastructure/                       ✅ Layer directory
+    └── http/
+```
+
+❌ **Incorrect structure:**
+```
+src/features/pokemon-detail/
+├── index.ts
+├── entities.ts                           ❌ Orphaned at root
+├── helpers.ts                            ❌ Orphaned at root
+├── IEvolutionChainLink.ts                ❌ Orphaned at root
+└── domain/
+    └── entities/
+```
+
+**When to apply:**
+- All feature development
+- When refactoring legacy code
+- Before creating new files in a feature
+
+**How to fix violations:**
+- Move orphaned files to their proper layer directory
+- If the file contains domain logic → `domain/entities/` or `domain/value-objects/`
+- If the file contains DTOs → `infrastructure/http/dto/`
+- If the file contains helpers → extract to proper layer or `infrastructure/`
 
 ## Pre-Flight Checklists
 
@@ -1009,7 +1147,7 @@ export class PokemonListItem {
 
 - `PokemonListItem` - Plain data container (no methods)
 - `PokemonType` - Simple validation only (no behavior methods)
-- `PokemonByType` - Plain data container (no methods)
+- `PokemonReference` - Plain data container (no methods)
 - `PokemonByName` - Plain data container (no methods)
 
 **Why no domain tests:**
@@ -2332,7 +2470,7 @@ const sorted = viewModel.sortPokemonList(pokemonList); // ❌ Business logic in 
 ```typescript
 // ✅ CORRECT: Overloaded hook with dependency injection
 
-interface UseFeatureResult {
+interface UseFeatureResult {  // ← Follow naming convention: Use{HookName}Result
   data: DataType[];
   isLoading: boolean;
   isError: boolean;
@@ -2493,6 +2631,24 @@ Does hook create infrastructure (repositories, clients)?
     ├─ Testing: Inject mock repository
     └─ Component: Calls hook with no infrastructure params
 ```
+
+### Reference Implementation ("Golden Hook")
+
+**ALWAYS use `usePokemonList` as your reference when creating hooks with infrastructure.**
+
+Before implementing a new hook that manages external dependencies:
+
+- [ ] Read `src/features/pokemon-list/infrastructure/react/hooks/usePokemonList.ts`
+- [ ] Copy the overload pattern exactly (production + testing signatures)
+- [ ] Use the same dependency injection detection logic
+- [ ] Verify your tests cover: happy path, loading state, error state (minimum 3 test scenarios)
+
+**Why this approach matters:**
+
+- **Consistency**: All infrastructure hooks follow the same proven pattern
+- **Testability**: Isolated unit testing becomes straightforward with overloads
+- **Maintainability**: New team members have a clear reference to follow
+- **Quality**: Built-in reminder to test error states, not just happy paths
 
 ### Modifying Virtual Scrolling
 

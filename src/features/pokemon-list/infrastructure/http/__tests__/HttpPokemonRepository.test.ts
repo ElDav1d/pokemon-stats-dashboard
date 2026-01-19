@@ -3,8 +3,8 @@ import { HttpPokemonRepository } from "../HttpPokemonRepository";
 import { PokemonType } from "../../../../../shared/domain/value-objects/PokemonType";
 import { pokemonByNameResponseMock, pokemonByTypeResponseMock } from "./mocks";
 import { FetchHttpClient } from "../../../../../shared/infrastructure/client/fetch/FetchHttpClient";
-import { PokemonByType } from "../../../domain/value-objects/PokemonByType";
-import { PokemonByName } from "../../../domain/value-objects/PokemonByName";
+import { PokemonReference } from "../../../../../shared/domain/value-objects";
+import { PokemonItem } from "../../../domain/value-objects/PokemonItem";
 
 class HttpClientStub {
   public getMock = vi.fn();
@@ -43,10 +43,10 @@ it("should return a list of pokemons by type", async () => {
 
   const [pokemon1, pokemon2] = await repo.findAllByType(type);
 
-  expect(pokemon1).toBeInstanceOf(PokemonByType);
+  expect(pokemon1).toBeInstanceOf(PokemonReference);
   expect(pokemon1.name).toBe("charmander");
 
-  expect(pokemon2).toBeInstanceOf(PokemonByType);
+  expect(pokemon2).toBeInstanceOf(PokemonReference);
   expect(pokemon2.name).toBe("vulpix");
 });
 
@@ -61,7 +61,7 @@ it("should return the details of a pokemon by name", async () => {
 
   const pokemonDetails = await repo.findDetailsByName(pokemonName);
 
-  expect(pokemonDetails).toBeInstanceOf(PokemonByName);
+  expect(pokemonDetails).toBeInstanceOf(PokemonItem);
   expect(pokemonDetails?.name).toBe("charmander");
   expect(pokemonDetails?.height).toBe(6);
   expect(pokemonDetails?.imageUrl).toBe("sprite-url");

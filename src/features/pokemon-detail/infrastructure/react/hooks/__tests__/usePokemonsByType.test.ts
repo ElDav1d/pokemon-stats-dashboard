@@ -1,9 +1,10 @@
 import { renderHook, waitFor, act } from "@testing-library/react";
 import { vi, it, expect, beforeEach } from "vitest";
+import usePokemonsByType from "../usePokemonsByType";
 import {
   createMockPokemonDetailRepository,
   createMockPokemonDetailRepositoryWithError,
-} from "./mocks";
+} from "../../../../__tests__/mocks";
 
 beforeEach(() => {
   vi.spyOn(console, "error").mockImplementation(() => {});
@@ -53,11 +54,9 @@ it("updates selectedType when selectType is called", async () => {
 it("returns isLoading true while fetching", async () => {
   const mockRepository = createMockPokemonDetailRepository();
 
-  const { result } = renderHook(() => usePokemonsByType(mockRepository));
-
-  act(() => {
-    result.current.selectType("grass");
-  });
+  const { result } = renderHook(() =>
+    usePokemonDetail("bulbasaur", mockRepository),
+  );
 
   expect(result.current.isLoading).toBe(true);
 
@@ -71,11 +70,9 @@ it("returns isError true when fetch fails", async () => {
     new Error("API Error"),
   );
 
-  const { result } = renderHook(() => usePokemonsByType(mockRepository));
-
-  act(() => {
-    result.current.selectType("grass");
-  });
+  const { result } = renderHook(() =>
+    usePokemonDetail("bulbasaur", mockRepository),
+  );
 
   await waitFor(() => {
     expect(result.current.isError).toBe(true);

@@ -51,12 +51,26 @@ it("updates selectedType when selectType is called", async () => {
   expect(result.current.selectedType).toBe("fire");
 });
 
+it("updates selectedType when selectType is called", async () => {
+  const mockRepository = createMockPokemonDetailRepository();
+
+  const { result } = renderHook(() => usePokemonsByType(mockRepository));
+
+  act(() => {
+    result.current.selectType("fire");
+  });
+
+  expect(result.current.selectedType).toBe("fire");
+});
+
 it("returns isLoading true while fetching", async () => {
   const mockRepository = createMockPokemonDetailRepository();
 
-  const { result } = renderHook(() =>
-    usePokemonDetail("bulbasaur", mockRepository),
-  );
+  const { result } = renderHook(() => usePokemonsByType(mockRepository));
+
+  act(() => {
+    result.current.selectType("grass");
+  });
 
   expect(result.current.isLoading).toBe(true);
 
@@ -70,9 +84,11 @@ it("returns isError true when fetch fails", async () => {
     new Error("API Error"),
   );
 
-  const { result } = renderHook(() =>
-    usePokemonDetail("bulbasaur", mockRepository),
-  );
+  const { result } = renderHook(() => usePokemonsByType(mockRepository));
+
+  act(() => {
+    result.current.selectType("grass");
+  });
 
   await waitFor(() => {
     expect(result.current.isError).toBe(true);

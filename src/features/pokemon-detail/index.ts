@@ -1,1 +1,1 @@
-export { default as PokemonDetail } from "./PokemonDetail";
+export { PokemonDetail } from "./ui";

@@ -29,7 +29,7 @@ const PokemonDetailTypes = ({ types }: PokemonDetailTypesProps) => {
             key={name}
             value={name}
             selected={selectedType === name}
-            onClick={() => selectType(name)}
+            onClick={() => selectType(name)} // TODO: memoize?
           >
             {name}
           </SelectButton>

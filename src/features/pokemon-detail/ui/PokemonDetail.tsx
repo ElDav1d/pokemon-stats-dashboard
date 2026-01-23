@@ -1,6 +1,7 @@
 import usePokemonDetail from "../infrastructure/react/hooks/usePokemonDetail";
 import PokemonEvolutions from "./PokemonEvolutions";
 import PokemonStats from "./PokemonStats";
+import PokemonDetailTypes from "./PokemonDetailTypes";
 
 interface PokemonDetailProps {
   name: string;
@@ -40,7 +41,9 @@ const PokemonDetail = ({ name }: PokemonDetailProps) => {
         </div>
       </section>
 
-      {/* PokemonDetailTypes will be added after Phase 12 */}
+      {pokemonDetail.types.length > 0 && (
+        <PokemonDetailTypes types={pokemonDetail.types} />
+      )}
     </>
   );
 };

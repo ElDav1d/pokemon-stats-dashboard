@@ -1,5 +1,6 @@
 import { SelectButton, SelectButtonList } from "../../../ui";
 import usePokemonsByType from "../infrastructure/react/hooks/usePokemonsByType";
+import PokemonDetailTypesPokemonList from "./PokemonDetailTypesPokemonList";
 
 interface PokemonDetailTypesProps {
   types: string[];
@@ -37,13 +38,7 @@ const PokemonDetailTypes = ({ types }: PokemonDetailTypesProps) => {
       </SelectButtonList>
 
       {pokemonNames.length > 0 && (
-        <ul className="flex flex-wrap gap-2 mb-2 mt-4" aria-live="polite">
-          {pokemonNames.map((name) => (
-            <li className="capitalize" key={name}>
-              {name}
-            </li>
-          ))}
-        </ul>
+        <PokemonDetailTypesPokemonList pokemonNames={pokemonNames} />
       )}
     </section>
   );

@@ -1,7 +1,6 @@
 import usePokemonDetail from "../infrastructure/react/hooks/usePokemonDetail";
-import PokemonEvolutions from "./PokemonEvolutions";
-import PokemonStats from "./PokemonStats";
 import PokemonDetailTypes from "./PokemonDetailTypes";
+import PokemonDetailData from "./PokemonDetailData";
 
 interface PokemonDetailProps {
   name: string;
@@ -25,22 +24,12 @@ const PokemonDetail = ({ name }: PokemonDetailProps) => {
 
   return (
     <>
-      <section className="flex flex-col gap-4 md:flex-row bg-stone-600 rounded-lg p-4 mb-4">
-        <img
-          className="w-full md:w-80 xl:w-86 object-contain"
-          src={pokemonDetail.imageUrl}
-          alt={pokemonDetail.name}
-        />
-        <div className="w-full">
-          {evolutions.length > 0 && (
-            <PokemonEvolutions evolutions={evolutions} />
-          )}
-          {pokemonDetail.stats.length > 0 && (
-            <PokemonStats stats={pokemonDetail.stats} />
-          )}
-        </div>
-      </section>
-
+      <PokemonDetailData
+        imageUrl={pokemonDetail.imageUrl}
+        name={pokemonDetail.name}
+        evolutions={evolutions}
+        stats={pokemonDetail.stats}
+      />
       {pokemonDetail.types.length > 0 && (
         <PokemonDetailTypes types={pokemonDetail.types} />
       )}

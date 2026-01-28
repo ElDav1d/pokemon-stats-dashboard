@@ -1,3 +1,4 @@
+import { SubHeading } from "../../../ui";
 import PokemonEvolutionsList from "./PokemonEvolutionsList";
 interface PokemonEvolutionsProps {
   evolutions: string[];
@@ -10,9 +11,7 @@ const PokemonEvolutions = ({ evolutions }: PokemonEvolutionsProps) => {
 
   return (
     <>
-      <h2 className="mb-2 text-lg l:text-xl xl:text-2xl font-semibold">
-        Evolutions:
-      </h2>
+      <SubHeading title="Evolutions:" />
       <PokemonEvolutionsList evolutions={evolutions} />
     </>
   );

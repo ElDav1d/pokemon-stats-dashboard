@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { PokemonStat } from "../domain/value-objects/PokemonStat";
 import { useStatsGraph } from "../infrastructure/react/hooks/useStatsGraph";
 import PokemonStatsGraph from "./PokemonStatsGraph";
+import { SubHeading } from "../../../ui";
 
 interface PokemonStatsProps {
   stats: PokemonStat[];
@@ -14,9 +15,7 @@ const PokemonStats = ({ stats }: PokemonStatsProps) => {
 
   return (
     <>
-      <h2 className="mb-2 text-lg l:text-xl xl:text-2xl font-semibold">
-        Stats:
-      </h2>
+      <SubHeading title="Stats:" />
       <PokemonStatsGraph svgRef={svgRef} />
     </>
   );

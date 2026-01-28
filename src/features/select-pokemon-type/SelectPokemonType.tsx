@@ -4,6 +4,7 @@ import {
   SelectButtonList,
   LoadingMessage,
   ErrorMessage,
+  SubHeading,
 } from "../../ui";
 import { DEFAULT_POKEMON_TYPE } from "./domain/constants";
 import {
@@ -31,12 +32,10 @@ const SelectPokemonType = () => {
 
   return (
     <>
-      <h2
-        className="text-lg l:text-xl xl:text-2xl mb-4"
+      <SubHeading
+        title="Select a Pokemon Type to get the list"
         id="pokemon-type-list-heading"
-      >
-        Select a Pokemon Type to get the list
-      </h2>
+      />
 
       {isLoading && <LoadingMessage message="Loading pokemon types..." />}
 

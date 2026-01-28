@@ -1,4 +1,4 @@
-import { SelectButton, SelectButtonList } from "../../../ui";
+import { SelectButton, SelectButtonList, SubHeading } from "../../../ui";
 import usePokemonsByType from "../infrastructure/react/hooks/usePokemonsByType";
 import PokemonDetailTypesPokemonList from "./PokemonDetailTypesPokemonList";
 
@@ -14,12 +14,8 @@ const PokemonDetailTypes = ({ types }: PokemonDetailTypesProps) => {
       className="bg-stone-600 rounded-lg p-4 mb-4"
       aria-labelledby="pokemon-type-list-heading"
     >
-      <h2
-        className="mb-2 text-lg l:text-xl xl:text-2xl font-semibold"
-        id="pokemon-type-list-heading"
-      >
-        Types:
-      </h2>
+      <SubHeading title="Types:" id="pokemon-type-list-heading" />
+
       {/* TODO: disable button for fetched type list */}
       <SelectButtonList
         aria-live="polite"

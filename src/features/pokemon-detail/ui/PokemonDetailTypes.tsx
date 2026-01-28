@@ -16,7 +16,6 @@ const PokemonDetailTypes = ({ types }: PokemonDetailTypesProps) => {
     >
       <SubHeading title="Types:" id="pokemon-type-list-heading" />
 
-      {/* TODO: disable button for fetched type list */}
       <SelectButtonList
         aria-live="polite"
         aria-labelledby="pokemon-type-list-heading"
@@ -27,6 +26,7 @@ const PokemonDetailTypes = ({ types }: PokemonDetailTypesProps) => {
             key={name}
             value={name}
             selected={selectedType === name}
+            disabled={selectedType === name}
             onClick={() => selectType(name)}
           >
             {name}

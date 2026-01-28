@@ -20,6 +20,7 @@ const PokemonDetailTypes = ({ types }: PokemonDetailTypesProps) => {
       >
         Types:
       </h2>
+      {/* TODO: disable button for fetched type list */}
       <SelectButtonList
         aria-live="polite"
         aria-labelledby="pokemon-type-list-heading"

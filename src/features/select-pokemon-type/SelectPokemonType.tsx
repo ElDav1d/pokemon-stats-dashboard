@@ -40,7 +40,7 @@ const SelectPokemonType = () => {
       {isLoading && <LoadingMessage message="Loading pokemon types..." />}
 
       {isError && <ErrorMessage message="Error loading pokemon types" />}
-      {/* TODO: disable button for fetched type list */}
+
       {!isLoading && !isError && typeNames?.length > 0 && (
         <SelectButtonList
           aria-live="polite"

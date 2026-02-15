@@ -101,12 +101,6 @@ The application implements clean architecture principles with clear separation o
 - **Evolution Chain Navigation** - Browse Pokemon evolution lines
 - **Type-based Navigation** - Jump between Pokemon of the same type
 
-#### ⚠️ **Features In Development:**
-
-- Pokemon filtering capabilities
-- Pokemon comparison charts (2 Pokemon stats comparison)
-- Move-based analysis with type distribution charts
-
 ## 📋 **Development Backlog**
 
 ### **Basic Features:**
@@ -177,6 +171,7 @@ This is an **intentional overengineering exercise** to study and understand Clea
   - ✅ Comprehensive testing across all layers
 
 - **`select-pokemon-type` Feature** - Complete end-to-end implementation:
+
   - ✅ Domain layer: Entities and value objects
   - ✅ Application layer: Use cases for business logic
   - ✅ Infrastructure layer: HTTP adapters and React hooks
@@ -188,15 +183,23 @@ This is an **intentional overengineering exercise** to study and understand Clea
   - ✅ URL-specific fetch mocking for endpoint isolation
   - ✅ Complete UI state verification (loading → success/error)
 
+- **`pokemon-detail` Feature** - Complete hexagonal architecture:
+  - ✅ Domain layer: Entities (PokemonDetail, EvolutionChain) and value objects (PokemonStat, PokemonReference)
+  - ✅ Application layer: Use cases (GetPokemonDetail, GetEvolutionChain, GetPokemonsByType) and view models
+  - ✅ Infrastructure layer: HTTP adapters (HttpPokemonDetailRepository) and React hooks with DI
+  - ✅ **Dependency Injection Pattern**: Function overloads for testable hooks
+    - `usePokemonDetail(pokemonName)` - production use
+    - `usePokemonDetail(pokemonName, mockRepository)` - testing with mocked repository
+  - ✅ Components are "humble" - PokemonDetail, PokemonEvolutions, PokemonStats use only hooks
+  - ✅ Evolution chain logic extracted to `EvolutionChain` entity with behavior and tests
+  - ✅ Stats visualization extracted to `useStatsGraph` hook (D3 integration)
+  - ✅ Type-based Pokemon fetching extracted to `usePokemonsByType` hook
+  - ✅ Comprehensive testing: Unit tests per layer + integration tests
+  - ✅ Complete UI state coverage (loading, error, success)
+
 #### **⚠️ Partially Refactored:**
 
 - NONE
-
-#### **❌ Not Yet Refactored:**
-
-- **`pokemon-detail` Feature** - fetch directo en componentes, sin separación de capas
-- **`PokemonEvolutions`** - lógica de evolución acoplada al componente
-- **`PokemonStats`** / **`PokemonDetailTypes`** - componentes legacy
 
 #### **Definition of "Fully Refactored" (Our Criteria):**
 
@@ -209,6 +212,8 @@ This is an **intentional overengineering exercise** to study and understand Clea
 7. Integration tests with endpoint-specific mocking
 8. Complete UI state coverage (loading, error, success)
 9. Documentation in CLAUDE.md about patterns used
+
+**Status Summary**: Three features (`pokemon-list`, `select-pokemon-type`, `pokemon-detail`) are fully refactored to Hexagonal Architecture with comprehensive testing and dependency injection patterns.
 
 This learning project demonstrates how Clean and Hexagonal Architecture principles can be applied to React applications, even when not strictly necessary for the business domain.
 

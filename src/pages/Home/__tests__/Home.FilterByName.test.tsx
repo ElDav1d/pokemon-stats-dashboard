@@ -231,6 +231,37 @@ it("renders only charmander when filtering by suffix of its name", async () => {
   });
 });
 
+it("renders empty state message when filter matches no pokemons", async () => {
+  render(
+    <Provider store={store}>
+      <MemoryRouter initialEntries={["/?type=fire"]}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+        </Routes>
+      </MemoryRouter>
+    </Provider>,
+  );
+
+  const contentArea = within(screen.getByRole("main")).getByRole("article");
+
+  // Wait for all fire type pokemon to load
+  await waitFor(() => {
+    const pokemonItemList = within(contentArea).getByRole("list", {
+      name: /pokemon list/i,
+    });
+    expect(within(pokemonItemList).getAllByRole("listitem")).toHaveLength(3);
+  });
+
+  // "pikachu" is not a fire type pokemon — no results expected
+  await typeInNameFilter("pikachu");
+
+  await waitFor(() => {
+    expect(
+      screen.getByRole("heading", { level: 2, name: /sorry.*cannot find/i }),
+    ).toBeInTheDocument();
+  });
+});
+
 it("renders all pokemons again when user clears the name filter", async () => {
   render(
     <Provider store={store}>

@@ -256,9 +256,8 @@ it("renders empty state message when filter matches no pokemons", async () => {
   await typeInNameFilter("pikachu");
 
   await waitFor(() => {
-    expect(
-      screen.getByRole("heading", { level: 2, name: /sorry.*cannot find/i }),
-    ).toBeInTheDocument();
+    const statusEl = screen.getByRole("status");
+    expect(statusEl).toHaveTextContent(/sorry.*cannot find/i);
   });
 });
 

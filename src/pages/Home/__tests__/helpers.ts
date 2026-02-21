@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 
 export const typeInNameFilter = async (text: string) => {
   const user = userEvent.setup();
-  const input = await screen.findByRole("textbox", { name: /search by name/i });
+  const input = await screen.findByRole("searchbox", { name: /search by name/i });
   await user.clear(input);
   if (text) await user.type(input, text);
 };

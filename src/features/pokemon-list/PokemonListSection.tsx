@@ -52,7 +52,7 @@ const PokemonListSection = () => {
         onFilterByNameChange={setFilterByName}
       />
       {filterByName && pokemonList.length === 0 && (
-        <h2>Sorry, we cannot find Pokemons with that name</h2>
+        <output>Sorry, we cannot find Pokémon with that name</output>
       )}
       <PokemonListGrid visibleItems={visibleItems} totalHeight={totalHeight} />
     </section>

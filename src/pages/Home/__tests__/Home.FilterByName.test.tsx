@@ -48,6 +48,80 @@ it("renders only matching pokemons when user types complete name in name filter"
   });
 });
 
+it("renders only matching pokemon when user types partial name in name filter", async () => {
+  render(
+    <Provider store={store}>
+      <MemoryRouter initialEntries={["/?type=fire"]}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+        </Routes>
+      </MemoryRouter>
+    </Provider>,
+  );
+
+  const contentArea = within(screen.getByRole("main")).getByRole("article");
+
+  // Wait for all fire type pokemon to load
+  await waitFor(() => {
+    const pokemonItemList = within(contentArea).getByRole("list", {
+      name: /pokemon list/i,
+    });
+    expect(within(pokemonItemList).getAllByRole("listitem")).toHaveLength(3);
+  });
+
+  // "mander" is a suffix of "charmander" only — not present in "charmeleon" or "charizard"
+  await typeInNameFilter("mander");
+
+  await waitFor(() => {
+    const pokemonItemList = within(contentArea).getByRole("list", {
+      name: /pokemon list/i,
+    });
+
+    const items = within(pokemonItemList).getAllByRole("listitem");
+    expect(items).toHaveLength(1);
+    expect(
+      within(items[0]).getByRole("heading", { level: 3, name: /charmander/i }),
+    ).toBeInTheDocument();
+  });
+});
+
+it("renders only matching pokemon when user types uppercase name in name filter", async () => {
+  render(
+    <Provider store={store}>
+      <MemoryRouter initialEntries={["/?type=fire"]}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+        </Routes>
+      </MemoryRouter>
+    </Provider>,
+  );
+
+  const contentArea = within(screen.getByRole("main")).getByRole("article");
+
+  // Wait for all fire type pokemon to load
+  await waitFor(() => {
+    const pokemonItemList = within(contentArea).getByRole("list", {
+      name: /pokemon list/i,
+    });
+    expect(within(pokemonItemList).getAllByRole("listitem")).toHaveLength(3);
+  });
+
+  await typeInNameFilter("CHARMELEON");
+
+  // Only charmeleon should remain visible despite uppercase input
+  await waitFor(() => {
+    const pokemonItemList = within(contentArea).getByRole("list", {
+      name: /pokemon list/i,
+    });
+
+    const items = within(pokemonItemList).getAllByRole("listitem");
+    expect(items).toHaveLength(1);
+    expect(
+      within(items[0]).getByRole("heading", { level: 3, name: /charmeleon/i }),
+    ).toBeInTheDocument();
+  });
+});
+
 it("renders all pokemons again when user clears the name filter", async () => {
   render(
     <Provider store={store}>

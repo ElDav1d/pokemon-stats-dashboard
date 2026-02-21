@@ -10,11 +10,16 @@ import PokemonListGrid from "./PokemonListGrid";
 const PokemonListSection = () => {
   const [searchParams] = useSearchParams();
   const selectedTypeParam = searchParams.get("type");
-  const { sortByHeight: isSortedByHeight, handleToggleSortByHeight } =
-    useListControls();
+  const {
+    sortByHeight: isSortedByHeight,
+    handleToggleSortByHeight,
+    filterByName,
+    setFilterByName,
+  } = useListControls();
 
   const { pokemonList, isLoading, isError } = usePokemonList(
-    selectedTypeParam ?? ""
+    selectedTypeParam ?? "",
+    filterByName
   );
 
   const { visibleItems, totalHeight } = useVirtualGridList(pokemonList, {
@@ -43,6 +48,8 @@ const PokemonListSection = () => {
       <PokemonListControls
         isSortedByHeight={isSortedByHeight}
         onSortChange={handleToggleSortByHeight}
+        filterByName={filterByName}
+        onFilterByNameChange={setFilterByName}
       />
       <PokemonListGrid visibleItems={visibleItems} totalHeight={totalHeight} />
     </section>

@@ -3,11 +3,15 @@ import React from "react";
 interface PokemonListControlsProps {
   isSortedByHeight: boolean;
   onSortChange: () => void;
+  filterByName: string;
+  onFilterByNameChange: (value: string) => void;
 }
 
 const PokemonListControls: React.FC<PokemonListControlsProps> = ({
   isSortedByHeight,
   onSortChange,
+  filterByName,
+  onFilterByNameChange,
 }) => {
   return (
     <fieldset className="my-6">
@@ -23,6 +27,17 @@ const PokemonListControls: React.FC<PokemonListControlsProps> = ({
         onChange={onSortChange}
       />
       <label htmlFor="height">By height</label>
+      <div className="mt-4">
+        <label htmlFor="search-by-name">Search by name</label>
+        <input
+          className="ml-2 border"
+          type="text"
+          id="search-by-name"
+          name="search-by-name"
+          value={filterByName}
+          onChange={(e) => onFilterByNameChange(e.target.value)}
+        />
+      </div>
     </fieldset>
   );
 };

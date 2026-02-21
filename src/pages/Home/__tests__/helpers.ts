@@ -1,6 +1,13 @@
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+export const typeInNameFilter = async (text: string) => {
+  const user = userEvent.setup();
+  const input = await screen.findByRole("textbox", { name: /search by name/i });
+  await user.clear(input);
+  if (text) await user.type(input, text);
+};
+
 export const clickButtonFireType = async () => {
   const user = userEvent.setup();
 

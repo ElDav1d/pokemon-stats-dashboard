@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   useAppDispatch,
   useAppSelector,
@@ -15,8 +16,12 @@ export const useListControls = () => {
     dispatch(toggleSortByHeight());
   };
 
+  const [filterByName, setFilterByName] = useState("");
+
   return {
     sortByHeight,
     handleToggleSortByHeight,
+    filterByName,
+    setFilterByName,
   };
 };

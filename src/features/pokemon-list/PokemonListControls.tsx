@@ -30,7 +30,7 @@ const PokemonListControls: React.FC<PokemonListControlsProps> = ({
       <div className="mt-4">
         <label htmlFor="search-by-name">Search by name</label>
         <input
-          className="ml-2 border"
+          className="ml-2 border text-gray-900"
           type="search"
           id="search-by-name"
           name="search-by-name"

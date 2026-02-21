@@ -135,11 +135,18 @@ function usePokemonList(
     fetchData();
   }, [selectedType, viewModel]);
 
+  // Apply transformations: filter first, then sort. rawList is never mutated.
   const pokemonList = useMemo(() => {
-    let list = debouncedFilter
-      ? viewModel.filterPokemonsByName(rawList, debouncedFilter)
-      : rawList;
-    if (sortByHeight) list = viewModel.sortPokemonListByHeight(list);
+    let list = rawList;
+
+    if (debouncedFilter) {
+      list = viewModel.filterPokemonsByName(rawList, debouncedFilter);
+    }
+
+    if (sortByHeight) {
+      list = viewModel.sortPokemonListByHeight(list);
+    }
+
     return list;
   }, [rawList, sortByHeight, debouncedFilter, viewModel]);
 

@@ -1,4 +1,5 @@
-import React from "react";
+import PokemonListNameFilter from "./PokemonListNameFilter";
+import PokemonListSortControl from "./PokemonListSortControl";
 
 interface PokemonListControlsProps {
   isSortedByHeight: boolean;
@@ -7,36 +8,20 @@ interface PokemonListControlsProps {
   onFilterByNameChange: (value: string) => void;
 }
 
-const PokemonListControls: React.FC<PokemonListControlsProps> = ({
+const PokemonListControls = ({
   isSortedByHeight,
   onSortChange,
   filterByName,
   onFilterByNameChange,
-}) => {
+}: PokemonListControlsProps) => {
   return (
     <fieldset className="my-6">
       <legend className="text-lg l:text-xl xl:text-2xl">
         Order the pokemons:
       </legend>
-      <input
-        className="mr-2"
-        type="checkbox"
-        id="height"
-        name="height"
-        checked={isSortedByHeight}
-        onChange={onSortChange}
-      />
-      <label htmlFor="height">By height</label>
+      <PokemonListSortControl checked={isSortedByHeight} onChange={onSortChange} />
       <div className="mt-4">
-        <label htmlFor="search-by-name">Search by name</label>
-        <input
-          className="ml-2 border text-gray-900"
-          type="search"
-          id="search-by-name"
-          name="search-by-name"
-          value={filterByName}
-          onChange={(e) => onFilterByNameChange(e.target.value)}
-        />
+        <PokemonListNameFilter value={filterByName} onChange={onFilterByNameChange} />
       </div>
     </fieldset>
   );

@@ -5,7 +5,7 @@ interface PokemonListNameFilterProps {
 
 const PokemonListNameFilter = ({ value, onChange }: PokemonListNameFilterProps) => {
   return (
-    <div className="flex-1">
+    <div className="flex-1 md:flex-none md:w-48">
       <label htmlFor="search-by-name" className="sr-only">
         Search by name
       </label>

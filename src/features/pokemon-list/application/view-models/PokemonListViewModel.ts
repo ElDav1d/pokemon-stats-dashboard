@@ -2,6 +2,7 @@ import { PokemonRepository } from "../../domain/ports/PokemonRepository";
 import { PokemonListItem } from "../../domain/entities/PokemonListItem";
 import { GetPokemonListUseCase } from "../use-cases/get-pokemon-list/GetPokemonListUseCase";
 import { SortPokemonsByHeightUseCase } from "../use-cases/sort-pokemon-list-by-height/SortPokemonLIstByHeightUseCase";
+import { FilterPokemonsByNameUseCase } from "../use-cases/filter-pokemons-by-name/FilterPokemonsByNameUseCase";
 import { PokemonType } from "../../../../shared/domain/value-objects/PokemonType";
 
 export class PokemonListViewModel {
@@ -21,5 +22,9 @@ export class PokemonListViewModel {
 
   sortPokemonListByHeight(list: PokemonListItem[]): PokemonListItem[] {
     return SortPokemonsByHeightUseCase.execute(list);
+  }
+
+  filterPokemonsByName(list: PokemonListItem[], query: string): PokemonListItem[] {
+    return FilterPokemonsByNameUseCase.execute(list, query);
   }
 }

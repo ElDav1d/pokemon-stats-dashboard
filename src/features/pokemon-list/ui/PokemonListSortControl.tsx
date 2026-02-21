@@ -5,17 +5,15 @@ interface PokemonListSortControlProps {
 
 const PokemonListSortControl = ({ checked, onChange }: PokemonListSortControlProps) => {
   return (
-    <>
+    <label className="flex items-center gap-2 cursor-pointer whitespace-nowrap">
       <input
-        className="mr-2"
         type="checkbox"
-        id="height"
         name="height"
         checked={checked}
         onChange={onChange}
       />
-      <label htmlFor="height">By height</label>
-    </>
+      <span>By height</span>
+    </label>
   );
 };
 

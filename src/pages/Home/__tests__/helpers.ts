@@ -23,7 +23,7 @@ export const clickSortByHeightCheckbox = async () => {
 
   const contentArea = within(screen.getByRole("main")).getByRole("article");
   const orderCheckboxes = within(contentArea).getByRole("group", {
-    name: /order the pokemons/i,
+    name: /list controls/i,
   });
   const sortByHeightCheckbox = within(orderCheckboxes).getByRole("checkbox", {
     name: /by height/i,

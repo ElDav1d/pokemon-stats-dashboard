@@ -49,7 +49,7 @@ it("renders the initial elements", async () => {
   // Wait for checkbox to appear (after default type is selected)
   await waitFor(() => {
     const orderCheckboxes = within(contentArea).getByRole("group", {
-      name: /order the pokemons/i,
+      name: /list controls/i,
     });
     const sortByHeightCheckbox = within(orderCheckboxes).getByRole("checkbox", {
       name: /by height/i,

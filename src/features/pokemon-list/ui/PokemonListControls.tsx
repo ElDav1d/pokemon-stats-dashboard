@@ -16,12 +16,10 @@ const PokemonListControls = ({
 }: PokemonListControlsProps) => {
   return (
     <fieldset className="my-6">
-      <legend className="text-lg l:text-xl xl:text-2xl">
-        Order the pokemons:
-      </legend>
-      <PokemonListSortControl checked={isSortedByHeight} onChange={onSortChange} />
-      <div className="mt-4">
+      <legend className="sr-only">List controls</legend>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
         <PokemonListNameFilter value={filterByName} onChange={onFilterByNameChange} />
+        <PokemonListSortControl checked={isSortedByHeight} onChange={onSortChange} />
       </div>
     </fieldset>
   );

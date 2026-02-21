@@ -1,9 +1,9 @@
 import { useSearchParams } from "react-router-dom";
-import usePokemonList from "./infrastructure/react/hooks/usePokemonList";
-import { useVirtualGridList } from "../../shared/infrastructure/react/hooks/useVirtualGridList";
-import { useListControls } from "./infrastructure/react/hooks/useListControls";
-import { pokemonListConfig, responsiveBreakpoints } from "./domain/constants";
-import { LoadingMessage, ErrorMessage } from "../../ui";
+import usePokemonList from "../infrastructure/react/hooks/usePokemonList";
+import { useVirtualGridList } from "../../../shared/infrastructure/react/hooks/useVirtualGridList";
+import { useListControls } from "../infrastructure/react/hooks/useListControls";
+import { pokemonListConfig, responsiveBreakpoints } from "../domain/constants";
+import { LoadingMessage, ErrorMessage } from "../../../ui";
 import PokemonListControls from "./PokemonListControls";
 import PokemonListGrid from "./PokemonListGrid";
 

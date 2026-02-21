@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { Link } from "react-router-dom";
-import { paths } from "../../lib/constants";
+import { paths } from "../../../lib/constants";
 
 export interface IPokemonListItemProps {
   name: string;

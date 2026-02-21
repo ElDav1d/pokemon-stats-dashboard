@@ -1,5 +1,5 @@
 import { SelectPokemonType } from "../../features/select-pokemon-type";
-import PokemonListSection from "../../features/pokemon-list/PokemonListSection";
+import { PokemonListSection } from "../../features/pokemon-list";
 
 const Home = () => {
   return (

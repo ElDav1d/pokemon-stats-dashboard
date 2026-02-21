@@ -1,7 +1,7 @@
 import React from "react";
 import PokemonListItem from "./PokemonListItem";
-import { PokemonListItem as PokemonListItemEntity } from "./domain/entities/PokemonListItem";
-import { pokemonListConfig } from "./domain/constants";
+import { PokemonListItem as PokemonListItemEntity } from "../domain/entities/PokemonListItem";
+import { pokemonListConfig } from "../domain/constants";
 
 interface VisibleItem {
   item: PokemonListItemEntity;

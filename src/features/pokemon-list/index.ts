@@ -1,1 +1,1 @@
-export { default as PokemonList } from "./PokemonListSection";
+export { PokemonListSection } from "./ui";

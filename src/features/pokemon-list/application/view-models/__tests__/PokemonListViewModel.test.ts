@@ -10,6 +10,9 @@ import {
   mockPokemonListItemCharizard,
   mockPokemonListItemVulpix,
   mockPokemonListItemCharmander,
+  mockPokemonListItemBulbasaur,
+  mockPokemonListItemIvysaur,
+  mockPokemonListItemVenusaur,
 } from "../../../__tests__/mocks";
 
 it("should load pokemon list by type", async () => {
@@ -39,6 +42,41 @@ it("should return empty array when type is empty", async () => {
 
   expect(result).toEqual([]);
   expect(mockRepository.findAllByType).not.toHaveBeenCalled();
+});
+
+it("should filter pokemon list by name matching a partial query", () => {
+  const mockRepository = createMockPokemonRepository([], []);
+
+  const list = [
+    mockPokemonListItemBulbasaur,
+    mockPokemonListItemIvysaur,
+    mockPokemonListItemVenusaur,
+  ];
+
+  const viewModel = new PokemonListViewModel(mockRepository);
+
+  const result = viewModel.filterPokemonsByName(list, "saur");
+
+  expect(result).toHaveLength(3);
+  expect(result[0].name).toBe("bulbasaur");
+  expect(result[1].name).toBe("ivysaur");
+  expect(result[2].name).toBe("venusaur");
+});
+
+it("should return the full list when filter query is empty", () => {
+  const mockRepository = createMockPokemonRepository([], []);
+
+  const list = [
+    mockPokemonListItemBulbasaur,
+    mockPokemonListItemIvysaur,
+    mockPokemonListItemVenusaur,
+  ];
+
+  const viewModel = new PokemonListViewModel(mockRepository);
+
+  const result = viewModel.filterPokemonsByName(list, "");
+
+  expect(result).toHaveLength(3);
 });
 
 it("should sort pokemon list by height", () => {

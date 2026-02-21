@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react";
+import { renderHook, act } from "@testing-library/react";
 import { vi, it, expect, beforeEach } from "vitest";
 import { useListControls } from "../useListControls";
 import * as reduxHooks from "../../../../../../shared/infrastructure/redux/hooks";
@@ -36,4 +36,26 @@ it("dispatches toggleSortByHeight action when handleToggleSortByHeight is called
   result.current.handleToggleSortByHeight();
 
   expect(mockDispatch).toHaveBeenCalled();
+});
+
+it("returns filterByName as empty string initially", () => {
+  vi.spyOn(reduxHooks, "useAppSelector").mockReturnValue(false);
+  vi.spyOn(reduxHooks, "useAppDispatch").mockReturnValue(vi.fn());
+
+  const { result } = renderHook(() => useListControls());
+
+  expect(result.current.filterByName).toBe("");
+});
+
+it("updates filterByName when setFilterByName is called", () => {
+  vi.spyOn(reduxHooks, "useAppSelector").mockReturnValue(false);
+  vi.spyOn(reduxHooks, "useAppDispatch").mockReturnValue(vi.fn());
+
+  const { result } = renderHook(() => useListControls());
+
+  act(() => {
+    result.current.setFilterByName("char");
+  });
+
+  expect(result.current.filterByName).toBe("char");
 });

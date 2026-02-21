@@ -26,7 +26,7 @@ function usePokemonList(
   selectedType: string,
   repository?: PokemonRepository
 ): UsePokemonListResult {
-  const [pokemonList, setPokemonList] = useState<PokemonListItem[]>([]);
+  const [rawList, setRawList] = useState<PokemonListItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
 
@@ -58,7 +58,7 @@ function usePokemonList(
 
   useEffect(() => {
     if (!selectedType) {
-      setPokemonList([]);
+      setRawList([]);
       setIsLoading(false);
       setIsError(false);
       return;
@@ -69,16 +69,11 @@ function usePokemonList(
       setIsError(false);
 
       try {
-        let result = await viewModel.loadPokemonList(selectedType);
-
-        if (sortByHeight) {
-          result = viewModel.sortPokemonListByHeight(result);
-        }
-
-        setPokemonList(result);
+        const result = await viewModel.loadPokemonList(selectedType);
+        setRawList(result);
       } catch (error) {
         console.error("Error fetching pokemon list:", error);
-        setPokemonList([]);
+        setRawList([]);
         setIsError(true);
       } finally {
         setIsLoading(false);
@@ -86,7 +81,12 @@ function usePokemonList(
     };
 
     fetchData();
-  }, [selectedType, viewModel, sortByHeight]);
+  }, [selectedType, viewModel]);
+
+  const pokemonList = useMemo(() => {
+    if (sortByHeight) return viewModel.sortPokemonListByHeight(rawList);
+    return rawList;
+  }, [rawList, sortByHeight, viewModel]);
 
   return {
     pokemonList,

@@ -7,6 +7,12 @@ import { FetchHttpClient } from "../../../../../shared/infrastructure/client/fet
 import { useAppSelector } from "../../../../../shared/infrastructure/redux/hooks";
 import { useDebounce } from "../../../../../shared/infrastructure/react/hooks/useDebounce";
 
+export interface ListFilters {
+  filterByName?: string;
+  filterByMinHeight?: number;
+  filterByMaxHeight?: number;
+}
+
 interface UsePokemonListResult {
   pokemonList: PokemonListItem[];
   isLoading: boolean;
@@ -17,16 +23,16 @@ interface UsePokemonListResult {
  * Hook that loads and transforms the pokemon list for the current type.
  *
  * ## Overload design
- * Supports four calling conventions sharing the same implementation:
+ * Supports two calling conventions sharing the same implementation:
  *
- *   Production (no filter):      usePokemonList(selectedType)
- *   Production (with filter):    usePokemonList(selectedType, filterByName)
- *   Testing (with repo):         usePokemonList(selectedType, mockRepository)
- *   Testing (repo + filter):     usePokemonList(selectedType, mockRepository, filterByName)
+ *   Production (no filter):   usePokemonList(selectedType)
+ *   Production (with filter): usePokemonList(selectedType, filters)
+ *   Testing (with repo):      usePokemonList(selectedType, mockRepository)
+ *   Testing (repo + filter):  usePokemonList(selectedType, mockRepository, filters)
  *
  * The second param is detected at runtime:
- *   - string  → filterByName (production)
- *   - object  → PokemonRepository (testing / dependency injection)
+ *   - object with "findAllByType" → PokemonRepository (testing / dependency injection)
+ *   - ListFilters object or undefined → filter values (production)
  *
  * ## Internal separation: fetch vs. transformation
  * `useEffect` only fetches (runs when selectedType changes).
@@ -35,62 +41,59 @@ interface UsePokemonListResult {
  *
  * ## Debounce
  * filterByName is debounced 300ms internally to avoid recalculating
- * the list on every keystroke.
+ * the list on every keystroke. filterByMinHeight and filterByMaxHeight
+ * are applied without debounce (number inputs fire fewer events).
  */
 
-// Overload for component usage (no filter)
-function usePokemonList(selectedType: string): UsePokemonListResult;
-
-// Overload for component usage (with filter)
+// Overload for component usage (no filter or with ListFilters)
 function usePokemonList(
   selectedType: string,
-  filterByName: string
+  filters?: ListFilters,
 ): UsePokemonListResult;
 
-// Overload for testing (with repository injection, no filter)
-function usePokemonList(
-  selectedType: string,
-  repository: PokemonRepository
-): UsePokemonListResult;
-
-// Overload for testing (with repository injection and filter)
+// Overload for testing (with repository injection, optional ListFilters)
 function usePokemonList(
   selectedType: string,
   repository: PokemonRepository,
-  filterByName: string
+  filters?: ListFilters,
 ): UsePokemonListResult;
 
 // Implementation
 function usePokemonList(
   selectedType: string,
-  secondParam?: PokemonRepository | string,
-  thirdParam?: string
+  secondParam?: PokemonRepository | ListFilters,
+  thirdParam?: ListFilters,
 ): UsePokemonListResult {
   const [rawList, setRawList] = useState<PokemonListItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
 
   const sortByHeight = useAppSelector(
-    (state) => state.listControls.sortByHeight
+    (state) => state.listControls.sortByHeight,
   );
 
   const isRepositoryInjected =
-    secondParam !== undefined && typeof secondParam !== "string";
+    secondParam !== undefined && "findAllByType" in secondParam;
 
-  const filterByName =
-    typeof secondParam === "string" ? secondParam : (thirdParam ?? "");
+  const filters: ListFilters = isRepositoryInjected
+    ? (thirdParam ?? {})
+    : ((secondParam as ListFilters | undefined) ?? {});
 
-  const debouncedFilter = useDebounce(filterByName, 300);
+  const {
+    filterByName = "",
+    filterByMinHeight = 0,
+    filterByMaxHeight = 0,
+  } = filters;
 
-  // Extract the injected repository separately so that changes to filterByName
-  // (secondParam as a string) never cause repositoryInstance to recreate.
+  const debouncedFilterByName = useDebounce(filterByName, 300);
+
   const injectedRepository = isRepositoryInjected
     ? (secondParam as PokemonRepository)
     : undefined;
 
   const httpClient = useMemo(
     () => new FetchHttpClient("https://pokeapi.co/api/v2/"),
-    []
+    [],
   );
 
   const repositoryInstance = useMemo(() => {
@@ -105,7 +108,7 @@ function usePokemonList(
 
   const viewModel = useMemo(
     () => new PokemonListViewModel(repositoryInstance),
-    [repositoryInstance]
+    [repositoryInstance],
   );
 
   useEffect(() => {
@@ -139,8 +142,16 @@ function usePokemonList(
   const pokemonList = useMemo(() => {
     let list = rawList;
 
-    if (debouncedFilter) {
-      list = viewModel.filterPokemonsByName(rawList, debouncedFilter);
+    if (debouncedFilterByName) {
+      list = viewModel.filterPokemonsByName(list, debouncedFilterByName);
+    }
+
+    if (filterByMinHeight > 0 || filterByMaxHeight > 0) {
+      list = viewModel.filterPokemonsByHeightRange(
+        list,
+        filterByMinHeight,
+        filterByMaxHeight,
+      );
     }
 
     if (sortByHeight) {
@@ -148,7 +159,14 @@ function usePokemonList(
     }
 
     return list;
-  }, [rawList, sortByHeight, debouncedFilter, viewModel]);
+  }, [
+    rawList,
+    sortByHeight,
+    debouncedFilterByName,
+    filterByMinHeight,
+    filterByMaxHeight,
+    viewModel,
+  ]);
 
   return {
     pokemonList,

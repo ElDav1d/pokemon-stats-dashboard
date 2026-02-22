@@ -14,7 +14,7 @@ afterEach(() => {
 
 it("returns full list when filterByName is empty", async () => {
   const { result } = renderHook(() =>
-    usePokemonList("grass", testData.mockRepository!, "")
+    usePokemonList("grass", testData.mockRepository!, { filterByName: "" })
   );
 
   await waitFor(() => {
@@ -24,7 +24,7 @@ it("returns full list when filterByName is empty", async () => {
 
 it("returns only matching pokemons when filterByName is provided", async () => {
   const { result } = renderHook(() =>
-    usePokemonList("grass", testData.mockRepository!, "bulbasaur")
+    usePokemonList("grass", testData.mockRepository!, { filterByName: "bulbasaur" })
   );
 
   await waitFor(() => {
@@ -35,7 +35,7 @@ it("returns only matching pokemons when filterByName is provided", async () => {
 
 it("filters case-insensitively", async () => {
   const { result } = renderHook(() =>
-    usePokemonList("grass", testData.mockRepository!, "SAUR")
+    usePokemonList("grass", testData.mockRepository!, { filterByName: "SAUR" })
   );
 
   await waitFor(() => {
@@ -48,7 +48,7 @@ it("filters case-insensitively", async () => {
 
 it("returns empty list when no pokemon matches the filter", async () => {
   const { result } = renderHook(() =>
-    usePokemonList("grass", testData.mockRepository!, "pikachu")
+    usePokemonList("grass", testData.mockRepository!, { filterByName: "pikachu" })
   );
 
   await waitFor(() => {
@@ -61,7 +61,7 @@ it("returns empty list when no pokemon matches the filter", async () => {
 it("updates filtered list after debounce when filterByName changes", async () => {
   const { result, rerender } = renderHook(
     ({ filter }: { filter: string }) =>
-      usePokemonList("grass", testData.mockRepository!, filter),
+      usePokemonList("grass", testData.mockRepository!, { filterByName: filter }),
     { initialProps: { filter: "" } }
   );
 

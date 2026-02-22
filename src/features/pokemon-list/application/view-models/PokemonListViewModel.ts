@@ -3,6 +3,7 @@ import { PokemonListItem } from "../../domain/entities/PokemonListItem";
 import { GetPokemonListUseCase } from "../use-cases/get-pokemon-list/GetPokemonListUseCase";
 import { SortPokemonsByHeightUseCase } from "../use-cases/sort-pokemon-list-by-height/SortPokemonLIstByHeightUseCase";
 import { FilterPokemonsByNameUseCase } from "../use-cases/filter-pokemons-by-name/FilterPokemonsByNameUseCase";
+import { FilterPokemonsByHeightRangeUseCase } from "../use-cases/filter-pokemons-by-height-range/FilterPokemonsByHeightRangeUseCase";
 import { PokemonType } from "../../../../shared/domain/value-objects/PokemonType";
 
 export class PokemonListViewModel {
@@ -26,5 +27,13 @@ export class PokemonListViewModel {
 
   filterPokemonsByName(list: PokemonListItem[], query: string): PokemonListItem[] {
     return FilterPokemonsByNameUseCase.execute(list, query);
+  }
+
+  filterPokemonsByHeightRange(
+    list: PokemonListItem[],
+    minHeight: number,
+    maxHeight: number
+  ): PokemonListItem[] {
+    return FilterPokemonsByHeightRangeUseCase.execute(list, minHeight, maxHeight);
   }
 }

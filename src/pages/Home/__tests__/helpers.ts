@@ -18,6 +18,20 @@ export const clickButtonFireType = async () => {
   await user.click(buttonFireType);
 };
 
+export const typeInMinHeightFilter = async (value: number | "") => {
+  const user = userEvent.setup();
+  const input = await screen.findByRole("spinbutton", { name: /min height/i });
+  await user.clear(input);
+  if (value !== "") await user.type(input, String(value));
+};
+
+export const typeInMaxHeightFilter = async (value: number | "") => {
+  const user = userEvent.setup();
+  const input = await screen.findByRole("spinbutton", { name: /max height/i });
+  await user.clear(input);
+  if (value !== "") await user.type(input, String(value));
+};
+
 export const clickSortByHeightCheckbox = async () => {
   const user = userEvent.setup();
 

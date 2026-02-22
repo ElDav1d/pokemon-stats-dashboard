@@ -15,11 +15,16 @@ const PokemonListSection = () => {
     handleToggleSortByHeight,
     filterByName,
     setFilterByName,
+    filterByMinHeight,
+    setFilterByMinHeight,
+    filterByMaxHeight,
+    setFilterByMaxHeight,
+    isInvalidHeightRange,
   } = useListControls();
 
   const { pokemonList, isLoading, isError } = usePokemonList(
     selectedTypeParam ?? "",
-    filterByName
+    { filterByName, filterByMinHeight, filterByMaxHeight }
   );
 
   const { visibleItems, totalHeight } = useVirtualGridList(pokemonList, {
@@ -43,6 +48,9 @@ const PokemonListSection = () => {
     );
   }
 
+  const hasActiveFilter =
+    filterByName.length > 0 || filterByMinHeight > 0 || filterByMaxHeight > 0;
+
   return (
     <section>
       <PokemonListControls
@@ -50,9 +58,14 @@ const PokemonListSection = () => {
         onSortChange={handleToggleSortByHeight}
         filterByName={filterByName}
         onFilterByNameChange={setFilterByName}
+        filterByMinHeight={filterByMinHeight}
+        filterByMaxHeight={filterByMaxHeight}
+        isInvalidHeightRange={isInvalidHeightRange}
+        onFilterByMinHeightChange={setFilterByMinHeight}
+        onFilterByMaxHeightChange={setFilterByMaxHeight}
       />
-      {filterByName && pokemonList.length === 0 && (
-        <output>Sorry, we cannot find Pokémon with that name</output>
+      {hasActiveFilter && pokemonList.length === 0 && (
+        <output>Sorry, we cannot find Pokémon with those criteria</output>
       )}
       <PokemonListGrid visibleItems={visibleItems} totalHeight={totalHeight} />
     </section>

@@ -79,6 +79,23 @@ it("should return the full list when filter query is empty", () => {
   expect(result).toHaveLength(3);
 });
 
+it("should filter pokemon list by height range", () => {
+  const mockRepository = createMockPokemonRepository([], []);
+
+  const list = [
+    mockPokemonListItemBulbasaur,
+    mockPokemonListItemIvysaur,
+    mockPokemonListItemVenusaur,
+  ];
+
+  const viewModel = new PokemonListViewModel(mockRepository);
+
+  const result = viewModel.filterPokemonsByHeightRange(list, 8, 15);
+
+  expect(result).toHaveLength(1);
+  expect(result[0].name).toBe("venusaur");
+});
+
 it("should sort pokemon list by height", () => {
   const mockRepository = createMockPokemonRepository([], []);
 

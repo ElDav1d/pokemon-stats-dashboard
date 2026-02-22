@@ -59,3 +59,88 @@ it("updates filterByName when setFilterByName is called", () => {
 
   expect(result.current.filterByName).toBe("char");
 });
+
+it("returns filterByMinHeight as 0 initially", () => {
+  vi.spyOn(reduxHooks, "useAppSelector").mockReturnValue(false);
+  vi.spyOn(reduxHooks, "useAppDispatch").mockReturnValue(vi.fn());
+
+  const { result } = renderHook(() => useListControls());
+
+  expect(result.current.filterByMinHeight).toBe(0);
+});
+
+it("updates filterByMinHeight when setFilterByMinHeight is called", () => {
+  vi.spyOn(reduxHooks, "useAppSelector").mockReturnValue(false);
+  vi.spyOn(reduxHooks, "useAppDispatch").mockReturnValue(vi.fn());
+
+  const { result } = renderHook(() => useListControls());
+
+  act(() => {
+    result.current.setFilterByMinHeight(10);
+  });
+
+  expect(result.current.filterByMinHeight).toBe(10);
+});
+
+it("returns filterByMaxHeight as 0 initially", () => {
+  vi.spyOn(reduxHooks, "useAppSelector").mockReturnValue(false);
+  vi.spyOn(reduxHooks, "useAppDispatch").mockReturnValue(vi.fn());
+
+  const { result } = renderHook(() => useListControls());
+
+  expect(result.current.filterByMaxHeight).toBe(0);
+});
+
+it("updates filterByMaxHeight when setFilterByMaxHeight is called", () => {
+  vi.spyOn(reduxHooks, "useAppSelector").mockReturnValue(false);
+  vi.spyOn(reduxHooks, "useAppDispatch").mockReturnValue(vi.fn());
+
+  const { result } = renderHook(() => useListControls());
+
+  act(() => {
+    result.current.setFilterByMaxHeight(20);
+  });
+
+  expect(result.current.filterByMaxHeight).toBe(20);
+});
+
+it("returns isInvalidHeightRange as false when only min is set", () => {
+  vi.spyOn(reduxHooks, "useAppSelector").mockReturnValue(false);
+  vi.spyOn(reduxHooks, "useAppDispatch").mockReturnValue(vi.fn());
+
+  const { result } = renderHook(() => useListControls());
+
+  act(() => {
+    result.current.setFilterByMinHeight(10);
+  });
+
+  expect(result.current.isInvalidHeightRange).toBe(false);
+});
+
+it("returns isInvalidHeightRange as true when min is greater than max", () => {
+  vi.spyOn(reduxHooks, "useAppSelector").mockReturnValue(false);
+  vi.spyOn(reduxHooks, "useAppDispatch").mockReturnValue(vi.fn());
+
+  const { result } = renderHook(() => useListControls());
+
+  act(() => {
+    result.current.setFilterByMinHeight(15);
+    result.current.setFilterByMaxHeight(5);
+  });
+
+  expect(result.current.isInvalidHeightRange).toBe(true);
+});
+
+it("returns isInvalidHeightRange as false when min equals max", () => {
+  vi.spyOn(reduxHooks, "useAppSelector").mockReturnValue(false);
+  vi.spyOn(reduxHooks, "useAppDispatch").mockReturnValue(vi.fn());
+
+  const { result } = renderHook(() => useListControls());
+
+  act(() => {
+    result.current.setFilterByMinHeight(10);
+    result.current.setFilterByMaxHeight(10);
+  });
+
+  expect(result.current.isInvalidHeightRange).toBe(false);
+});

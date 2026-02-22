@@ -113,7 +113,7 @@ The application implements clean architecture principles with clear separation o
 ### **Intermediate Features:**
 
 - **List Filtering & Sorting**
-  - ⚠️ **Filtering:** Filter the Pokemon list by various criteria
+  - ✅ **Filtering:** Filter the Pokemon list by name and height range
   - ✅ **Sorting:** Sort the Pokemon list by height
 - **Enhanced Pokemon Details**
   - ✅ **Evolution Navigation:** If a Pokemon has evolutions, access the evolution Pokemon's details
